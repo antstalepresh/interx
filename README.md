@@ -9,6 +9,18 @@ It will connect to the node using the GRPC endpoint as well as the RPC endpoint 
 
 ### Installation
 
+Specify sekai commit hash
+
+```bash
+go get github.com/KiraCore/sekai@<commit hash here>
+```
+
+example
+
+```bash
+go get github.com/KiraCore/sekai@458f872e5ff8
+```
+
 Use following command in the root respository of INTERX.
 
 ```bash
