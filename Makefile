@@ -1,4 +1,6 @@
+ifndef GOBIN
 GOBIN=${HOME}/go/bin
+endif
 
 generate:
 	# Generate go, gRPC-Gateway, OpenAPI output.
@@ -20,7 +22,7 @@ generate:
 	# statik -m -f -src third_party/OpenAPI/
 
 install: go.sum
-		go build -o $(GOBIN)/interxd
+	go build -o $(GOBIN)/interxd
 
 start:
 	go run main.go
