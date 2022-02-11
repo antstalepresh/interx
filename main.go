@@ -9,6 +9,7 @@ import (
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/gateway"
 	_ "github.com/KiraCore/interx/statik"
+	"github.com/tyler-smith/go-bip39"
 	"google.golang.org/grpc/grpclog"
 )
 
@@ -36,7 +37,8 @@ func main() {
 	initCommand := flag.NewFlagSet("init", flag.ExitOnError)
 	startCommand := flag.NewFlagSet("start", flag.ExitOnError)
 
-	initConfigFilePtr := initCommand.String("config", "./config.json", "The interx configuration path.")
+	homeDir, _ := os.UserHomeDir()
+	initHomePtr := initCommand.String("home", homeDir+"/.interxd", "The interx configuration path.")
 	initVersion := initCommand.String("version", config.InterxVersion, "The interxd version")
 	initServeHTTPS := initCommand.Bool("serve_https", false, "http or https.")
 	initGrpcPtr := initCommand.String("grpc", "dns:///0.0.0.0:9090", "The grpc endpoint of the sekaid.")
@@ -49,12 +51,15 @@ func main() {
 	initSeedNodeId := initCommand.String("seed_node_id", "", "The seed node id.")
 
 	initPortPtr := initCommand.String("port", "11000", "The interx port.")
-	initSigningMnemonicPtr := initCommand.String("signing_mnemonic", "interx.mnemonic", "The interx signing mnemonic file path or seeds.")
+
+	entropy, _ := bip39.NewEntropy(256)
+	mnemonic, _ := bip39.NewMnemonic(entropy)
+	initSigningMnemonicPtr := initCommand.String("signing_mnemonic", mnemonic, "The interx signing mnemonic file path or seeds.")
 
 	initSyncStatus := initCommand.Int64("status_sync", 5, "The time in seconds and INTERX syncs node status.")
 	initHaltedAvgBlockTimes := initCommand.Int64("halted_avg_block_times", 10, "This will be used for checking consensus halted.")
 
-	initCacheDirPtr := initCommand.String("cache_dir", "cache", "The interx cache directory path.")
+	initCacheDirPtr := initCommand.String("cache_dir", "", "The interx cache directory path.")
 	initMaxCacheSize := initCommand.String("max_cache_size", "2GB", "The maximum cache size.")
 	initCachingDuration := initCommand.Int64("caching_duration", 5, "The caching clear duration in seconds.")
 	initMaxDownloadSize := initCommand.String("download_file_size_limitation", "10MB", "The maximum download file size.")
@@ -75,7 +80,7 @@ func main() {
 	initNodeDiscoveryTendermintPort := initCommand.String("node_discovery_tendermint_port", "26657", "The default tendermint port to be used in node discovery")
 	initNodeDiscoveryTimeout := initCommand.String("node_discovery_timeout", "3s", "The connection timeout to be used in node discovery")
 
-	startConfigPtr := startCommand.String("config", "./config.json", "The interx configurtion path. (Required)")
+	startHomePtr := startCommand.String("home", homeDir+"/.interxd", "The interx configuration path. (Required)")
 
 	flag.Usage = printUsage
 	flag.Parse()
@@ -100,9 +105,20 @@ func main() {
 				if faucetMnemonic == "" {
 					faucetMnemonic = *initSigningMnemonicPtr
 				}
+
+				err := os.MkdirAll(*initHomePtr, os.ModePerm)
+				if err != nil {
+					fmt.Printf("Not available to create folder: %s\n", *initHomePtr)
+				}
+
+				cacheDir := *initCacheDirPtr
+				if cacheDir == "" {
+					cacheDir = *initHomePtr + "/cache"
+				}
+
 				config.InitConfig(
 					*initVersion,
-					*initConfigFilePtr,
+					*initHomePtr+"/config.json",
 					*initServeHTTPS,
 					*initGrpcPtr,
 					*initRPCPtr,
@@ -115,7 +131,7 @@ func main() {
 					*initSigningMnemonicPtr,
 					*initSyncStatus,
 					*initHaltedAvgBlockTimes,
-					*initCacheDirPtr,
+					cacheDir,
 					*initMaxCacheSize,
 					*initCachingDuration,
 					*initMaxDownloadSize,
@@ -133,7 +149,7 @@ func main() {
 					*initNodeKey,
 				)
 
-				fmt.Printf("Created interx configuration file: %s\n", *initConfigFilePtr)
+				fmt.Printf("Created interx configuration file: %s\n", *initHomePtr+"/config.json")
 				return
 			}
 		case "start":
@@ -142,7 +158,7 @@ func main() {
 			if startCommand.Parsed() {
 				// Check which subcommand was Parsed using the FlagSet.Parsed() function. Handle each case accordingly.
 				// FlagSet.Parse() will evaluate to false if no flags were parsed (i.e. the user did not provide any flags)
-				configFilePath := *startConfigPtr
+				configFilePath := *startHomePtr + "/config.json"
 				fmt.Println("configFilePath", configFilePath)
 
 				// Adds gRPC internal logs. This is quite verbose, so adjust as desired!
