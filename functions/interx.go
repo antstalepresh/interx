@@ -378,6 +378,25 @@ func RegisterInterxFunctions() {
 	)
 
 	AddInterxFunction(
+		"QueryExecutionFee",
+		config.QueryExecutionFee,
+		`{
+			"description": "QueryExecutionFee is a function to query execution fee by transaction type.",
+			"parameters": {
+				"message": {
+					"type":        "string",
+					"description": "This is an option of a transaction type"
+				}
+			},
+			"response": {
+				"fee": {
+					"description": "The execution fee info"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
 		"QueryKiraTokensAliases",
 		config.QueryKiraTokensAliases,
 		`{
