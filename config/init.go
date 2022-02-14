@@ -59,6 +59,7 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryKiraTokensAliases] = defaultRPCSetting
 	config.API["GET"][QueryKiraTokensRates] = defaultRPCSetting
 	config.API["GET"][QueryNetworkProperties] = defaultRPCSetting
+	config.API["GET"][QueryExecutionFee] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkList] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkOptions] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkStatus] = defaultRPCSetting
