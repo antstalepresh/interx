@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tyler-smith/go-bip39"
 )
 
 func getPostMethods() []string {
@@ -58,6 +59,7 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryKiraTokensAliases] = defaultRPCSetting
 	config.API["GET"][QueryKiraTokensRates] = defaultRPCSetting
 	config.API["GET"][QueryNetworkProperties] = defaultRPCSetting
+	config.API["GET"][QueryExecutionFee] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkList] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkOptions] = defaultRPCSetting
 	config.API["GET"][QueryRosettaNetworkStatus] = defaultRPCSetting
@@ -113,7 +115,8 @@ func defaultConfig() InterxConfigFromFile {
 	configFromFile.Node.ValidatorNodeID = ""
 	configFromFile.Node.SeedNodeID = ""
 
-	configFromFile.MnemonicFile = "interx.mnemonic"
+	entropy, _ := bip39.NewEntropy(256)
+	configFromFile.MnemonicFile, _ = bip39.NewMnemonic(entropy)
 
 	configFromFile.AddrBooks = "addrbook.json"
 	configFromFile.NodeKey = "node_key.json"

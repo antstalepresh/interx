@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5a89ad02-e8c7-4864-bbec-838b872f2205",
+		"_postman_id": "07f03cfc-0b10-4ac8-a8c7-efff5c47d85a",
 		"name": "Kira",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2336,6 +2336,42 @@
 								"gov",
 								"roles_by_address",
 								"kira1s7g4hmm6zjr5pk6zjvmxc654nntdahecr9cqej"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Execution Fee",
+			"item": [
+				{
+					"name": "Query Execution Fee by transaction type",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/gov/execution_fee?message=set-network-properties",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"gov",
+								"execution_fee"
+							],
+							"query": [
+								{
+									"key": "message",
+									"value": "set-network-properties"
+								}
 							]
 						}
 					},

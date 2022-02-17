@@ -12,6 +12,7 @@ import "kira/gov/identity_registrar.proto";
 import "kira/gov/actor.proto";
 import "kira/gov/network_properties.proto";
 import "kira/gov/role.proto";
+import "kira/gov/execution_fee.proto";
 
 // Defines the import path that should be used to import the generated package,
 // and the package name.
@@ -133,6 +134,10 @@ service Query {
   // Returns the permissions an actor has by address.
   rpc PermissionsByAddress (PermissionsByAddressRequest) returns (PermissionsResponse) {
     option (google.api.http).get = "/api/kira/gov/permissions_by_address/{val_addr}";
+  }
+  // ExecutionFee returns execution fee from msg type
+  rpc ExecutionFee (ExecutionFeeRequest) returns (ExecutionFeeResponse) {
+    option (google.api.http).get = "/api/kira/gov/execution_fee";
   }
 }
 
@@ -310,4 +315,11 @@ message PermissionsByAddressRequest {
 
 message PermissionsResponse {
   Permissions permissions = 1;
+}
+
+message ExecutionFeeRequest {
+  string message = 1;
+}
+message ExecutionFeeResponse {
+  kira.gov.ExecutionFee fee = 1;
 }
