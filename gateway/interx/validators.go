@@ -57,10 +57,15 @@ func queryValidatorsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, rpcAd
 	proposer := queries["proposer"]
 	countTotal := queries["count_total"]
 	all := queries["all"]
+	status_only := queries["status_only"]
 
 	if len(all) == 1 && all[0] == "true" {
 		// Query All Validators
 		return tasks.AllValidators, nil, http.StatusOK
+	}
+
+	if len(status_only) == 1 && status_only[0] == "true" {
+		return tasks.AllValidators.Status, nil, http.StatusOK
 	}
 
 	response := struct {
@@ -109,6 +114,7 @@ func queryValidatorsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, rpcAd
 
 		response.Validators = append(response.Validators, validator)
 	}
+
 	return response, nil, http.StatusOK
 }
 

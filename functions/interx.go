@@ -616,6 +616,11 @@ func RegisterInterxFunctions() {
 					"description": "This is an option to query all validators.",
 					"optional": true
 				},
+				"status_only": {
+					"type":        "string",
+					"description": "This is an option to query only status of all validators.",
+					"optional": true
+				},
 				"address": {
 					"type":        "string",
 					"description": "This is an option to query validator by a given kira address",
