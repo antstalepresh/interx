@@ -115,7 +115,7 @@ func defaultConfig() InterxConfigFromFile {
 	configFromFile.Node.ValidatorNodeID = ""
 	configFromFile.Node.SeedNodeID = ""
 
-	entropy, _ := bip39.NewEntropy(100)
+	entropy, _ := bip39.NewEntropy(256)
 	configFromFile.MnemonicFile, _ = bip39.NewMnemonic(entropy)
 
 	configFromFile.AddrBooks = "addrbook.json"
