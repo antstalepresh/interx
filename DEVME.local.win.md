@@ -31,6 +31,11 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2 && \
  chmod +x /usr/local/bin/systemctl2 && \
  systemctl2 --version
+
+# install kira bash helper utils
+BRANCH="v0.0.1" && cd /tmp && rm -fv ./i.sh && \
+wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install.sh -O ./i.sh && \
+ chmod 555 -v ./i.sh && ./i.sh "$BRANCH" "/var/kiraglob" && . /etc/profile && rm -fv ./i.sh
  
 # uninstall golang if needed
 ( go clean -modcache -cache -n || echo "Failed to cleanup go cache" ) && \
@@ -40,37 +45,38 @@ wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/mas
   ( rm -rfv "$GOCACHE" || echo "Failed to cleanup go cache" )
 
 # install golang
-GO_VERSION="1.17.2" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
+GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
 GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
  wget https://dl.google.com/go/${GO_TAR} && \
- tar -C /usr/local -xvf $GO_TAR && touch ~/.bash_aliases && \
- if ! grep -q GOPATH ~/.bash_aliases ; then
-  echo "export GOROOT=/usr/local/go" >> ~/.bash_aliases
-  echo "export GOBIN=/usr/local/go/bin" >> ~/.bash_aliases
-  echo "export GOPATH=/home/go" >> ~/.bash_aliases
-  echo "export GOCACHE=/home/go/cache" >> ~/.bash_aliases
-  echo "export PATH=\$PATH:\$GOROOT:\$GOBIN:\$GOPATH" >> ~/.bash_aliases
-  . ~/.bashrc
-  go version
-else
-  go version
-fi
+ tar -C /usr/local -xvf $GO_TAR && \
+ setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT" && \
+ setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN" && \
+ setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH" && \
+ setGlobEnv GOCACHE "/home/go/cache" && \
+ loadGlobEnvs && go version
 
 # mount C drive or other disk where repo is stored
-mkdir -p /mnt/c && \
- echo "mount -t drvfs C: /mnt/c" >> ~/.bash_aliases
+setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c"
 
 # set env variable to your local repos
 echo "SEKAI_REPO=\"/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/sekai\"" >> ~/.bash_aliases && \
  echo "INTERX_REPO=\"/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/interx\"" >> ~/.bash_aliases
 
 # set home directory of your repos
-echo "SEKAID_HOME=/root/.sekaid" >> ~/.bash_aliases
+echo "SEKAID_HOME=/root/.sekaid" >> ~/.bash_aliases && \
+ echo "INTERXD_HOME=/root/.interxd" >> ~/.bash_aliases
 
 # Ensure you have Docker Desktop installed: https://code.visualstudio.com/blogs/2020/03/02/docker-in-wsl2 & reboot your entire host machine
 
 . ~/.bashrc
 cd $INTERX_REPO
+```
+
+# Clean Clone
+```
+cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
+ git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
+ cd ./interx
 ```
 
 ## Installation
@@ -79,4 +85,42 @@ cd $INTERX_REPO
 go get github.com/KiraCore/sekai@master
 
 make install
+```
+
+## Startup
+
+```
+
+    CFG_grpc="dns:///127.0.0.1:9090" && \
+     CFG_rpc="http://127.0.0.1:26657" && \
+     rm -rfv $INTERXD_HOME && mkdir -p $INTERXD_HOME/cache && \
+     rm -rfv /interx/cache &&
+     interxd init --cache_dir="$INTERXD_HOME/cache" --config="$INTERXD_HOME/config.json" --grpc="$CFG_grpc" --rpc="$CFG_rpc" --port="$INTERNAL_API_PORT" \
+      --signing_mnemonic="$COMMON_DIR/signing.mnemonic" \
+      --seed_node_id="$seed_node_id" \
+      --sentry_node_id="$sentry_node_id" \
+      --validator_node_id="$validator_node_id" \
+      --addrbook="$KIRA_ADDRBOOK_FILE" \
+      --faucet_time_limit=30 \
+      --faucet_amounts="100000ukex,20000000test,300000000000000000samolean,1lol" \
+      --faucet_minimum_amounts="1000ukex,50000test,250000000000000samolean,1lol" \
+      --fee_amounts="ukex 1000ukex,test 500ukex,samolean 250ukex, lol 100ukex" \
+      --version="$KIRA_SETUP_VER"
+
+    seed_node_id=$(globGet seed_node_id)
+    sentry_node_id=$(globGet sentry_node_id)
+    validator_node_id=$(globGet validator_node_id)
+
+    interxd init --cache_dir="$CACHE_DIR" --config="$CONFIG_PATH" --grpc="$CFG_grpc" --rpc="$CFG_rpc" --port="$INTERNAL_API_PORT" \
+      --signing_mnemonic="$COMMON_DIR/signing.mnemonic" \
+      --seed_node_id="$seed_node_id" \
+      --sentry_node_id="$sentry_node_id" \
+      --validator_node_id="$validator_node_id" \
+      --addrbook="$KIRA_ADDRBOOK_FILE" \
+      --faucet_time_limit=30 \
+      --faucet_amounts="100000ukex,20000000test,300000000000000000samolean,1lol" \
+      --faucet_minimum_amounts="1000ukex,50000test,250000000000000samolean,1lol" \
+      --fee_amounts="ukex 1000ukex,test 500ukex,samolean 250ukex, lol 100ukex" \
+      --version="$KIRA_SETUP_VER"
+
 ```
