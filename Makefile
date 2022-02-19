@@ -24,6 +24,9 @@ generate:
 install: go.sum
 	go build -o $(GOBIN)/interxd
 
+install2:
+	./scripts/install.sh
+
 start:
 	go run main.go
 

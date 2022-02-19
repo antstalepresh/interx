@@ -58,18 +58,17 @@ GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp 
 # mount C drive or other disk where repo is stored
 setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c"
 
-# set env variable to your local repos
-echo "SEKAI_REPO=\"/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/sekai\"" >> ~/.bash_aliases && \
- echo "INTERX_REPO=\"/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/interx\"" >> ~/.bash_aliases
+# set env variable to your local repos (will vary depending on the user)
+setGlobEnv SEKAI_REPO "/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/sekai" && \
+ setGlobEnv INTERX_REPO "/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/interx" && \
+ loadGlobEnvs
 
 # set home directory of your repos
-echo "SEKAID_HOME=/root/.sekaid" >> ~/.bash_aliases && \
- echo "INTERXD_HOME=/root/.interxd" >> ~/.bash_aliases
+setGlobEnv SEKAID_HOME "/root/.sekaid" && \
+ setGlobEnv INTERXD_HOME "/root/.interxd" && \
+ loadGlobEnvs
 
 # Ensure you have Docker Desktop installed: https://code.visualstudio.com/blogs/2020/03/02/docker-in-wsl2 & reboot your entire host machine
-
-. ~/.bashrc
-cd $INTERX_REPO
 ```
 
 # Clean Clone
@@ -82,6 +81,8 @@ cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
 ## Installation
 
 ```
+cd $INTERX_REPO
+
 go get github.com/KiraCore/sekai@master
 
 make install
