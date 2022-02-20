@@ -17,15 +17,21 @@ wsl --set-version Ubuntu-20.04 2
 ```
 # Open Ubuntu 20.04 WSL 2.0 console
 
+sudo -s
+
 # Install Essential Dependecies
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
- apt-get update -y && \
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
  apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-    software-properties-common curl wget git nginx apt-transport-https file build-essential net-tools hashdeep \
-    protobuf-compiler golang-goprotobuf-dev golang-grpc-gateway golang-github-grpc-ecosystem-grpc-gateway-dev lsb-release \
-    clang cmake gcc g++ pkg-config libudev-dev libusb-1.0-0-dev iputils-ping nano jq python python3 python3-pip gnupg \
-    bash libglu1-mesa lsof bc dnsutils psmisc netcat  make nodejs tar unzip xz-utils yarn zip p7zip-full ca-certificates \
-	bridge-utils containerd docker.io 
+ software-properties-common curl wget git nginx apt-transport-https file build-essential net-tools hashdeep \
+ protobuf-compiler golang-goprotobuf-dev golang-grpc-gateway golang-github-grpc-ecosystem-grpc-gateway-dev lsb-release \
+ clang cmake gcc g++ pkg-config libudev-dev libusb-1.0-0-dev iputils-ping nano jq python python3 python3-pip gnupg \
+ bash libglu1-mesa lsof bc dnsutils psmisc netcat  make nodejs tar unzip xz-utils yarn zip p7zip-full ca-certificates \
+ bridge-utils containerd docker.io dos2unix protobuf-compiler
+
+# install homebrew
+sudo -u $SUDO_USER /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+ setGlobPath "/home/linuxbrew/.linuxbrew/bin" && loadGlobEnvs && brew --version && sleep 1 && \
+ sudo -u $SUDO_USER bash -c '. /etc/profile && brew doctor'
 
 # install systemd alternative
 wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2 && \
@@ -39,13 +45,13 @@ wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install
  
 # uninstall golang if needed
 ( go clean -modcache -cache -n || echo "Failed to cleanup go cache" ) && \
-  ( rm -rfv "$GOROOT" || echo "Failed to cleanup go root" ) && \
-  ( rm -rfv "$GOBIN" || echo "Failed to cleanup go bin" ) && \
-  ( rm -rfv "$GOPATH" || echo "Failed to cleanup go path" ) && \
-  ( rm -rfv "$GOCACHE" || echo "Failed to cleanup go cache" )
+( rm -rfv "$GOROOT" || echo "Failed to cleanup go root" ) && \
+( rm -rfv "$GOBIN" || echo "Failed to cleanup go bin" ) && \
+( rm -rfv "$GOPATH" || echo "Failed to cleanup go path" ) && \
+( rm -rfv "$GOCACHE" || echo "Failed to cleanup go cache" )
 
 # mount C drive or other disk where repo is stored
-setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c"
+setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c || echo 'Failed to mount C drive'"
 
 # set env variable to your local repos (will vary depending on the user)
 setGlobEnv SEKAI_REPO "/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/sekai" && \
@@ -72,7 +78,10 @@ cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
 ```
 cd $INTERX_REPO
 
-go get github.com/KiraCore/sekai@master
+chmod 777 ./scripts/protocgen.sh && \
+ dos2unix ./scripts/protocgen.sh && \
+ ./scripts/protocgen.sh
+
 
 make install
 ```
