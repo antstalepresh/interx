@@ -44,17 +44,6 @@ wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install
   ( rm -rfv "$GOPATH" || echo "Failed to cleanup go path" ) && \
   ( rm -rfv "$GOCACHE" || echo "Failed to cleanup go cache" )
 
-# install golang
-GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
-GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
- wget https://dl.google.com/go/${GO_TAR} && \
- tar -C /usr/local -xvf $GO_TAR && \
- setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT" && \
- setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN" && \
- setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH" && \
- setGlobEnv GOCACHE "/home/go/cache" && \
- loadGlobEnvs && go version
-
 # mount C drive or other disk where repo is stored
 setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c"
 

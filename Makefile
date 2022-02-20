@@ -1,7 +1,3 @@
-ifndef GOBIN
-GOBIN=${HOME}/go/bin
-endif
-
 generate:
 	# Generate go, gRPC-Gateway, OpenAPI output.
 	#
@@ -21,10 +17,7 @@ generate:
 	# Generate static assets for OpenAPI UI
 	# statik -m -f -src third_party/OpenAPI/
 
-install: go.sum
-	go build -o $(GOBIN)/interxd
-
-install2:
+install:
 	./scripts/install.sh
 
 start:
