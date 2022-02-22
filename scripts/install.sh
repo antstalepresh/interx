@@ -10,23 +10,23 @@ GO_VER=$(go version 2> /dev/null || echo "")
 # Installing utils is essential to simplify the setup steps
 if [ -z "$UTILS_VER" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..."
-    KIRA_UTILS_BRANCH="v0.0.1"
-    cd /tmp && rm -fv ./i.sh
-    wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh
+    KIRA_UTILS_BRANCH="v0.0.1" && cd /tmp && rm -fv ./i.sh && \
+    wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh && \
     chmod 555 -v ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob"
 fi
 
 # install golang if needed
 if  ($(isNullOrEmpty "$GO_VER")) ; then
-    GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64")
-    GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR
-    wget https://dl.google.com/go/${GO_TAR}
-    tar -C /usr/local -xvf $GO_TAR
-    setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT"
-    setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN"
-    setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH"
-    setGlobEnv GOCACHE "/home/go/cache"
-    loadGlobEnvs 
+    GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
+     GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
+     wget https://dl.google.com/go/${GO_TAR} && chmod 555 -v $GO_TAR && \
+     tar -C /usr/local -xvf $GO_TAR && \
+     setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT" && \
+     setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN" && \
+     setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH" && \
+     setGlobEnv GOCACHE "/home/go/cache" && \
+     loadGlobEnvs && \
+     mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
     echoInfo "INFO: Sucessfully intalled $(go version)"
 fi
 
