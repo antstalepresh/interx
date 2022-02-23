@@ -4,7 +4,7 @@ package cosmos.bank.v1beta1;
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/base/pagination.proto";
 
 // Defines the import path that should be used to import the generated package,
 // and the package name.
@@ -57,7 +57,7 @@ message QueryAllBalancesRequest {
   bytes address = 1;
 
   // pagination defines an optional pagination for the request.
-  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+  cosmos.base.PageRequest pagination = 2;
 }
 
 // QueryAllBalancesResponse is the response type for the Query/AllBalances RPC method.
@@ -66,7 +66,7 @@ message QueryAllBalancesResponse {
   repeated Coin balances = 1;
 
   // pagination defines the pagination in the response.
-   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+   cosmos.base.PageResponse pagination = 2;
 }
 
 // QueryTotalSupplyRequest is the request type for the Query/TotalSupply RPC method.
