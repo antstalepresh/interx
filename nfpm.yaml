@@ -1,0 +1,21 @@
+name: "interx"
+arch: "amd64"
+platform: "linux"
+version: "v0.1.18.15"
+section: "default"
+priority: "extra"
+replaces:
+- interxd
+provides:
+- interxd
+maintainer: "Yevhen Yakubovskyi <yaievgeniy@gmail.com>"
+description: "INTERX is an interchain engine, proxy, 
+load balancer & security gateway service for communication between backend and frontend. 
+It will connect to the node using the GRPC endpoint as well as the RPC endpoint"
+
+homepage: "http://github.com/KiraCore/interx"
+license: "AGPL-3.0 license"
+
+contents:
+- src: ./interxd
+  dst: ./interxd
