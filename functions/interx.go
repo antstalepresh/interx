@@ -397,6 +397,20 @@ func RegisterInterxFunctions() {
 	)
 
 	AddInterxFunction(
+		"QueryExecutionFees",
+		config.QueryExecutionFees,
+		`{
+			"description": "QueryExecutionFees is a function to query all execution fees.",
+			"response": {
+				"fees": {
+					"type":        "array",
+					"description": "All execution fees"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
 		"QueryKiraTokensAliases",
 		config.QueryKiraTokensAliases,
 		`{

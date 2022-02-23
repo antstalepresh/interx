@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/base/pagination.proto";
 
 option go_package = "github.com/KiraCore/interx/proto-gen/kira/slashing";
 
@@ -85,7 +85,7 @@ message QuerySigningInfoResponse {
 // QuerySigningInfosRequest is the request type for the Query/SigningInfos RPC
 // method
 message QuerySigningInfosRequest {
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+  cosmos.base.PageRequest pagination = 1;
   bool all = 2;
 }
 
@@ -94,5 +94,5 @@ message QuerySigningInfosRequest {
 message QuerySigningInfosResponse {
   // info is the signing info of all validators
   repeated ValidatorSigningInfo info = 1 [(gogoproto.nullable) = false];
-  cosmos.base.query.v1beta1.PageResponse  pagination = 2;
+  cosmos.base.PageResponse  pagination = 2;
 }

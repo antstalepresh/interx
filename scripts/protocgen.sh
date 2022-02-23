@@ -2,6 +2,9 @@
 
 set -eo pipefail
 
+# get protoc executions
+go get google.golang.org/grpc/cmd/protoc-gen-go-grpc 2>/dev/null
+
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
 for dir in $proto_dirs; do
@@ -10,7 +13,8 @@ for dir in $proto_dirs; do
 		-I third_party/grpc-gateway/ \
 		-I third_party/googleapis/ \
 		-I third_party/proto/ \
-		--go_out=plugins=grpc,paths=source_relative:./proto-gen \
+		--go_out=paths=source_relative:./proto-gen \
+		--go-grpc_out=paths=source_relative:./proto-gen \
 		--grpc-gateway_out=paths=source_relative:./proto-gen \
 		$(find "${dir}" -maxdepth 1 -name '*.proto')
 		# --openapiv2_out=third_party/OpenAPI/ \

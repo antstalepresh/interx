@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/base/pagination.proto";
 import "kira/gov/identity_registrar.proto";
 
 // Defines the import path that should be used to import the generated package,
@@ -46,7 +46,7 @@ message ValidatorsRequest {
   string proposer = 6;
   
   // pagination defines an optional pagination for the request.
-  cosmos.base.query.v1beta1.PageRequest pagination = 7 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+  cosmos.base.PageRequest pagination = 7 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
 
   bool all = 8;
 }
@@ -74,5 +74,5 @@ message ValidatorsResponse {
   repeated string actors = 2;
 
   // pagination defines the pagination in the response.
-  cosmos.base.query.v1beta1.PageResponse pagination = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+  cosmos.base.PageResponse pagination = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
 }
