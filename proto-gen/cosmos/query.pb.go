@@ -7,7 +7,7 @@
 package cosmos
 
 import (
-	proto "github.com/KiraCore/interx/proto"
+	proto_gen "github.com/KiraCore/interx/proto-gen"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -581,14 +581,14 @@ type StatusResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChainId   string       `protobuf:"bytes,1,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
-	Block     uint64       `protobuf:"varint,2,opt,name=block,proto3" json:"block,omitempty"`
-	BlockTime string       `protobuf:"bytes,3,opt,name=block_time,json=blockTime,proto3" json:"block_time,omitempty"`
-	Timestamp uint64       `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Response  *Status      `protobuf:"bytes,5,opt,name=response,proto3" json:"response,omitempty"`
-	Error     *proto.Error `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
-	Signature string       `protobuf:"bytes,7,opt,name=signature,proto3" json:"signature,omitempty"`
-	Hash      string       `protobuf:"bytes,8,opt,name=hash,proto3" json:"hash,omitempty"`
+	ChainId   string           `protobuf:"bytes,1,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
+	Block     uint64           `protobuf:"varint,2,opt,name=block,proto3" json:"block,omitempty"`
+	BlockTime string           `protobuf:"bytes,3,opt,name=block_time,json=blockTime,proto3" json:"block_time,omitempty"`
+	Timestamp uint64           `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Response  *Status          `protobuf:"bytes,5,opt,name=response,proto3" json:"response,omitempty"`
+	Error     *proto_gen.Error `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
+	Signature string           `protobuf:"bytes,7,opt,name=signature,proto3" json:"signature,omitempty"`
+	Hash      string           `protobuf:"bytes,8,opt,name=hash,proto3" json:"hash,omitempty"`
 }
 
 func (x *StatusResponse) Reset() {
@@ -658,7 +658,7 @@ func (x *StatusResponse) GetResponse() *Status {
 	return nil
 }
 
-func (x *StatusResponse) GetError() *proto.Error {
+func (x *StatusResponse) GetError() *proto_gen.Error {
 	if x != nil {
 		return x.Error
 	}
@@ -947,14 +947,14 @@ type TransactionHashResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ChainId   string       `protobuf:"bytes,1,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
-	Block     uint64       `protobuf:"varint,2,opt,name=block,proto3" json:"block,omitempty"`
-	BlockTime string       `protobuf:"bytes,3,opt,name=block_time,json=blockTime,proto3" json:"block_time,omitempty"`
-	Timestamp uint64       `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Response  *Transaction `protobuf:"bytes,5,opt,name=response,proto3" json:"response,omitempty"`
-	Error     *proto.Error `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
-	Signature string       `protobuf:"bytes,7,opt,name=signature,proto3" json:"signature,omitempty"`
-	Hash      string       `protobuf:"bytes,8,opt,name=hash,proto3" json:"hash,omitempty"`
+	ChainId   string           `protobuf:"bytes,1,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
+	Block     uint64           `protobuf:"varint,2,opt,name=block,proto3" json:"block,omitempty"`
+	BlockTime string           `protobuf:"bytes,3,opt,name=block_time,json=blockTime,proto3" json:"block_time,omitempty"`
+	Timestamp uint64           `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Response  *Transaction     `protobuf:"bytes,5,opt,name=response,proto3" json:"response,omitempty"`
+	Error     *proto_gen.Error `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
+	Signature string           `protobuf:"bytes,7,opt,name=signature,proto3" json:"signature,omitempty"`
+	Hash      string           `protobuf:"bytes,8,opt,name=hash,proto3" json:"hash,omitempty"`
 }
 
 func (x *TransactionHashResponse) Reset() {
@@ -1024,7 +1024,7 @@ func (x *TransactionHashResponse) GetResponse() *Transaction {
 	return nil
 }
 
-func (x *TransactionHashResponse) GetError() *proto.Error {
+func (x *TransactionHashResponse) GetError() *proto_gen.Error {
 	if x != nil {
 		return x.Error
 	}
@@ -1251,7 +1251,7 @@ var file_cosmos_query_proto_goTypes = []interface{}{
 	(*Transaction)(nil),             // 11: cosmos.query.Transaction
 	(*TransactionHashRequest)(nil),  // 12: cosmos.query.TransactionHashRequest
 	(*TransactionHashResponse)(nil), // 13: cosmos.query.TransactionHashResponse
-	(*proto.Error)(nil),             // 14: type.Error
+	(*proto_gen.Error)(nil),         // 14: type.Error
 }
 var file_cosmos_query_proto_depIdxs = []int32{
 	0,  // 0: cosmos.query.NodeInfo.protocol_version:type_name -> cosmos.query.ProtocolVersion

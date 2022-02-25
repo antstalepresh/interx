@@ -7,7 +7,7 @@
 package cosmos
 
 import (
-	proto "github.com/KiraCore/interx/proto"
+	proto_gen "github.com/KiraCore/interx/proto-gen"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -162,7 +162,7 @@ type PostTransactionResponse struct {
 	BlockTime string                 `protobuf:"bytes,3,opt,name=block_time,json=blockTime,proto3" json:"block_time,omitempty"`
 	Timestamp uint64                 `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	Response  *PostTransactionResult `protobuf:"bytes,5,opt,name=response,proto3" json:"response,omitempty"`
-	Error     *proto.Error           `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
+	Error     *proto_gen.Error       `protobuf:"bytes,6,opt,name=error,proto3" json:"error,omitempty"`
 	Signature string                 `protobuf:"bytes,7,opt,name=signature,proto3" json:"signature,omitempty"`
 	Hash      string                 `protobuf:"bytes,8,opt,name=hash,proto3" json:"hash,omitempty"`
 }
@@ -234,7 +234,7 @@ func (x *PostTransactionResponse) GetResponse() *PostTransactionResult {
 	return nil
 }
 
-func (x *PostTransactionResponse) GetError() *proto.Error {
+func (x *PostTransactionResponse) GetError() *proto_gen.Error {
 	if x != nil {
 		return x.Error
 	}
@@ -332,7 +332,7 @@ var file_cosmos_tx_proto_goTypes = []interface{}{
 	(*PostTransactionResult)(nil),   // 0: cosmos.tx.PostTransactionResult
 	(*PostTransactionRequest)(nil),  // 1: cosmos.tx.PostTransactionRequest
 	(*PostTransactionResponse)(nil), // 2: cosmos.tx.PostTransactionResponse
-	(*proto.Error)(nil),             // 3: type.Error
+	(*proto_gen.Error)(nil),         // 3: type.Error
 }
 var file_cosmos_tx_proto_depIdxs = []int32{
 	0, // 0: cosmos.tx.PostTransactionResponse.response:type_name -> cosmos.tx.PostTransactionResult
