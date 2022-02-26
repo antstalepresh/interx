@@ -76,6 +76,7 @@ if ($(isNullOrEmpty "$BUF_VER")) ; then
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 fi
 
+
 COSMOS_BRANCH=v0.45.1
 go get github.com/KiraCore/sekai@$SEKAI_BRANCH
 go get github.com/cosmos/cosmos-sdk@$COSMOS_BRANCH
@@ -86,31 +87,34 @@ mkdir -p ./proto-gen ./proto
 kira_dir=$(go list -f '{{ .Dir }}' -m github.com/KiraCore/sekai@$SEKAI_BRANCH)
 cosmos_sdk_dir=$(go list -f '{{ .Dir }}' -m github.com/cosmos/cosmos-sdk@$COSMOS_BRANCH)
 
-rm -rfv ./proto/cosmos ./proto/kira
-cp -rv $cosmos_sdk_dir/proto/cosmos ./proto
-cp -rv $kira_dir/proto/kira ./proto
+rm -rfv ./proto/cosmos ./proto/kira ./third_party/proto
+mkdir -p ./third_party/proto
+cp -rfv $cosmos_sdk_dir/proto/cosmos ./proto
+cp -rfv $cosmos_sdk_dir/third_party/proto/cosmos_proto ./third_party/proto
+cp -rfv $cosmos_sdk_dir/third_party/proto/tendermint ./third_party/proto
+cp -rfv $kira_dir/proto/kira ./proto
 
 echoInfo "INFO: Removing unused protos from cosmos & kira directories"
-# cosmos
-rm -rfv ./proto/cosmos/authz
-rm -rfv ./proto/cosmos/capability
-rm -rfv ./proto/cosmos/crisis 
-rm -rfv ./proto/cosmos/crypto
-rm -rfv ./proto/cosmos/distribution 
-rm -rfv ./proto/cosmos/evidence 
-rm -rfv ./proto/cosmos/feegrant 
-rm -rfv ./proto/cosmos/genutil 
-rm -rfv ./proto/cosmos/gov
-rm -rfv ./proto/cosmos/mint 
-rm -rfv ./proto/cosmos/params 
-rm -rfv ./proto/cosmos/slashing 
-rm -rfv ./proto/cosmos/tx 
-rm -rfv ./proto/cosmos/upgrade 
-rm -rfv ./proto/cosmos/vesting
+# # cosmos
+# rm -rfv ./proto/cosmos/authz
+# rm -rfv ./proto/cosmos/capability
+# rm -rfv ./proto/cosmos/crisis 
+# rm -rfv ./proto/cosmos/crypto
+# rm -rfv ./proto/cosmos/distribution 
+# rm -rfv ./proto/cosmos/evidence 
+# rm -rfv ./proto/cosmos/feegrant 
+# rm -rfv ./proto/cosmos/genutil 
+# rm -rfv ./proto/cosmos/gov
+# rm -rfv ./proto/cosmos/mint 
+# rm -rfv ./proto/cosmos/params 
+# rm -rfv ./proto/cosmos/slashing 
+# rm -rfv ./proto/cosmos/tx 
+# rm -rfv ./proto/cosmos/upgrade 
+# rm -rfv ./proto/cosmos/vesting
 # kira
-rm -rfv ./proto/kira/evidence
-rm -rfv ./proto/kira/genutil
-rm -rfv ./proto/kira/spending
+# rm -rfv ./proto/kira/evidence
+# rm -rfv ./proto/kira/genutil
+# rm -rfv ./proto/kira/spending
 
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
