@@ -3,13 +3,14 @@
 ## Re/Install WSL on Windows 10 (PowerShell)
 
 ```
-wsl --terminate Ubuntu-20.04
-wsl --unregister Ubuntu-20.04
+# Uninstall Ubuntu
+wsl --terminate Ubuntu-20.04 && \
+ wsl --unregister Ubuntu-20.04
 
-wsl --install -d Ubuntu-20.04
-wsl --setdefault Ubuntu-20.04
-wsl --set-version Ubuntu-20.04 2
-
+# Install Ubuntu
+wsl --install -d Ubuntu-20.04 && \
+ wsl --setdefault Ubuntu-20.04 && \
+ wsl --set-version Ubuntu-20.04 2
 ```
 
 ## Essential Dependencies
@@ -20,18 +21,14 @@ wsl --set-version Ubuntu-20.04 2
 sudo -s
 
 # Install Essential Dependecies
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
+
+apt-get install -y curl && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
  apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
- software-properties-common curl wget git nginx apt-transport-https file build-essential net-tools hashdeep \
+ software-properties-common wget git nginx apt-transport-https file build-essential net-tools hashdeep \
  protobuf-compiler golang-goprotobuf-dev golang-grpc-gateway golang-github-grpc-ecosystem-grpc-gateway-dev lsb-release \
  clang cmake gcc g++ pkg-config libudev-dev libusb-1.0-0-dev iputils-ping nano jq python python3 python3-pip gnupg \
  bash libglu1-mesa lsof bc dnsutils psmisc netcat  make nodejs tar unzip xz-utils yarn zip p7zip-full ca-certificates \
- bridge-utils containerd docker.io dos2unix protobuf-compiler
-
-# install homebrew
-sudo -u $SUDO_USER /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
- setGlobPath "/home/linuxbrew/.linuxbrew/bin" && loadGlobEnvs && brew --version && sleep 1 && \
- sudo -u $SUDO_USER bash -c '. /etc/profile && brew doctor'
+ containerd docker.io dos2unix
 
 # install systemd alternative
 wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl2 && \
