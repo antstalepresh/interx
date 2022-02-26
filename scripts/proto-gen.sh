@@ -99,7 +99,7 @@ for dir in $proto_dirs; do
           --go_out=paths=source_relative:./proto-gen \
           --go-grpc_out=paths=source_relative:./proto-gen \
           --grpc-gateway_out=paths=source_relative:./proto-gen \
-          $fil || ( echoErr "ERROR: Failed proto build for: ${fil}")
+          $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
     done
 done
 
