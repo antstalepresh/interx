@@ -27,7 +27,7 @@ wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install
 
 ### Installation
 
-Quick Git Clone
+Quick Git Clone (Old)
 
 ```
 (docker rmi $(docker images "tendermintdev/sdk-proto-gen" -a -q) || echo "NO IMAGE TO WIPE" ) && \
@@ -38,21 +38,15 @@ Quick Git Clone
  go mod tidy && \
  make install && \
  go mod verify && echo "SUCCESS" || echo "FAILED"
- 
- dos2unix ./scripts/install.sh &&
- dos2unix ./scripts/protocgen.sh
 ```
 
-Specify sekai commit hash (otherwise master branch will be used)
+Quick Git Clone (New)
 
 ```
-setGlobEnv SEKAI_BRANCH "master"
-```
-
-Use following command in the root respository of INTERX.
-
-```bash
-make install
+cd $HOME && rm -fvr ./interx && INTERX_BRANCH="asmodat-tmp" && \
+ git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
+ cd ./interx && chmod 777 -R ./scripts && \
+ make install && echo "SUCCESS" || echo "FAILED"
 ```
 
 It will install INTERX binary(`interxd`) to `$GOBIN`.

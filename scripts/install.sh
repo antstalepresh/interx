@@ -16,7 +16,7 @@ if [ -z "$UTILS_VER" ] ; then
 fi
 
 # install golang if needed
-if  ($(isNullOrEmpty "$GO_VER")) ; then
+if  ($(isNullOrEmpty "$GO_VER")) || ($(isNullOrEmpty "$GOBIN")) ; then
     GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
      GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
      wget https://dl.google.com/go/${GO_TAR} && \
@@ -34,17 +34,6 @@ fi
 # navigate to current direcotry and load global environment variables
 cd $CURRENT_DIR
 loadGlobEnvs
-
-if ($(isNullOrEmpty "$SEKAI_BRANCH")) ; then
-    SEKAI_BRANCH="master"
-    echoWarn "WARNING: SEKAI branch 'SEKAI_BRANCH' env variable was undefined, the '$SEKAI_BRANCH' branch will be used during installation process!" && sleep 1
-    setGlobEnv SEKAI_BRANCH "$SEKAI_BRANCH"
-fi
-
-if ($(isNullOrEmpty "$GOBIN")) ; then
-    GOBIN=${HOME}/go/bin
-    echoWarn "WARNING: GOBIN env variable was undefined, the '$GOBIN' will be used during installation process!" && sleep 1
-fi
 
 go clean -modcache
 BUF_VER=$(buf --version 2> /dev/null || echo "")
@@ -76,22 +65,11 @@ if ($(isNullOrEmpty "$BUF_VER")) ; then
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 fi
 
-function goUpdate(){
-    local module=$1
-    local version=$2
-    local current=$(go list -m -f '{{ .Version }}' github.com/KiraCore/sekai 2> /dev/null || echo "")
-    if [ "$current" != "$version" ] ; then
-        go get "${module}@${version}"
-        echoInfo "INFO: Updated module ${module}, $current -> $version"
-    else
-        echoInfo "INFO: Module ${module}@${version} is up to date"
-    fi
-}
-
 COSMOS_BRANCH="v0.45.1"
 SEKAI_BRANCH="master"
-goUpdate github.com/KiraCore/sekai "$SEKAI_BRANCH"
-goUpdate github.com/cosmos/cosmos-sdk "$COSMOS_BRANCH"
+
+go get github.com/KiraCore/sekai@$SEKAI_BRANCH
+go get github.com/cosmos/cosmos-sdk@$COSMOS_BRANCH
 
 echoInfo "Cleaning up proto gen files..."
 rm -rfv ./proto-gen
@@ -121,13 +99,11 @@ for dir in $proto_dirs; do
           --go_out=paths=source_relative:./proto-gen \
           --go-grpc_out=paths=source_relative:./proto-gen \
           --grpc-gateway_out=paths=source_relative:./proto-gen \
-          $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 1 )
+          $fil || ( echoErr "ERROR: Failed proto build for: ${fil}")
     done
 done
 
-echoInfo "Proto files were generated for:"
-echoInfo echo ${proto_dirs[*]}
-sleep 1
+echoInfo "INFO: Success, all proto files were compiled!"
 
 go mod tidy
 go build -o "${GOBIN}/interxd"
