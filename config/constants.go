@@ -21,6 +21,7 @@ const (
 	QueryDataReference        = "/api/kira/gov/data/{key}"
 	QueryNetworkProperties    = "/api/kira/gov/network_properties"
 	QueryExecutionFee         = "/api/kira/gov/execution_fee"
+	QueryExecutionFees        = "/api/kira/gov/execution_fees"
 	QueryKiraTokensAliases    = "/api/kira/tokens/aliases"
 	QueryKiraTokensRates      = "/api/kira/tokens/rates"
 	QueryKiraFunctions        = "/api/kira/metadata"

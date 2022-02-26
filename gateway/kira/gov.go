@@ -22,11 +22,13 @@ func RegisterKiraGovRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr
 	r.HandleFunc(config.QueryDataReference, QueryDataReferenceRequest(gwCosmosmux, rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryNetworkProperties, QueryNetworkPropertiesRequest(gwCosmosmux, rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryExecutionFee, QueryExecutionFeeRequest(gwCosmosmux, rpcAddr)).Methods("GET")
+	r.HandleFunc(config.QueryExecutionFees, QueryExecutionFeesRequest(gwCosmosmux, rpcAddr)).Methods("GET")
 
 	common.AddRPCMethod("GET", config.QueryDataReferenceKeys, "This is an API to query all data reference keys.", true)
 	common.AddRPCMethod("GET", config.QueryDataReference, "This is an API to query data reference by key.", true)
 	common.AddRPCMethod("GET", config.QueryNetworkProperties, "This is an API to query network properties.", true)
 	common.AddRPCMethod("GET", config.QueryExecutionFee, "This is an API to query execution fee by transaction type.", true)
+	common.AddRPCMethod("GET", config.QueryExecutionFees, "This is an API to query all execution fees.", true)
 }
 
 func queryDataReferenceKeysHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
@@ -187,10 +189,6 @@ func QueryNetworkPropertiesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func QueryExecutionFeeHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	queries := r.URL.Query()
-	message := queries["message"]
-
-	r.URL.Path = fmt.Sprintf("/api/kira/gov/execution_fee?transaction_type=%s", message[0])
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -203,10 +201,10 @@ func QueryExecutionFeeRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) htt
 
 		common.GetLogger().Info("[query-execution-fee] Entering execution fee query")
 
-		if !common.RPCMethods["GET"][config.QueryNetworkProperties].Enabled {
+		if !common.RPCMethods["GET"][config.QueryExecutionFee].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
 		} else {
-			if common.RPCMethods["GET"][config.QueryNetworkProperties].CachingEnabled {
+			if common.RPCMethods["GET"][config.QueryExecutionFee].CachingEnabled {
 				found, cacheResponse, cacheError, cacheStatus := common.SearchCache(request, response)
 				if found {
 					response.Response, response.Error, statusCode = cacheResponse, cacheError, cacheStatus
@@ -220,6 +218,40 @@ func QueryExecutionFeeRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) htt
 			response.Response, response.Error, statusCode = QueryNetworkPropertiesHandle(r, gwCosmosmux)
 		}
 
-		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryNetworkProperties].CachingEnabled)
+		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryExecutionFee].CachingEnabled)
+	}
+}
+
+func QueryExecutionFeesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	return common.ServeGRPC(r, gwCosmosmux)
+}
+
+// QueryExecutionFeeRequest is a function to query execution fee by transaction type.
+func QueryExecutionFeesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+		statusCode := http.StatusOK
+
+		common.GetLogger().Info("[query-execution-fees] Entering execution fees query")
+
+		if !common.RPCMethods["GET"][config.QueryExecutionFees].Enabled {
+			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
+		} else {
+			if common.RPCMethods["GET"][config.QueryExecutionFees].CachingEnabled {
+				found, cacheResponse, cacheError, cacheStatus := common.SearchCache(request, response)
+				if found {
+					response.Response, response.Error, statusCode = cacheResponse, cacheError, cacheStatus
+					common.WrapResponse(w, request, *response, statusCode, false)
+
+					common.GetLogger().Info("[query-execution-fees] Returning from the cache")
+					return
+				}
+			}
+
+			response.Response, response.Error, statusCode = QueryExecutionFeesHandle(r, gwCosmosmux)
+		}
+
+		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryExecutionFees].CachingEnabled)
 	}
 }
