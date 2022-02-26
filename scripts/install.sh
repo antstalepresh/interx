@@ -90,6 +90,23 @@ rm -rfv ./proto/cosmos ./proto/kira
 cp -rv $cosmos_sdk_dir/proto/cosmos ./proto
 cp -rv $kira_dir/proto/kira ./proto
 
+echoInfo "INFO: Removing unused protos from cosmos & kira directories"
+rm -rfv ./proto/cosmos/authz
+rm -rfv ./proto/cosmos/capability
+rm -rfv ./proto/cosmos/crisis 
+rm -rfv ./proto/cosmos/crypto
+rm -rfv ./proto/cosmos/distribution 
+rm -rfv ./proto/cosmos/evidence 
+rm -rfv ./proto/cosmos/feegrant 
+rm -rfv ./proto/cosmos/genutil 
+rm -rfv ./proto/cosmos/gov
+rm -rfv ./proto/cosmos/mint 
+rm -rfv ./proto/cosmos/params 
+rm -rfv ./proto/cosmos/slashing 
+rm -rfv ./proto/cosmos/tx 
+rm -rfv ./proto/cosmos/upgrade 
+rm -rfv ./proto/cosmos/vesting
+
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
 echoInfo "Generating protobuf files..."
