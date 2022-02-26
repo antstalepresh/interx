@@ -3,12 +3,15 @@ proto-gen:
 
 install:
 	./scripts/proto-gen.sh
-	./scripts/install.sh
+	./scripts/build.sh
+
+build:
+	./scripts/build.sh
 
 start:
 	go run main.go
 
 publish:
 	./scripts/proto-gen.sh
-	./scripts/install.sh
+	./scripts/build.sh
 	nfpm pkg --packager deb --target . -f ./nfpm.yaml
