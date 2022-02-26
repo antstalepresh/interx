@@ -76,10 +76,22 @@ if ($(isNullOrEmpty "$BUF_VER")) ; then
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 fi
 
+function goUpdate(){
+    local module=$1
+    local version=$2
+    local current=$(go list -m -f '{{ .Version }}' github.com/KiraCore/sekai 2> /dev/null || echo "")
+    if [ "$current" != "$version" ] ; then
+        go get "${module}@${version}"
+        echoInfo "INFO: Updated module ${module}, $current -> $version"
+    else
+        echoInfo "INFO: Module ${module}@${version} is up to date"
+    fi
+}
 
-COSMOS_BRANCH=v0.45.1
-go get github.com/KiraCore/sekai@$SEKAI_BRANCH
-go get github.com/cosmos/cosmos-sdk@$COSMOS_BRANCH
+COSMOS_BRANCH="v0.45.1"
+SEKAI_BRANCH="master"
+goUpdate github.com/KiraCore/sekai "$SEKAI_BRANCH"
+goUpdate github.com/cosmos/cosmos-sdk "$COSMOS_BRANCH"
 
 echoInfo "Cleaning up proto gen files..."
 rm -rfv ./proto-gen
@@ -93,28 +105,6 @@ cp -rfv $cosmos_sdk_dir/proto/cosmos ./proto
 cp -rfv $cosmos_sdk_dir/third_party/proto/cosmos_proto ./third_party/proto
 cp -rfv $cosmos_sdk_dir/third_party/proto/tendermint ./third_party/proto
 cp -rfv $kira_dir/proto/kira ./proto
-
-echoInfo "INFO: Removing unused protos from cosmos & kira directories"
-# # cosmos
-# rm -rfv ./proto/cosmos/authz
-# rm -rfv ./proto/cosmos/capability
-# rm -rfv ./proto/cosmos/crisis 
-# rm -rfv ./proto/cosmos/crypto
-# rm -rfv ./proto/cosmos/distribution 
-# rm -rfv ./proto/cosmos/evidence 
-# rm -rfv ./proto/cosmos/feegrant 
-# rm -rfv ./proto/cosmos/genutil 
-# rm -rfv ./proto/cosmos/gov
-# rm -rfv ./proto/cosmos/mint 
-# rm -rfv ./proto/cosmos/params 
-# rm -rfv ./proto/cosmos/slashing 
-# rm -rfv ./proto/cosmos/tx 
-# rm -rfv ./proto/cosmos/upgrade 
-# rm -rfv ./proto/cosmos/vesting
-# kira
-# rm -rfv ./proto/kira/evidence
-# rm -rfv ./proto/kira/genutil
-# rm -rfv ./proto/kira/spending
 
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
@@ -135,25 +125,11 @@ for dir in $proto_dirs; do
     done
 done
 
-# buf protoc \
-#           -I "./proto" \
-#           -I third_party/grpc-gateway/ \
-#           -I "$cosmos_sdk_dir/third_party/proto" \
-#           -I "$cosmos_sdk_dir/proto" \
-#           --go_out=plugins=grpc,paths=source_relative:./proto-gen \
-#           --grpc-gateway_out=paths=source_relative:./proto-gen \
-#           $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 1 )
-
-
-#--go-grpc_out=paths=source_relative:./proto-gen \
-
 echoInfo "Proto files were generated for:"
 echoInfo echo ${proto_dirs[*]}
 sleep 1
 
-# TODO: GO mod tidy requires protogen, resolve the pending issues
 go mod tidy
-
 go build -o "${GOBIN}/interxd"
 go mod verify
 echoInfo "INFO: Sucessfully intalled INTERX $(interxd version)"

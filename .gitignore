@@ -4,3 +4,5 @@ faucet.mnemonic
 interx.mnemonic
 proto-gen
 third_party/proto
+proto/cosmos
+proto/kira
