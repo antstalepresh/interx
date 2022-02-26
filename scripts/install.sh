@@ -91,6 +91,7 @@ cp -rv $cosmos_sdk_dir/proto/cosmos ./proto
 cp -rv $kira_dir/proto/kira ./proto
 
 echoInfo "INFO: Removing unused protos from cosmos & kira directories"
+# cosmos
 rm -rfv ./proto/cosmos/authz
 rm -rfv ./proto/cosmos/capability
 rm -rfv ./proto/cosmos/crisis 
@@ -106,6 +107,10 @@ rm -rfv ./proto/cosmos/slashing
 rm -rfv ./proto/cosmos/tx 
 rm -rfv ./proto/cosmos/upgrade 
 rm -rfv ./proto/cosmos/vesting
+# kira
+rm -rfv ./proto/kira/evidence
+rm -rfv ./proto/kira/genutil
+rm -rfv ./proto/kira/spending
 
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
