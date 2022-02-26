@@ -4,7 +4,7 @@
 // - protoc             v3.19.1
 // source: kira/tokens/query.proto
 
-package tokens
+package types
 
 import (
 	context "context"
@@ -23,9 +23,15 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryClient interface {
 	// Returns the token alias
+	GetTokenAlias(ctx context.Context, in *TokenAliasRequest, opts ...grpc.CallOption) (*TokenAliasResponse, error)
 	GetAllTokenAliases(ctx context.Context, in *AllTokenAliasesRequest, opts ...grpc.CallOption) (*AllTokenAliasesResponse, error)
+	GetTokenAliasesByDenom(ctx context.Context, in *TokenAliasesByDenomRequest, opts ...grpc.CallOption) (*TokenAliasesByDenomResponse, error)
 	// Returns the token rates
+	GetTokenRate(ctx context.Context, in *TokenRateRequest, opts ...grpc.CallOption) (*TokenRateResponse, error)
 	GetAllTokenRates(ctx context.Context, in *AllTokenRatesRequest, opts ...grpc.CallOption) (*AllTokenRatesResponse, error)
+	GetTokenRatesByDenom(ctx context.Context, in *TokenRatesByDenomRequest, opts ...grpc.CallOption) (*TokenRatesByDenomResponse, error)
+	// Returns tokens black/white lists
+	GetTokenBlackWhites(ctx context.Context, in *TokenBlackWhitesRequest, opts ...grpc.CallOption) (*TokenBlackWhitesResponse, error)
 }
 
 type queryClient struct {
@@ -36,9 +42,36 @@ func NewQueryClient(cc grpc.ClientConnInterface) QueryClient {
 	return &queryClient{cc}
 }
 
+func (c *queryClient) GetTokenAlias(ctx context.Context, in *TokenAliasRequest, opts ...grpc.CallOption) (*TokenAliasResponse, error) {
+	out := new(TokenAliasResponse)
+	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetTokenAlias", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) GetAllTokenAliases(ctx context.Context, in *AllTokenAliasesRequest, opts ...grpc.CallOption) (*AllTokenAliasesResponse, error) {
 	out := new(AllTokenAliasesResponse)
 	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetAllTokenAliases", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetTokenAliasesByDenom(ctx context.Context, in *TokenAliasesByDenomRequest, opts ...grpc.CallOption) (*TokenAliasesByDenomResponse, error) {
+	out := new(TokenAliasesByDenomResponse)
+	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetTokenAliasesByDenom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetTokenRate(ctx context.Context, in *TokenRateRequest, opts ...grpc.CallOption) (*TokenRateResponse, error) {
+	out := new(TokenRateResponse)
+	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetTokenRate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,14 +87,38 @@ func (c *queryClient) GetAllTokenRates(ctx context.Context, in *AllTokenRatesReq
 	return out, nil
 }
 
+func (c *queryClient) GetTokenRatesByDenom(ctx context.Context, in *TokenRatesByDenomRequest, opts ...grpc.CallOption) (*TokenRatesByDenomResponse, error) {
+	out := new(TokenRatesByDenomResponse)
+	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetTokenRatesByDenom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetTokenBlackWhites(ctx context.Context, in *TokenBlackWhitesRequest, opts ...grpc.CallOption) (*TokenBlackWhitesResponse, error) {
+	out := new(TokenBlackWhitesResponse)
+	err := c.cc.Invoke(ctx, "/kira.tokens.Query/GetTokenBlackWhites", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
 	// Returns the token alias
+	GetTokenAlias(context.Context, *TokenAliasRequest) (*TokenAliasResponse, error)
 	GetAllTokenAliases(context.Context, *AllTokenAliasesRequest) (*AllTokenAliasesResponse, error)
+	GetTokenAliasesByDenom(context.Context, *TokenAliasesByDenomRequest) (*TokenAliasesByDenomResponse, error)
 	// Returns the token rates
+	GetTokenRate(context.Context, *TokenRateRequest) (*TokenRateResponse, error)
 	GetAllTokenRates(context.Context, *AllTokenRatesRequest) (*AllTokenRatesResponse, error)
+	GetTokenRatesByDenom(context.Context, *TokenRatesByDenomRequest) (*TokenRatesByDenomResponse, error)
+	// Returns tokens black/white lists
+	GetTokenBlackWhites(context.Context, *TokenBlackWhitesRequest) (*TokenBlackWhitesResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -69,11 +126,26 @@ type QueryServer interface {
 type UnimplementedQueryServer struct {
 }
 
+func (UnimplementedQueryServer) GetTokenAlias(context.Context, *TokenAliasRequest) (*TokenAliasResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenAlias not implemented")
+}
 func (UnimplementedQueryServer) GetAllTokenAliases(context.Context, *AllTokenAliasesRequest) (*AllTokenAliasesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllTokenAliases not implemented")
 }
+func (UnimplementedQueryServer) GetTokenAliasesByDenom(context.Context, *TokenAliasesByDenomRequest) (*TokenAliasesByDenomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenAliasesByDenom not implemented")
+}
+func (UnimplementedQueryServer) GetTokenRate(context.Context, *TokenRateRequest) (*TokenRateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenRate not implemented")
+}
 func (UnimplementedQueryServer) GetAllTokenRates(context.Context, *AllTokenRatesRequest) (*AllTokenRatesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllTokenRates not implemented")
+}
+func (UnimplementedQueryServer) GetTokenRatesByDenom(context.Context, *TokenRatesByDenomRequest) (*TokenRatesByDenomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenRatesByDenom not implemented")
+}
+func (UnimplementedQueryServer) GetTokenBlackWhites(context.Context, *TokenBlackWhitesRequest) (*TokenBlackWhitesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenBlackWhites not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -86,6 +158,24 @@ type UnsafeQueryServer interface {
 
 func RegisterQueryServer(s grpc.ServiceRegistrar, srv QueryServer) {
 	s.RegisterService(&Query_ServiceDesc, srv)
+}
+
+func _Query_GetTokenAlias_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenAliasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenAlias(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.tokens.Query/GetTokenAlias",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenAlias(ctx, req.(*TokenAliasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_GetAllTokenAliases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -102,6 +192,42 @@ func _Query_GetAllTokenAliases_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).GetAllTokenAliases(ctx, req.(*AllTokenAliasesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetTokenAliasesByDenom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenAliasesByDenomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenAliasesByDenom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.tokens.Query/GetTokenAliasesByDenom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenAliasesByDenom(ctx, req.(*TokenAliasesByDenomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetTokenRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenRateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenRate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.tokens.Query/GetTokenRate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenRate(ctx, req.(*TokenRateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -124,6 +250,42 @@ func _Query_GetAllTokenRates_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetTokenRatesByDenom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenRatesByDenomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenRatesByDenom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.tokens.Query/GetTokenRatesByDenom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenRatesByDenom(ctx, req.(*TokenRatesByDenomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetTokenBlackWhites_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenBlackWhitesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetTokenBlackWhites(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.tokens.Query/GetTokenBlackWhites",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetTokenBlackWhites(ctx, req.(*TokenBlackWhitesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -132,12 +294,32 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetTokenAlias",
+			Handler:    _Query_GetTokenAlias_Handler,
+		},
+		{
 			MethodName: "GetAllTokenAliases",
 			Handler:    _Query_GetAllTokenAliases_Handler,
 		},
 		{
+			MethodName: "GetTokenAliasesByDenom",
+			Handler:    _Query_GetTokenAliasesByDenom_Handler,
+		},
+		{
+			MethodName: "GetTokenRate",
+			Handler:    _Query_GetTokenRate_Handler,
+		},
+		{
 			MethodName: "GetAllTokenRates",
 			Handler:    _Query_GetAllTokenRates_Handler,
+		},
+		{
+			MethodName: "GetTokenRatesByDenom",
+			Handler:    _Query_GetTokenRatesByDenom_Handler,
+		},
+		{
+			MethodName: "GetTokenBlackWhites",
+			Handler:    _Query_GetTokenBlackWhites_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,296 +1,119 @@
-syntax="proto3";
-
+syntax = "proto3";
 package kira.gov;
 
-import "google/api/annotations.proto";
-import "gogoproto/gogo.proto";
-import "protoc-gen-openapiv2/options/annotations.proto";
-import "cosmos/base/pagination.proto";
-import "kira/gov/data_registry.proto";
-import "kira/gov/proposal.proto";
-import "kira/gov/identity_registrar.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "kira/gov/actor.proto";
-import "kira/gov/network_properties.proto";
+import "kira/gov/councilor.proto";
+import "kira/gov/data_registry.proto";
 import "kira/gov/role.proto";
 import "kira/gov/execution_fee.proto";
+import "kira/gov/network_properties.proto";
+import "kira/gov/proposal.proto";
+import "kira/gov/identity_registrar.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
-// Defines the import path that should be used to import the generated package,
-// and the package name.
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/gov";
+option go_package = "github.com/KiraCore/sekai/x/gov/types";
 
-// These annotations are used when generating the OpenAPI file.
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-  info: {
-    version: "1.0";
-  };
-  external_docs: {
-    url: "https://github.com/KiraCore/interx";
-    description: "gRPC-gateway";
-  }
-  schemes: HTTP;
-};
-
+// Query defines the gRPC querier service
 service Query {
+  // Returns the permissions an actor has by address.
+  rpc PermissionsByAddress (PermissionsByAddressRequest) returns (PermissionsResponse) {}
+  // Returns all registered roles
+  rpc AllRoles (AllRolesRequest) returns (AllRolesResponse) {}
+  // Returns the roles that are assigned to an address.
+  rpc RolesByAddress (RolesByAddressRequest) returns (RolesByAddressResponse) {}
+  // Role returns the role details from role sid
+  rpc Role (RoleRequest) returns (RoleResponse) {}
+  // CouncilorByAddress returns the councilor object from its address
+  rpc CouncilorByAddress (CouncilorByAddressRequest) returns (CouncilorResponse) {}
+  // CouncilorByMoniker returns the councilor object from its moniker
+  rpc CouncilorByMoniker (CouncilorByMonikerRequest) returns (CouncilorResponse) {}
+  // NetworkProperties returns network properties
+  rpc NetworkProperties (NetworkPropertiesRequest) returns (NetworkPropertiesResponse) {}
+  // ExecutionFee returns execution fee from msg type
+  rpc ExecutionFee (ExecutionFeeRequest) returns (ExecutionFeeResponse) {}
+  // PoorNetworkMessages returns poor network messages
+  rpc PoorNetworkMessages (PoorNetworkMessagesRequest) returns (PoorNetworkMessagesResponse) {}
   // Proposal queries proposal details based on ProposalID.
   rpc Proposal(QueryProposalRequest) returns (QueryProposalResponse) {
-    option (google.api.http).get = "/api/kira/gov/proposals/{proposal_id}";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query Proposal"
-      description: "Query Proposal."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/gov/proposals/{proposal_id}";
   }
   // Proposals queries all proposals based on given status.
   rpc Proposals(QueryProposalsRequest) returns (QueryProposalsResponse) {
-    option (google.api.http).get = "/api/kira/gov/proposals";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query Proposals"
-      description: "Query Proposals."
-      tags: "query"
-    };
-  }
-  // Query all data reference keys with pagination.
-  rpc AllDataReferenceKeys(QueryDataReferenceKeysRequest) returns (QueryDataReferenceKeysResponse) {
-    option (google.api.http).get = "/api/kira/gov/data_keys";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query All Data Reference Keys"
-      description: "Query Data Reference Keys."
-      tags: "query"
-    };
-  }
-  // Query data reference by key.
-  rpc DataReferenceByKey(QueryDataReferenceRequest) returns (QueryDataReferenceResponse) {
-    option (google.api.http).get = "/api/kira/gov/data/{key}";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query Data Refernce"
-      description: "Query Data Reference."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/gov/proposals";
   }
   // WhitelistedProposalVoters returns whitelisted voters for a proposal for tracking
   rpc WhitelistedProposalVoters(QueryWhitelistedProposalVotersRequest) returns (QueryWhitelistedProposalVotersResponse) {
-    option (google.api.http).get = "/api/kira/gov/voters/{proposal_id}";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query whitelisted proposal voters by a given proposal_id"
-      description: "Query whitelisted proposal voters by a given proposal_id."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/gov/voters/{proposal_id}";
   }
+  // Vote queries voted information based on proposalID, voterAddr.
+  rpc Vote(QueryVoteRequest) returns (QueryVoteResponse) {}
   // Votes queries votes of a given proposal.
   rpc Votes(QueryVotesRequest) returns (QueryVotesResponse) {
-    option (google.api.http).get = "/api/kira/gov/votes/{proposal_id}";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query proposal votes by a given proposal_id"
-      description: "Query proposal votes by a given proposal_id."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/gov/votes/{proposal_id}";
   }
-  // NetworkProperties returns network properties
-  rpc NetworkProperties (NetworkPropertiesRequest) returns (NetworkPropertiesResponse) {
-    option (google.api.http).get = "/api/kira/gov/network_properties";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query network properties"
-      description: "Query network properties."
-      tags: "query"
-    };
+  // Query all data reference keys with pagination.
+  rpc AllDataReferenceKeys(QueryDataReferenceKeysRequest) returns (QueryDataReferenceKeysResponse) {
+    option (google.api.http).get = "/kira/gov/data_keys";
   }
-
+  // Query data reference by key.
+  rpc DataReferenceByKey(QueryDataReferenceRequest) returns (QueryDataReferenceResponse) {
+    option (google.api.http).get = "/kira/gov/data/{key}";
+  }
   // Query identity record by id
   rpc IdentityRecord(QueryIdentityRecordRequest) returns (QueryIdentityRecordResponse) {
-    option (google.api.http).get = "/api/kira/gov/identity_record/{id}";
+    option (google.api.http).get = "/kira/gov/identity_record/{id}";
   }
   // Query identity records by records creator
   rpc IdentityRecordsByAddress(QueryIdentityRecordsByAddressRequest) returns (QueryIdentityRecordsByAddressResponse) {
-    option (google.api.http).get = "/api/kira/gov/identity_records/{creator}";
+    option (google.api.http).get = "/kira/gov/identity_records/{creator}";
   }
   // Query all identity records
   rpc AllIdentityRecords(QueryAllIdentityRecordsRequest) returns (QueryAllIdentityRecordsResponse) {
-    option (google.api.http).get = "/api/kira/gov/all_identity_records";
+    option (google.api.http).get = "/kira/gov/all_identity_records";
   }
   // Query identity record verify request by id
   rpc IdentityRecordVerifyRequest(QueryIdentityVerifyRecordRequest) returns (QueryIdentityVerifyRecordResponse) {
-    option (google.api.http).get = "/api/kira/gov/identity_verify_record/{request_id}";
+    option (google.api.http).get = "/kira/gov/identity_verify_record/{request_id}";
   }
   // Query identity records verify requests by requester
   rpc IdentityRecordVerifyRequestsByRequester(QueryIdentityRecordVerifyRequestsByRequester) returns (QueryIdentityRecordVerifyRequestsByRequesterResponse) {
-    option (google.api.http).get = "/api/kira/gov/identity_verify_requests_by_requester/{requester}";
+    option (google.api.http).get = "/kira/gov/identity_verify_requests_by_requester/{requester}";
   }
   // Query identity records verify requests by approver
   rpc IdentityRecordVerifyRequestsByApprover(QueryIdentityRecordVerifyRequestsByApprover) returns (QueryIdentityRecordVerifyRequestsByApproverResponse) {
-    option (google.api.http).get = "/api/kira/gov/identity_verify_requests_by_approver/{approver}";
+    option (google.api.http).get = "/kira/gov/identity_verify_requests_by_approver/{approver}";
   }
   // Query all identity records verify requests
   rpc AllIdentityRecordVerifyRequests(QueryAllIdentityRecordVerifyRequests) returns (QueryAllIdentityRecordVerifyRequestsResponse) {
-    option (google.api.http).get = "/api/kira/gov/all_identity_verify_requests";
+    option (google.api.http).get = "/kira/gov/all_identity_verify_requests";
   }
-  // Returns all registered roles
-  rpc AllRoles (AllRolesRequest) returns (AllRolesResponse) {
-    option (google.api.http).get = "/api/kira/gov/all_roles";
+  // Query all proposal durations
+  rpc AllProposalDurations(QueryAllProposalDurations) returns (QueryAllProposalDurationsResponse) {
+    option (google.api.http).get = "/kira/gov/all_proposal_durations";
   }
-  // Returns the roles that are assigned to an address.
-  rpc RolesByAddress (RolesByAddressRequest) returns (RolesByAddressResponse) {
-    option (google.api.http).get = "/api/kira/gov/roles_by_address/{val_addr}";
-  }
-  // Returns the permissions an actor has by address.
-  rpc PermissionsByAddress (PermissionsByAddressRequest) returns (PermissionsResponse) {
-    option (google.api.http).get = "/api/kira/gov/permissions_by_address/{val_addr}";
-  }
-  // ExecutionFee returns execution fee from msg type
-  rpc ExecutionFee (ExecutionFeeRequest) returns (ExecutionFeeResponse) {
-    option (google.api.http).get = "/api/kira/gov/execution_fee";
-  }
-  // AllExecutionFees returns execution fee from msg type
-  rpc AllExecutionFees (AllExecutionFeesRequest) returns (AllExecutionFeesResponse) {
-    option (google.api.http).get = "/api/kira/gov/execution_fees";
+  // Query single proposal duration
+  rpc ProposalDuration(QueryProposalDuration) returns (QueryProposalDurationResponse) {
+    option (google.api.http).get = "/kira/gov/proposal_duration/{proposal_type}";
   }
 }
 
-// QueryProposalRequest is the request type for the Query/Proposal RPC method.
-message QueryProposalRequest {
-  // proposal_id defines the unique id of the proposal.
-  uint64 proposal_id = 1;
-}
-
-// QueryProposalResponse is the response type for the Query/Proposal RPC method.
-message QueryProposalResponse {
-  Proposal proposal = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryProposalsRequest is the request type for the Query/Proposals RPC method.
-message QueryProposalsRequest {
-  option (gogoproto.equal)           = false;
-  option (gogoproto.goproto_getters) = false;
-
-  // voter defines the voter address for the proposals.
-  string voter = 1;
-  cosmos.base.PageRequest pagination = 2;
-  bool all = 3;
-  bool reverse = 4;
-}
-
-// QueryProposalsResponse is the response type for the Query/Proposals RPC
-// method.
-message QueryProposalsResponse {
-  repeated Proposal proposals = 1 [(gogoproto.nullable) = false];
-  cosmos.base.PageResponse pagination = 2;
-}
-
-// QueryDataReferenceKeysRequest is the response type for data reference keys query.
-message QueryDataReferenceKeysRequest {
-  cosmos.base.PageRequest pagination = 1;
-}
-
-// QueryDataReferenceKeysResponse is the response type for data reference keys query.
-message QueryDataReferenceKeysResponse {
-  repeated string keys = 1;
-  cosmos.base.PageResponse pagination = 2;
-}
-
-// QueryDataReferenceRequest is the response type for data reference query.
-message QueryDataReferenceRequest {
-  string key = 1;
-}
-
-// QueryDataReferenceResponse is the response type for data referencequery.
-message QueryDataReferenceResponse {
-  DataRegistryEntry data = 1;
-}
-
-// QueryWhitelistedProposalVotersRequest is the request type for Query/WhitelistedProposalVoters RPC method.
-message QueryWhitelistedProposalVotersRequest {
-  // proposal_id defines the unique id of the proposal.
-  uint64 proposal_id = 1;
-}
-
-// QueryWhitelistedProposalVotersResponse is the response type for Query/WhitelistedProposalVoters RPC method.
-message QueryWhitelistedProposalVotersResponse {
-  repeated NetworkActor voters = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryVotesRequest is the request type for the Query/Votes RPC method.
-message QueryVotesRequest {
-  // proposal_id defines the unique id of the proposal.
-  uint64 proposal_id = 1;
-}
-
-// QueryVotesResponse is the response type for the Query/Votes RPC method.
-message QueryVotesResponse {
-  // votes defined the queried votes.
-  repeated Vote votes = 1 [(gogoproto.nullable) = false];
-}
-
-// NetworkPropertiesRequest is the request type for the NetworkProperties Query
 message NetworkPropertiesRequest {}
 
-// NetworkPropertiesResponse is the response type for the NetworkProperties Query
 message NetworkPropertiesResponse {
-  NetworkProperties properties = 1;
+  kira.gov.NetworkProperties properties = 1;
 }
 
-
-message QueryIdentityRecordRequest {
-  uint64 id = 1;
-}
-message QueryIdentityRecordResponse {
-  IdentityRecord record = 1;
-}
-
-message QueryIdentityRecordsByAddressRequest {
-  bytes creator = 1 [
+message PermissionsByAddressRequest {
+  bytes val_addr = 1 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
-    (gogoproto.moretags) = "yaml:\"creator\""
+    (gogoproto.moretags) = "yaml:\"val_addr\""
   ];
-  repeated string keys = 2;
-}
-message QueryIdentityRecordsByAddressResponse {
-  repeated IdentityRecord records = 1 [(gogoproto.nullable) = false];
 }
 
-message QueryAllIdentityRecordsRequest {
-  cosmos.base.PageRequest pagination = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
-}
-message QueryAllIdentityRecordsResponse {
-  repeated IdentityRecord records = 1 [(gogoproto.nullable) = false];
-  cosmos.base.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
-}
-
-message QueryIdentityVerifyRecordRequest {
-  uint64 request_id = 1;
-}
-message QueryIdentityVerifyRecordResponse {
-  IdentityRecordsVerify verify_record = 1;
-}
-
-message QueryIdentityRecordVerifyRequestsByApprover {
-  bytes approver = 1 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
-    (gogoproto.moretags) = "yaml:\"approver\""
-  ];
-  cosmos.base.PageRequest pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
-}
-message QueryIdentityRecordVerifyRequestsByApproverResponse {
-  repeated IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
-  cosmos.base.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
-}
-
-message QueryIdentityRecordVerifyRequestsByRequester {
-  bytes requester = 1 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
-    (gogoproto.moretags) = "yaml:\"requester\""
-  ];
-  cosmos.base.PageRequest pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
-}
-message QueryIdentityRecordVerifyRequestsByRequesterResponse {
-  repeated IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
-  cosmos.base.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
-}
-
-message QueryAllIdentityRecordVerifyRequests {
-  cosmos.base.PageRequest pagination = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
-}
-message QueryAllIdentityRecordVerifyRequestsResponse {
-  repeated IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
-  cosmos.base.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+message PermissionsResponse {
+  kira.gov.Permissions permissions = 1;
 }
 
 message RoleQuery {
@@ -306,30 +129,219 @@ message AllRolesResponse {
 }
 
 message RolesByAddressRequest {
-  bytes val_addr = 1;
+  bytes val_addr = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"val_addr\""
+  ];
 }
 
 message RolesByAddressResponse {
   repeated uint64 roleIds = 1;
 }
 
-message PermissionsByAddressRequest {
-  bytes val_addr = 1;
+message RoleRequest {
+  string identifier = 1; // sid or id
 }
 
-message PermissionsResponse {
-  Permissions permissions = 1;
+message RoleResponse {
+  RoleQuery role = 1; 
 }
 
 message ExecutionFeeRequest {
-  string message = 1;
+  string transaction_type = 1;
 }
 message ExecutionFeeResponse {
   kira.gov.ExecutionFee fee = 1;
 }
 
-message AllExecutionFeesRequest {
+message PoorNetworkMessagesRequest {}
+message PoorNetworkMessagesResponse {
+  repeated string messages = 1;
 }
-message AllExecutionFeesResponse {
-  repeated kira.gov.ExecutionFee fees = 1;
+
+message CouncilorByAddressRequest {
+  bytes val_addr = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"val_addr\""
+  ];
+}
+
+message CouncilorByMonikerRequest {
+  string moniker = 1;
+}
+
+message CouncilorResponse {
+  kira.gov.Councilor councilor = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryProposalRequest is the request type for the Query/Proposal RPC method.
+message QueryProposalRequest {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+}
+
+// QueryProposalResponse is the response type for the Query/Proposal RPC method.
+message QueryProposalResponse {
+  kira.gov.Proposal proposal = 1 [(gogoproto.nullable) = false];
+  repeated kira.gov.Vote votes = 2 [(gogoproto.nullable) = false];
+}
+
+// QueryProposalsRequest is the request type for the Query/Proposals RPC method.
+message QueryProposalsRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // voter defines the voter address for the proposals.
+  string voter = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+
+// QueryProposalsResponse is the response type for the Query/Proposals RPC
+// method.
+message QueryProposalsResponse {
+  repeated kira.gov.Proposal proposals = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+// QueryWhitelistedProposalVotersRequest is the request type for Query/WhitelistedProposalVoters RPC method.
+message QueryWhitelistedProposalVotersRequest {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+}
+
+// QueryWhitelistedProposalVotersResponse is the response type for Query/WhitelistedProposalVoters RPC method.
+message QueryWhitelistedProposalVotersResponse {
+  repeated kira.gov.NetworkActor voters = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryVoteRequest is the request type for the Query/Vote RPC method.
+message QueryVoteRequest {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+
+  // voter defines the oter address for the proposals.
+  bytes voter = 2[
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+}
+
+// QueryVoteResponse is the response type for the Query/Vote RPC method.
+message QueryVoteResponse {
+  // vote defined the queried vote.
+  kira.gov.Vote vote = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryVotesRequest is the request type for the Query/Votes RPC method.
+message QueryVotesRequest {
+  // proposal_id defines the unique id of the proposal.
+  uint64 proposal_id = 1;
+}
+
+// QueryVotesResponse is the response type for the Query/Votes RPC method.
+message QueryVotesResponse {
+  // votes defined the queried votes.
+  repeated kira.gov.Vote votes = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryDataReferenceKeysRequest is the request type for data reference keys query.
+message QueryDataReferenceKeysRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+
+// QueryDataReferenceKeysResponse is the response type for data reference keys query.
+message QueryDataReferenceKeysResponse {
+  repeated string keys = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+// QueryDataReferenceRequest is the response type for data reference query.
+message QueryDataReferenceRequest {
+  string key = 1;
+}
+
+// QueryDataReferenceResponse is the response type for data referencequery.
+message QueryDataReferenceResponse {
+  kira.gov.DataRegistryEntry data = 1;
+}
+
+message QueryIdentityRecordRequest {
+  uint64 id = 1;
+}
+message QueryIdentityRecordResponse {
+  kira.gov.IdentityRecord record = 1;
+}
+
+message QueryIdentityRecordsByAddressRequest {
+  bytes creator = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"creator\""
+  ];
+  repeated string keys = 2;
+}
+message QueryIdentityRecordsByAddressResponse {
+  repeated kira.gov.IdentityRecord records = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllIdentityRecordsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+message QueryAllIdentityRecordsResponse {
+  repeated kira.gov.IdentityRecord records = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+message QueryIdentityVerifyRecordRequest {
+  uint64 request_id = 1;
+}
+message QueryIdentityVerifyRecordResponse {
+  kira.gov.IdentityRecordsVerify verify_record = 1;
+}
+
+message QueryIdentityRecordVerifyRequestsByApprover {
+  bytes approver = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"approver\""
+  ];
+  cosmos.base.query.v1beta1.PageRequest pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+message QueryIdentityRecordVerifyRequestsByApproverResponse {
+  repeated kira.gov.IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+message QueryIdentityRecordVerifyRequestsByRequester {
+  bytes requester = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"requester\""
+  ];
+  cosmos.base.query.v1beta1.PageRequest pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+message QueryIdentityRecordVerifyRequestsByRequesterResponse {
+  repeated kira.gov.IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+message QueryAllIdentityRecordVerifyRequests {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageRequest"];
+}
+message QueryAllIdentityRecordVerifyRequestsResponse {
+  repeated kira.gov.IdentityRecordsVerify verify_records = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types/query.PageResponse"];
+}
+
+message QueryAllProposalDurations {}
+
+message QueryAllProposalDurationsResponse {
+  map<string, uint64> proposal_durations = 1;
+}
+
+message QueryProposalDuration {
+  string proposal_type = 1;
+}
+
+message QueryProposalDurationResponse {
+  uint64 duration = 1;
 }

@@ -2,6 +2,3 @@
 cache/
 faucet.mnemonic
 interx.mnemonic
-proto-gen/
-proto-gen/*
-proto-gen/*/*

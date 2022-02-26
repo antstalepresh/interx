@@ -4,7 +4,7 @@
 // - protoc             v3.19.1
 // source: kira/gov/query.proto
 
-package gov
+package types
 
 import (
 	context "context"
@@ -22,20 +22,38 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryClient interface {
+	// Returns the permissions an actor has by address.
+	PermissionsByAddress(ctx context.Context, in *PermissionsByAddressRequest, opts ...grpc.CallOption) (*PermissionsResponse, error)
+	// Returns all registered roles
+	AllRoles(ctx context.Context, in *AllRolesRequest, opts ...grpc.CallOption) (*AllRolesResponse, error)
+	// Returns the roles that are assigned to an address.
+	RolesByAddress(ctx context.Context, in *RolesByAddressRequest, opts ...grpc.CallOption) (*RolesByAddressResponse, error)
+	// Role returns the role details from role sid
+	Role(ctx context.Context, in *RoleRequest, opts ...grpc.CallOption) (*RoleResponse, error)
+	// CouncilorByAddress returns the councilor object from its address
+	CouncilorByAddress(ctx context.Context, in *CouncilorByAddressRequest, opts ...grpc.CallOption) (*CouncilorResponse, error)
+	// CouncilorByMoniker returns the councilor object from its moniker
+	CouncilorByMoniker(ctx context.Context, in *CouncilorByMonikerRequest, opts ...grpc.CallOption) (*CouncilorResponse, error)
+	// NetworkProperties returns network properties
+	NetworkProperties(ctx context.Context, in *NetworkPropertiesRequest, opts ...grpc.CallOption) (*NetworkPropertiesResponse, error)
+	// ExecutionFee returns execution fee from msg type
+	ExecutionFee(ctx context.Context, in *ExecutionFeeRequest, opts ...grpc.CallOption) (*ExecutionFeeResponse, error)
+	// PoorNetworkMessages returns poor network messages
+	PoorNetworkMessages(ctx context.Context, in *PoorNetworkMessagesRequest, opts ...grpc.CallOption) (*PoorNetworkMessagesResponse, error)
 	// Proposal queries proposal details based on ProposalID.
 	Proposal(ctx context.Context, in *QueryProposalRequest, opts ...grpc.CallOption) (*QueryProposalResponse, error)
 	// Proposals queries all proposals based on given status.
 	Proposals(ctx context.Context, in *QueryProposalsRequest, opts ...grpc.CallOption) (*QueryProposalsResponse, error)
+	// WhitelistedProposalVoters returns whitelisted voters for a proposal for tracking
+	WhitelistedProposalVoters(ctx context.Context, in *QueryWhitelistedProposalVotersRequest, opts ...grpc.CallOption) (*QueryWhitelistedProposalVotersResponse, error)
+	// Vote queries voted information based on proposalID, voterAddr.
+	Vote(ctx context.Context, in *QueryVoteRequest, opts ...grpc.CallOption) (*QueryVoteResponse, error)
+	// Votes queries votes of a given proposal.
+	Votes(ctx context.Context, in *QueryVotesRequest, opts ...grpc.CallOption) (*QueryVotesResponse, error)
 	// Query all data reference keys with pagination.
 	AllDataReferenceKeys(ctx context.Context, in *QueryDataReferenceKeysRequest, opts ...grpc.CallOption) (*QueryDataReferenceKeysResponse, error)
 	// Query data reference by key.
 	DataReferenceByKey(ctx context.Context, in *QueryDataReferenceRequest, opts ...grpc.CallOption) (*QueryDataReferenceResponse, error)
-	// WhitelistedProposalVoters returns whitelisted voters for a proposal for tracking
-	WhitelistedProposalVoters(ctx context.Context, in *QueryWhitelistedProposalVotersRequest, opts ...grpc.CallOption) (*QueryWhitelistedProposalVotersResponse, error)
-	// Votes queries votes of a given proposal.
-	Votes(ctx context.Context, in *QueryVotesRequest, opts ...grpc.CallOption) (*QueryVotesResponse, error)
-	// NetworkProperties returns network properties
-	NetworkProperties(ctx context.Context, in *NetworkPropertiesRequest, opts ...grpc.CallOption) (*NetworkPropertiesResponse, error)
 	// Query identity record by id
 	IdentityRecord(ctx context.Context, in *QueryIdentityRecordRequest, opts ...grpc.CallOption) (*QueryIdentityRecordResponse, error)
 	// Query identity records by records creator
@@ -50,16 +68,10 @@ type QueryClient interface {
 	IdentityRecordVerifyRequestsByApprover(ctx context.Context, in *QueryIdentityRecordVerifyRequestsByApprover, opts ...grpc.CallOption) (*QueryIdentityRecordVerifyRequestsByApproverResponse, error)
 	// Query all identity records verify requests
 	AllIdentityRecordVerifyRequests(ctx context.Context, in *QueryAllIdentityRecordVerifyRequests, opts ...grpc.CallOption) (*QueryAllIdentityRecordVerifyRequestsResponse, error)
-	// Returns all registered roles
-	AllRoles(ctx context.Context, in *AllRolesRequest, opts ...grpc.CallOption) (*AllRolesResponse, error)
-	// Returns the roles that are assigned to an address.
-	RolesByAddress(ctx context.Context, in *RolesByAddressRequest, opts ...grpc.CallOption) (*RolesByAddressResponse, error)
-	// Returns the permissions an actor has by address.
-	PermissionsByAddress(ctx context.Context, in *PermissionsByAddressRequest, opts ...grpc.CallOption) (*PermissionsResponse, error)
-	// ExecutionFee returns execution fee from msg type
-	ExecutionFee(ctx context.Context, in *ExecutionFeeRequest, opts ...grpc.CallOption) (*ExecutionFeeResponse, error)
-	// AllExecutionFees returns execution fee from msg type
-	AllExecutionFees(ctx context.Context, in *AllExecutionFeesRequest, opts ...grpc.CallOption) (*AllExecutionFeesResponse, error)
+	// Query all proposal durations
+	AllProposalDurations(ctx context.Context, in *QueryAllProposalDurations, opts ...grpc.CallOption) (*QueryAllProposalDurationsResponse, error)
+	// Query single proposal duration
+	ProposalDuration(ctx context.Context, in *QueryProposalDuration, opts ...grpc.CallOption) (*QueryProposalDurationResponse, error)
 }
 
 type queryClient struct {
@@ -68,6 +80,87 @@ type queryClient struct {
 
 func NewQueryClient(cc grpc.ClientConnInterface) QueryClient {
 	return &queryClient{cc}
+}
+
+func (c *queryClient) PermissionsByAddress(ctx context.Context, in *PermissionsByAddressRequest, opts ...grpc.CallOption) (*PermissionsResponse, error) {
+	out := new(PermissionsResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/PermissionsByAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AllRoles(ctx context.Context, in *AllRolesRequest, opts ...grpc.CallOption) (*AllRolesResponse, error) {
+	out := new(AllRolesResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllRoles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) RolesByAddress(ctx context.Context, in *RolesByAddressRequest, opts ...grpc.CallOption) (*RolesByAddressResponse, error) {
+	out := new(RolesByAddressResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/RolesByAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) Role(ctx context.Context, in *RoleRequest, opts ...grpc.CallOption) (*RoleResponse, error) {
+	out := new(RoleResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/Role", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) CouncilorByAddress(ctx context.Context, in *CouncilorByAddressRequest, opts ...grpc.CallOption) (*CouncilorResponse, error) {
+	out := new(CouncilorResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/CouncilorByAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) CouncilorByMoniker(ctx context.Context, in *CouncilorByMonikerRequest, opts ...grpc.CallOption) (*CouncilorResponse, error) {
+	out := new(CouncilorResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/CouncilorByMoniker", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) NetworkProperties(ctx context.Context, in *NetworkPropertiesRequest, opts ...grpc.CallOption) (*NetworkPropertiesResponse, error) {
+	out := new(NetworkPropertiesResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/NetworkProperties", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ExecutionFee(ctx context.Context, in *ExecutionFeeRequest, opts ...grpc.CallOption) (*ExecutionFeeResponse, error) {
+	out := new(ExecutionFeeResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/ExecutionFee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) PoorNetworkMessages(ctx context.Context, in *PoorNetworkMessagesRequest, opts ...grpc.CallOption) (*PoorNetworkMessagesResponse, error) {
+	out := new(PoorNetworkMessagesResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/PoorNetworkMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *queryClient) Proposal(ctx context.Context, in *QueryProposalRequest, opts ...grpc.CallOption) (*QueryProposalResponse, error) {
@@ -88,27 +181,18 @@ func (c *queryClient) Proposals(ctx context.Context, in *QueryProposalsRequest, 
 	return out, nil
 }
 
-func (c *queryClient) AllDataReferenceKeys(ctx context.Context, in *QueryDataReferenceKeysRequest, opts ...grpc.CallOption) (*QueryDataReferenceKeysResponse, error) {
-	out := new(QueryDataReferenceKeysResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllDataReferenceKeys", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) DataReferenceByKey(ctx context.Context, in *QueryDataReferenceRequest, opts ...grpc.CallOption) (*QueryDataReferenceResponse, error) {
-	out := new(QueryDataReferenceResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/DataReferenceByKey", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *queryClient) WhitelistedProposalVoters(ctx context.Context, in *QueryWhitelistedProposalVotersRequest, opts ...grpc.CallOption) (*QueryWhitelistedProposalVotersResponse, error) {
 	out := new(QueryWhitelistedProposalVotersResponse)
 	err := c.cc.Invoke(ctx, "/kira.gov.Query/WhitelistedProposalVoters", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) Vote(ctx context.Context, in *QueryVoteRequest, opts ...grpc.CallOption) (*QueryVoteResponse, error) {
+	out := new(QueryVoteResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/Vote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -124,9 +208,18 @@ func (c *queryClient) Votes(ctx context.Context, in *QueryVotesRequest, opts ...
 	return out, nil
 }
 
-func (c *queryClient) NetworkProperties(ctx context.Context, in *NetworkPropertiesRequest, opts ...grpc.CallOption) (*NetworkPropertiesResponse, error) {
-	out := new(NetworkPropertiesResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/NetworkProperties", in, out, opts...)
+func (c *queryClient) AllDataReferenceKeys(ctx context.Context, in *QueryDataReferenceKeysRequest, opts ...grpc.CallOption) (*QueryDataReferenceKeysResponse, error) {
+	out := new(QueryDataReferenceKeysResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllDataReferenceKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) DataReferenceByKey(ctx context.Context, in *QueryDataReferenceRequest, opts ...grpc.CallOption) (*QueryDataReferenceResponse, error) {
+	out := new(QueryDataReferenceResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/DataReferenceByKey", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,45 +289,18 @@ func (c *queryClient) AllIdentityRecordVerifyRequests(ctx context.Context, in *Q
 	return out, nil
 }
 
-func (c *queryClient) AllRoles(ctx context.Context, in *AllRolesRequest, opts ...grpc.CallOption) (*AllRolesResponse, error) {
-	out := new(AllRolesResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllRoles", in, out, opts...)
+func (c *queryClient) AllProposalDurations(ctx context.Context, in *QueryAllProposalDurations, opts ...grpc.CallOption) (*QueryAllProposalDurationsResponse, error) {
+	out := new(QueryAllProposalDurationsResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllProposalDurations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) RolesByAddress(ctx context.Context, in *RolesByAddressRequest, opts ...grpc.CallOption) (*RolesByAddressResponse, error) {
-	out := new(RolesByAddressResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/RolesByAddress", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) PermissionsByAddress(ctx context.Context, in *PermissionsByAddressRequest, opts ...grpc.CallOption) (*PermissionsResponse, error) {
-	out := new(PermissionsResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/PermissionsByAddress", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) ExecutionFee(ctx context.Context, in *ExecutionFeeRequest, opts ...grpc.CallOption) (*ExecutionFeeResponse, error) {
-	out := new(ExecutionFeeResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/ExecutionFee", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) AllExecutionFees(ctx context.Context, in *AllExecutionFeesRequest, opts ...grpc.CallOption) (*AllExecutionFeesResponse, error) {
-	out := new(AllExecutionFeesResponse)
-	err := c.cc.Invoke(ctx, "/kira.gov.Query/AllExecutionFees", in, out, opts...)
+func (c *queryClient) ProposalDuration(ctx context.Context, in *QueryProposalDuration, opts ...grpc.CallOption) (*QueryProposalDurationResponse, error) {
+	out := new(QueryProposalDurationResponse)
+	err := c.cc.Invoke(ctx, "/kira.gov.Query/ProposalDuration", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -245,20 +311,38 @@ func (c *queryClient) AllExecutionFees(ctx context.Context, in *AllExecutionFees
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
+	// Returns the permissions an actor has by address.
+	PermissionsByAddress(context.Context, *PermissionsByAddressRequest) (*PermissionsResponse, error)
+	// Returns all registered roles
+	AllRoles(context.Context, *AllRolesRequest) (*AllRolesResponse, error)
+	// Returns the roles that are assigned to an address.
+	RolesByAddress(context.Context, *RolesByAddressRequest) (*RolesByAddressResponse, error)
+	// Role returns the role details from role sid
+	Role(context.Context, *RoleRequest) (*RoleResponse, error)
+	// CouncilorByAddress returns the councilor object from its address
+	CouncilorByAddress(context.Context, *CouncilorByAddressRequest) (*CouncilorResponse, error)
+	// CouncilorByMoniker returns the councilor object from its moniker
+	CouncilorByMoniker(context.Context, *CouncilorByMonikerRequest) (*CouncilorResponse, error)
+	// NetworkProperties returns network properties
+	NetworkProperties(context.Context, *NetworkPropertiesRequest) (*NetworkPropertiesResponse, error)
+	// ExecutionFee returns execution fee from msg type
+	ExecutionFee(context.Context, *ExecutionFeeRequest) (*ExecutionFeeResponse, error)
+	// PoorNetworkMessages returns poor network messages
+	PoorNetworkMessages(context.Context, *PoorNetworkMessagesRequest) (*PoorNetworkMessagesResponse, error)
 	// Proposal queries proposal details based on ProposalID.
 	Proposal(context.Context, *QueryProposalRequest) (*QueryProposalResponse, error)
 	// Proposals queries all proposals based on given status.
 	Proposals(context.Context, *QueryProposalsRequest) (*QueryProposalsResponse, error)
+	// WhitelistedProposalVoters returns whitelisted voters for a proposal for tracking
+	WhitelistedProposalVoters(context.Context, *QueryWhitelistedProposalVotersRequest) (*QueryWhitelistedProposalVotersResponse, error)
+	// Vote queries voted information based on proposalID, voterAddr.
+	Vote(context.Context, *QueryVoteRequest) (*QueryVoteResponse, error)
+	// Votes queries votes of a given proposal.
+	Votes(context.Context, *QueryVotesRequest) (*QueryVotesResponse, error)
 	// Query all data reference keys with pagination.
 	AllDataReferenceKeys(context.Context, *QueryDataReferenceKeysRequest) (*QueryDataReferenceKeysResponse, error)
 	// Query data reference by key.
 	DataReferenceByKey(context.Context, *QueryDataReferenceRequest) (*QueryDataReferenceResponse, error)
-	// WhitelistedProposalVoters returns whitelisted voters for a proposal for tracking
-	WhitelistedProposalVoters(context.Context, *QueryWhitelistedProposalVotersRequest) (*QueryWhitelistedProposalVotersResponse, error)
-	// Votes queries votes of a given proposal.
-	Votes(context.Context, *QueryVotesRequest) (*QueryVotesResponse, error)
-	// NetworkProperties returns network properties
-	NetworkProperties(context.Context, *NetworkPropertiesRequest) (*NetworkPropertiesResponse, error)
 	// Query identity record by id
 	IdentityRecord(context.Context, *QueryIdentityRecordRequest) (*QueryIdentityRecordResponse, error)
 	// Query identity records by records creator
@@ -273,16 +357,10 @@ type QueryServer interface {
 	IdentityRecordVerifyRequestsByApprover(context.Context, *QueryIdentityRecordVerifyRequestsByApprover) (*QueryIdentityRecordVerifyRequestsByApproverResponse, error)
 	// Query all identity records verify requests
 	AllIdentityRecordVerifyRequests(context.Context, *QueryAllIdentityRecordVerifyRequests) (*QueryAllIdentityRecordVerifyRequestsResponse, error)
-	// Returns all registered roles
-	AllRoles(context.Context, *AllRolesRequest) (*AllRolesResponse, error)
-	// Returns the roles that are assigned to an address.
-	RolesByAddress(context.Context, *RolesByAddressRequest) (*RolesByAddressResponse, error)
-	// Returns the permissions an actor has by address.
-	PermissionsByAddress(context.Context, *PermissionsByAddressRequest) (*PermissionsResponse, error)
-	// ExecutionFee returns execution fee from msg type
-	ExecutionFee(context.Context, *ExecutionFeeRequest) (*ExecutionFeeResponse, error)
-	// AllExecutionFees returns execution fee from msg type
-	AllExecutionFees(context.Context, *AllExecutionFeesRequest) (*AllExecutionFeesResponse, error)
+	// Query all proposal durations
+	AllProposalDurations(context.Context, *QueryAllProposalDurations) (*QueryAllProposalDurationsResponse, error)
+	// Query single proposal duration
+	ProposalDuration(context.Context, *QueryProposalDuration) (*QueryProposalDurationResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -290,26 +368,53 @@ type QueryServer interface {
 type UnimplementedQueryServer struct {
 }
 
+func (UnimplementedQueryServer) PermissionsByAddress(context.Context, *PermissionsByAddressRequest) (*PermissionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PermissionsByAddress not implemented")
+}
+func (UnimplementedQueryServer) AllRoles(context.Context, *AllRolesRequest) (*AllRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllRoles not implemented")
+}
+func (UnimplementedQueryServer) RolesByAddress(context.Context, *RolesByAddressRequest) (*RolesByAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RolesByAddress not implemented")
+}
+func (UnimplementedQueryServer) Role(context.Context, *RoleRequest) (*RoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Role not implemented")
+}
+func (UnimplementedQueryServer) CouncilorByAddress(context.Context, *CouncilorByAddressRequest) (*CouncilorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CouncilorByAddress not implemented")
+}
+func (UnimplementedQueryServer) CouncilorByMoniker(context.Context, *CouncilorByMonikerRequest) (*CouncilorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CouncilorByMoniker not implemented")
+}
+func (UnimplementedQueryServer) NetworkProperties(context.Context, *NetworkPropertiesRequest) (*NetworkPropertiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NetworkProperties not implemented")
+}
+func (UnimplementedQueryServer) ExecutionFee(context.Context, *ExecutionFeeRequest) (*ExecutionFeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExecutionFee not implemented")
+}
+func (UnimplementedQueryServer) PoorNetworkMessages(context.Context, *PoorNetworkMessagesRequest) (*PoorNetworkMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PoorNetworkMessages not implemented")
+}
 func (UnimplementedQueryServer) Proposal(context.Context, *QueryProposalRequest) (*QueryProposalResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Proposal not implemented")
 }
 func (UnimplementedQueryServer) Proposals(context.Context, *QueryProposalsRequest) (*QueryProposalsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Proposals not implemented")
 }
+func (UnimplementedQueryServer) WhitelistedProposalVoters(context.Context, *QueryWhitelistedProposalVotersRequest) (*QueryWhitelistedProposalVotersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WhitelistedProposalVoters not implemented")
+}
+func (UnimplementedQueryServer) Vote(context.Context, *QueryVoteRequest) (*QueryVoteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Vote not implemented")
+}
+func (UnimplementedQueryServer) Votes(context.Context, *QueryVotesRequest) (*QueryVotesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Votes not implemented")
+}
 func (UnimplementedQueryServer) AllDataReferenceKeys(context.Context, *QueryDataReferenceKeysRequest) (*QueryDataReferenceKeysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AllDataReferenceKeys not implemented")
 }
 func (UnimplementedQueryServer) DataReferenceByKey(context.Context, *QueryDataReferenceRequest) (*QueryDataReferenceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DataReferenceByKey not implemented")
-}
-func (UnimplementedQueryServer) WhitelistedProposalVoters(context.Context, *QueryWhitelistedProposalVotersRequest) (*QueryWhitelistedProposalVotersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method WhitelistedProposalVoters not implemented")
-}
-func (UnimplementedQueryServer) Votes(context.Context, *QueryVotesRequest) (*QueryVotesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Votes not implemented")
-}
-func (UnimplementedQueryServer) NetworkProperties(context.Context, *NetworkPropertiesRequest) (*NetworkPropertiesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NetworkProperties not implemented")
 }
 func (UnimplementedQueryServer) IdentityRecord(context.Context, *QueryIdentityRecordRequest) (*QueryIdentityRecordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IdentityRecord not implemented")
@@ -332,20 +437,11 @@ func (UnimplementedQueryServer) IdentityRecordVerifyRequestsByApprover(context.C
 func (UnimplementedQueryServer) AllIdentityRecordVerifyRequests(context.Context, *QueryAllIdentityRecordVerifyRequests) (*QueryAllIdentityRecordVerifyRequestsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AllIdentityRecordVerifyRequests not implemented")
 }
-func (UnimplementedQueryServer) AllRoles(context.Context, *AllRolesRequest) (*AllRolesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AllRoles not implemented")
+func (UnimplementedQueryServer) AllProposalDurations(context.Context, *QueryAllProposalDurations) (*QueryAllProposalDurationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllProposalDurations not implemented")
 }
-func (UnimplementedQueryServer) RolesByAddress(context.Context, *RolesByAddressRequest) (*RolesByAddressResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RolesByAddress not implemented")
-}
-func (UnimplementedQueryServer) PermissionsByAddress(context.Context, *PermissionsByAddressRequest) (*PermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PermissionsByAddress not implemented")
-}
-func (UnimplementedQueryServer) ExecutionFee(context.Context, *ExecutionFeeRequest) (*ExecutionFeeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecutionFee not implemented")
-}
-func (UnimplementedQueryServer) AllExecutionFees(context.Context, *AllExecutionFeesRequest) (*AllExecutionFeesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AllExecutionFees not implemented")
+func (UnimplementedQueryServer) ProposalDuration(context.Context, *QueryProposalDuration) (*QueryProposalDurationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProposalDuration not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -358,6 +454,168 @@ type UnsafeQueryServer interface {
 
 func RegisterQueryServer(s grpc.ServiceRegistrar, srv QueryServer) {
 	s.RegisterService(&Query_ServiceDesc, srv)
+}
+
+func _Query_PermissionsByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PermissionsByAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PermissionsByAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/PermissionsByAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PermissionsByAddress(ctx, req.(*PermissionsByAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AllRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AllRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AllRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/AllRoles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AllRoles(ctx, req.(*AllRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_RolesByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RolesByAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).RolesByAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/RolesByAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).RolesByAddress(ctx, req.(*RolesByAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_Role_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Role(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/Role",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Role(ctx, req.(*RoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_CouncilorByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CouncilorByAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CouncilorByAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/CouncilorByAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CouncilorByAddress(ctx, req.(*CouncilorByAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_CouncilorByMoniker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CouncilorByMonikerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CouncilorByMoniker(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/CouncilorByMoniker",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CouncilorByMoniker(ctx, req.(*CouncilorByMonikerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_NetworkProperties_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NetworkPropertiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).NetworkProperties(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/NetworkProperties",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).NetworkProperties(ctx, req.(*NetworkPropertiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ExecutionFee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecutionFeeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ExecutionFee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/ExecutionFee",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ExecutionFee(ctx, req.(*ExecutionFeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_PoorNetworkMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PoorNetworkMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PoorNetworkMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/PoorNetworkMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PoorNetworkMessages(ctx, req.(*PoorNetworkMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_Proposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -396,6 +654,60 @@ func _Query_Proposals_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_WhitelistedProposalVoters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryWhitelistedProposalVotersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).WhitelistedProposalVoters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/WhitelistedProposalVoters",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).WhitelistedProposalVoters(ctx, req.(*QueryWhitelistedProposalVotersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_Vote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryVoteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Vote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/Vote",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Vote(ctx, req.(*QueryVoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_Votes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryVotesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Votes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.gov.Query/Votes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Votes(ctx, req.(*QueryVotesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Query_AllDataReferenceKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryDataReferenceKeysRequest)
 	if err := dec(in); err != nil {
@@ -428,60 +740,6 @@ func _Query_DataReferenceByKey_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).DataReferenceByKey(ctx, req.(*QueryDataReferenceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_WhitelistedProposalVoters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryWhitelistedProposalVotersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).WhitelistedProposalVoters(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/WhitelistedProposalVoters",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).WhitelistedProposalVoters(ctx, req.(*QueryWhitelistedProposalVotersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_Votes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryVotesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Votes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/Votes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Votes(ctx, req.(*QueryVotesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_NetworkProperties_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NetworkPropertiesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).NetworkProperties(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/NetworkProperties",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).NetworkProperties(ctx, req.(*NetworkPropertiesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -612,92 +870,38 @@ func _Query_AllIdentityRecordVerifyRequests_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_AllRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AllRolesRequest)
+func _Query_AllProposalDurations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllProposalDurations)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).AllRoles(ctx, in)
+		return srv.(QueryServer).AllProposalDurations(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kira.gov.Query/AllRoles",
+		FullMethod: "/kira.gov.Query/AllProposalDurations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).AllRoles(ctx, req.(*AllRolesRequest))
+		return srv.(QueryServer).AllProposalDurations(ctx, req.(*QueryAllProposalDurations))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_RolesByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RolesByAddressRequest)
+func _Query_ProposalDuration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryProposalDuration)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).RolesByAddress(ctx, in)
+		return srv.(QueryServer).ProposalDuration(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/kira.gov.Query/RolesByAddress",
+		FullMethod: "/kira.gov.Query/ProposalDuration",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).RolesByAddress(ctx, req.(*RolesByAddressRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_PermissionsByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PermissionsByAddressRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).PermissionsByAddress(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/PermissionsByAddress",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).PermissionsByAddress(ctx, req.(*PermissionsByAddressRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_ExecutionFee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ExecutionFeeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).ExecutionFee(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/ExecutionFee",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ExecutionFee(ctx, req.(*ExecutionFeeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_AllExecutionFees_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AllExecutionFeesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).AllExecutionFees(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/kira.gov.Query/AllExecutionFees",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).AllExecutionFees(ctx, req.(*AllExecutionFeesRequest))
+		return srv.(QueryServer).ProposalDuration(ctx, req.(*QueryProposalDuration))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -710,6 +914,42 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "PermissionsByAddress",
+			Handler:    _Query_PermissionsByAddress_Handler,
+		},
+		{
+			MethodName: "AllRoles",
+			Handler:    _Query_AllRoles_Handler,
+		},
+		{
+			MethodName: "RolesByAddress",
+			Handler:    _Query_RolesByAddress_Handler,
+		},
+		{
+			MethodName: "Role",
+			Handler:    _Query_Role_Handler,
+		},
+		{
+			MethodName: "CouncilorByAddress",
+			Handler:    _Query_CouncilorByAddress_Handler,
+		},
+		{
+			MethodName: "CouncilorByMoniker",
+			Handler:    _Query_CouncilorByMoniker_Handler,
+		},
+		{
+			MethodName: "NetworkProperties",
+			Handler:    _Query_NetworkProperties_Handler,
+		},
+		{
+			MethodName: "ExecutionFee",
+			Handler:    _Query_ExecutionFee_Handler,
+		},
+		{
+			MethodName: "PoorNetworkMessages",
+			Handler:    _Query_PoorNetworkMessages_Handler,
+		},
+		{
 			MethodName: "Proposal",
 			Handler:    _Query_Proposal_Handler,
 		},
@@ -718,24 +958,24 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Proposals_Handler,
 		},
 		{
-			MethodName: "AllDataReferenceKeys",
-			Handler:    _Query_AllDataReferenceKeys_Handler,
-		},
-		{
-			MethodName: "DataReferenceByKey",
-			Handler:    _Query_DataReferenceByKey_Handler,
-		},
-		{
 			MethodName: "WhitelistedProposalVoters",
 			Handler:    _Query_WhitelistedProposalVoters_Handler,
+		},
+		{
+			MethodName: "Vote",
+			Handler:    _Query_Vote_Handler,
 		},
 		{
 			MethodName: "Votes",
 			Handler:    _Query_Votes_Handler,
 		},
 		{
-			MethodName: "NetworkProperties",
-			Handler:    _Query_NetworkProperties_Handler,
+			MethodName: "AllDataReferenceKeys",
+			Handler:    _Query_AllDataReferenceKeys_Handler,
+		},
+		{
+			MethodName: "DataReferenceByKey",
+			Handler:    _Query_DataReferenceByKey_Handler,
 		},
 		{
 			MethodName: "IdentityRecord",
@@ -766,24 +1006,12 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Query_AllIdentityRecordVerifyRequests_Handler,
 		},
 		{
-			MethodName: "AllRoles",
-			Handler:    _Query_AllRoles_Handler,
+			MethodName: "AllProposalDurations",
+			Handler:    _Query_AllProposalDurations_Handler,
 		},
 		{
-			MethodName: "RolesByAddress",
-			Handler:    _Query_RolesByAddress_Handler,
-		},
-		{
-			MethodName: "PermissionsByAddress",
-			Handler:    _Query_PermissionsByAddress_Handler,
-		},
-		{
-			MethodName: "ExecutionFee",
-			Handler:    _Query_ExecutionFee_Handler,
-		},
-		{
-			MethodName: "AllExecutionFees",
-			Handler:    _Query_AllExecutionFees_Handler,
+			MethodName: "ProposalDuration",
+			Handler:    _Query_ProposalDuration_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

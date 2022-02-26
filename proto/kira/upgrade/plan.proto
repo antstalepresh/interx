@@ -4,7 +4,7 @@ package kira.upgrade;
 import "gogoproto/gogo.proto";
 import "kira/upgrade/upgrade.proto";
 
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/upgrade";
+option go_package = "github.com/KiraCore/sekai/x/upgrade/types";
 
 message Plan {
   string name = 1;
@@ -20,6 +20,3 @@ message Plan {
   uint64 proposalID = 11; // save proposalID to reference vote info at the time of plan execution
   bool processed_no_vote_validators = 12;
 }
-
-
-

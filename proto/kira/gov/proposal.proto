@@ -5,10 +5,11 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "cosmos_proto/cosmos.proto";
-import "kira/gov/network_properties.proto";
+import "kira/gov/role.proto";
 import "kira/gov/permission.proto";
+import "kira/gov/network_properties.proto";
 
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/gov";
+option go_package = "github.com/KiraCore/sekai/x/gov/types";
 
 // VoteOption enumerates the valid vote options for a given governance proposal.
 enum VoteOption {
@@ -59,6 +60,7 @@ message MsgVoteProposal {
   VoteOption option      = 3;
 }
 
+
 message Proposal {
   option (gogoproto.goproto_getters) = false;
   uint64     proposal_id = 1;
@@ -81,7 +83,7 @@ message Proposal {
   string exec_result = 11; // describes execution result
 }
 
-message AssignPermissionProposal {
+message WhitelistAccountPermissionProposal {
   option (cosmos_proto.implements_interface) = "Content";
   option (gogoproto.equal) = true;
 
@@ -90,7 +92,94 @@ message AssignPermissionProposal {
     (gogoproto.moretags) = "yaml:\"address\""
   ];
 
-  uint32 permission = 2;
+  PermValue permission = 2;
+}
+
+message BlacklistAccountPermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  bytes address = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"address\""
+  ];
+  PermValue permission = 2;
+}
+
+message RemoveWhitelistedAccountPermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  bytes address = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"address\""
+  ];
+  PermValue permission = 2;
+}
+
+message RemoveBlacklistedAccountPermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  bytes address = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"address\""
+  ];
+  PermValue permission = 2;
+}
+
+message AssignRoleToAccountProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  bytes address = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"address\""
+  ];
+  string role_identifier = 2;
+}
+
+message UnassignRoleFromAccountProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  bytes address = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress",
+    (gogoproto.moretags) = "yaml:\"address\""
+  ];
+  string role_identifier = 2;
+}
+
+message WhitelistRolePermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  string role_identifier = 1;
+  PermValue permission = 2;
+}
+
+message BlacklistRolePermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  string role_identifier = 1;
+  PermValue permission = 2;
+}
+
+message RemoveWhitelistedRolePermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  string role_sid = 1;
+  PermValue permission = 2;
+}
+
+message RemoveBlacklistedRolePermissionProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  string role_sid = 1;
+  PermValue permission = 2;
 }
 
 message SetNetworkPropertyProposal {
@@ -98,7 +187,6 @@ message SetNetworkPropertyProposal {
   option (gogoproto.equal) = true;
 
   NetworkProperty network_property = 1;
-
   NetworkPropertyValue value = 2 [(gogoproto.nullable) = false];
 }
 
@@ -131,7 +219,14 @@ message CreateRoleProposal {
   repeated PermValue blacklisted_permissions = 4;
 }
 
+message RemoveRoleProposal {
+  option (cosmos_proto.implements_interface) = "Content";
+  option (gogoproto.equal) = true;
+
+  string role_sid = 1;
+}
+
 message SetProposalDurationsProposal {
   repeated string typeof_proposals = 1;
   repeated uint64 proposal_durations = 2;
-} 
+}

@@ -4,7 +4,7 @@ package kira.gov;
 import "gogoproto/gogo.proto";
 import "kira/gov/proposal.proto";
 
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/gov";
+option go_package = "github.com/KiraCore/sekai/x/gov/types";
 
 enum ActorStatus {
   option (gogoproto.goproto_enum_prefix) = false;
@@ -102,4 +102,4 @@ message MsgRemoveBlacklistedPermissions {
   ];
 
   uint32 permission = 3;
-} 
+}

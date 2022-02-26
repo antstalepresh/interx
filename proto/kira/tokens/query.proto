@@ -3,43 +3,36 @@ package kira.tokens;
 
 import "kira/tokens/alias.proto";
 import "kira/tokens/rate.proto";
+import "kira/tokens/freeze.proto";
+import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/tokens";
-
-// These annotations are used when generating the OpenAPI file.
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-  info: {
-    version: "1.0";
-  };
-  external_docs: {
-    url: "https://github.com/KiraCore/interx";
-    description: "gRPC-gateway";
-  }
-  schemes: HTTP;
-};
+option go_package = "github.com/KiraCore/sekai/x/tokens/types";
 
 // Query defines the gRPC querier service
 service Query {
   // Returns the token alias
+  rpc GetTokenAlias (TokenAliasRequest) returns (TokenAliasResponse) {}
   rpc GetAllTokenAliases (AllTokenAliasesRequest) returns (AllTokenAliasesResponse) {
-    option (google.api.http).get = "/api/kira/tokens/aliases";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query All Token Aliases"
-      description: "Query All Token Aliases."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/tokens/aliases";
   }
+  rpc GetTokenAliasesByDenom (TokenAliasesByDenomRequest) returns (TokenAliasesByDenomResponse) {}
   // Returns the token rates
+  rpc GetTokenRate (TokenRateRequest) returns (TokenRateResponse) {}
   rpc GetAllTokenRates (AllTokenRatesRequest) returns (AllTokenRatesResponse) {
-    option (google.api.http).get = "/api/kira/tokens/rates";
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "Query All Token Rates"
-      description: "Query All Token Rates."
-      tags: "query"
-    };
+    option (google.api.http).get = "/kira/tokens/rates";
   }
+  rpc GetTokenRatesByDenom (TokenRatesByDenomRequest) returns (TokenRatesByDenomResponse) {}
+  // Returns tokens black/white lists
+  rpc GetTokenBlackWhites (TokenBlackWhitesRequest) returns (TokenBlackWhitesResponse) {}
+}
+
+message TokenAliasRequest {
+  string symbol = 1;
+}
+
+message TokenAliasResponse {
+  kira.tokens.TokenAlias data = 1;
 }
 
 message AllTokenAliasesRequest {}
@@ -48,8 +41,37 @@ message AllTokenAliasesResponse {
   repeated kira.tokens.TokenAlias data = 1;
 }
 
+message TokenAliasesByDenomRequest {
+  repeated string denoms = 1;
+}
+  
+message TokenAliasesByDenomResponse {
+  map<string, kira.tokens.TokenAlias> data = 1;
+}
+
+message TokenRateRequest {
+  string denom = 1;
+}
+
+message TokenRateResponse {
+  kira.tokens.TokenRate data = 1;
+}
+
 message AllTokenRatesRequest {}
 
 message AllTokenRatesResponse {
   repeated kira.tokens.TokenRate data = 1;
+}
+
+message TokenRatesByDenomRequest {
+  repeated string denoms = 1;
+}
+  
+message TokenRatesByDenomResponse {
+  map<string, kira.tokens.TokenRate> data = 1;
+}
+
+message TokenBlackWhitesRequest {}
+message TokenBlackWhitesResponse {
+  TokensWhiteBlack data = 1;
 }

@@ -4,7 +4,7 @@ package kira.upgrade;
 import "google/protobuf/any.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/KiraCore/interx/proto-gen/kira/upgrade";
+option go_package = "github.com/KiraCore/sekai/x/upgrade/types";
 
 
 option (gogoproto.goproto_getters_all)  = false;
@@ -22,6 +22,7 @@ message ProposalSoftwareUpgrade {
   string memo = 8;
   bool instate_upgrade = 9;
   bool reboot_required = 10;
+  bool skip_handler = 11;
 }
 
 message ProposalCancelSoftwareUpgrade {

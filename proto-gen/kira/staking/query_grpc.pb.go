@@ -4,7 +4,7 @@
 // - protoc             v3.19.1
 // source: kira/staking/query.proto
 
-package staking
+package types
 
 import (
 	context "context"
@@ -22,7 +22,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryClient interface {
-	// Validators queries all validators that match the given status.
+	// Validators queries a validator by address.
+	ValidatorByAddress(ctx context.Context, in *ValidatorByAddressRequest, opts ...grpc.CallOption) (*ValidatorResponse, error)
+	// Validators queries a validator by moniker.
+	ValidatorByMoniker(ctx context.Context, in *ValidatorByMonikerRequest, opts ...grpc.CallOption) (*ValidatorResponse, error)
+	// Validators queries all validators by pagination
 	Validators(ctx context.Context, in *ValidatorsRequest, opts ...grpc.CallOption) (*ValidatorsResponse, error)
 }
 
@@ -32,6 +36,24 @@ type queryClient struct {
 
 func NewQueryClient(cc grpc.ClientConnInterface) QueryClient {
 	return &queryClient{cc}
+}
+
+func (c *queryClient) ValidatorByAddress(ctx context.Context, in *ValidatorByAddressRequest, opts ...grpc.CallOption) (*ValidatorResponse, error) {
+	out := new(ValidatorResponse)
+	err := c.cc.Invoke(ctx, "/kira.staking.Query/ValidatorByAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ValidatorByMoniker(ctx context.Context, in *ValidatorByMonikerRequest, opts ...grpc.CallOption) (*ValidatorResponse, error) {
+	out := new(ValidatorResponse)
+	err := c.cc.Invoke(ctx, "/kira.staking.Query/ValidatorByMoniker", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *queryClient) Validators(ctx context.Context, in *ValidatorsRequest, opts ...grpc.CallOption) (*ValidatorsResponse, error) {
@@ -47,7 +69,11 @@ func (c *queryClient) Validators(ctx context.Context, in *ValidatorsRequest, opt
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
-	// Validators queries all validators that match the given status.
+	// Validators queries a validator by address.
+	ValidatorByAddress(context.Context, *ValidatorByAddressRequest) (*ValidatorResponse, error)
+	// Validators queries a validator by moniker.
+	ValidatorByMoniker(context.Context, *ValidatorByMonikerRequest) (*ValidatorResponse, error)
+	// Validators queries all validators by pagination
 	Validators(context.Context, *ValidatorsRequest) (*ValidatorsResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
@@ -56,6 +82,12 @@ type QueryServer interface {
 type UnimplementedQueryServer struct {
 }
 
+func (UnimplementedQueryServer) ValidatorByAddress(context.Context, *ValidatorByAddressRequest) (*ValidatorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidatorByAddress not implemented")
+}
+func (UnimplementedQueryServer) ValidatorByMoniker(context.Context, *ValidatorByMonikerRequest) (*ValidatorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidatorByMoniker not implemented")
+}
 func (UnimplementedQueryServer) Validators(context.Context, *ValidatorsRequest) (*ValidatorsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Validators not implemented")
 }
@@ -70,6 +102,42 @@ type UnsafeQueryServer interface {
 
 func RegisterQueryServer(s grpc.ServiceRegistrar, srv QueryServer) {
 	s.RegisterService(&Query_ServiceDesc, srv)
+}
+
+func _Query_ValidatorByAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidatorByAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ValidatorByAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.staking.Query/ValidatorByAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ValidatorByAddress(ctx, req.(*ValidatorByAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ValidatorByMoniker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidatorByMonikerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ValidatorByMoniker(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kira.staking.Query/ValidatorByMoniker",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ValidatorByMoniker(ctx, req.(*ValidatorByMonikerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Query_Validators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -97,6 +165,14 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "kira.staking.Query",
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ValidatorByAddress",
+			Handler:    _Query_ValidatorByAddress_Handler,
+		},
+		{
+			MethodName: "ValidatorByMoniker",
+			Handler:    _Query_ValidatorByMoniker_Handler,
+		},
 		{
 			MethodName: "Validators",
 			Handler:    _Query_Validators_Handler,

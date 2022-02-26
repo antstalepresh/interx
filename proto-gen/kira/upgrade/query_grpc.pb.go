@@ -4,7 +4,7 @@
 // - protoc             v3.19.1
 // source: kira/upgrade/query.proto
 
-package upgrade
+package types
 
 import (
 	context "context"
@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryClient interface {
-	// CurrentPlan queries the current upgrade plan.
+	// CurrentPlan queries the current plan.
 	CurrentPlan(ctx context.Context, in *QueryCurrentPlanRequest, opts ...grpc.CallOption) (*QueryCurrentPlanResponse, error)
 	// NextPlan queries the next upgrade plan.
 	NextPlan(ctx context.Context, in *QueryNextPlanRequest, opts ...grpc.CallOption) (*QueryNextPlanResponse, error)
@@ -58,7 +58,7 @@ func (c *queryClient) NextPlan(ctx context.Context, in *QueryNextPlanRequest, op
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
-	// CurrentPlan queries the current upgrade plan.
+	// CurrentPlan queries the current plan.
 	CurrentPlan(context.Context, *QueryCurrentPlanRequest) (*QueryCurrentPlanResponse, error)
 	// NextPlan queries the next upgrade plan.
 	NextPlan(context.Context, *QueryNextPlanRequest) (*QueryNextPlanResponse, error)
