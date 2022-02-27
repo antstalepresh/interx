@@ -6,3 +6,4 @@ proto-gen
 third_party/proto
 proto/cosmos
 proto/kira
+codec/
