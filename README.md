@@ -45,7 +45,7 @@ Quick Git Clone (New)
 ```
 cd $HOME && rm -fvr ./interx && INTERX_BRANCH="asmodat-tmp" && \
  git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
- cd ./interx && chmod 777 -R ./scripts && \
+ cd ./interx && chmod -R 777 ./scripts && \
  make install && echo "SUCCESS" || echo "FAILED"
 ```
 

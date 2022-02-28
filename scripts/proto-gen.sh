@@ -12,7 +12,7 @@ if [ -z "$UTILS_VER" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..."
     KIRA_UTILS_BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
     wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh && \
-    chmod 555 -v ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && loadGlobEnvs
+    chmod 555 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && loadGlobEnvs
 fi
 
 # install golang if needed
