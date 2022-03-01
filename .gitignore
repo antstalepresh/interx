@@ -7,3 +7,5 @@ third_party/proto
 proto/cosmos
 proto/kira
 codec/
+bin
+nfpm_*

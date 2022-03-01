@@ -12,6 +12,7 @@ It will connect to the node using the GRPC endpoint as well as the RPC endpoint 
 #### Ubuntu
 
 ```
+# install essential dependencies
 apt-get install -y curl && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
  apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
  software-properties-common wget git nginx apt-transport-https file build-essential net-tools hashdeep \
@@ -20,9 +21,14 @@ apt-get install -y curl && curl -fsSL https://download.docker.com/linux/ubuntu/g
  bash libglu1-mesa lsof bc dnsutils psmisc netcat  make nodejs tar unzip xz-utils yarn zip p7zip-full ca-certificates \
  containerd docker.io dos2unix
 
-BRANCH="v0.0.1" && cd /tmp && rm -fv ./i.sh && \
+# install console helper
+BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
 wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install.sh -O ./i.sh && \
- chmod 555 -v ./i.sh && ./i.sh "$BRANCH" "/var/kiraglob" && . /etc/profile && rm -fv ./i.sh
+ chmod 777 ./i.sh && ./i.sh "$BRANCH" "/var/kiraglob" && . /etc/profile && rm -fv ./i.sh && utilsVersion
+
+# install deb package manager
+echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | tee /etc/apt/sources.list.d/goreleaser.list && apt-get update -y && \
+	apt install nfpm
 ```
 
 ### Installation

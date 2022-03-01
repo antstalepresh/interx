@@ -12,7 +12,7 @@ if [ -z "$UTILS_VER" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..."
     KIRA_UTILS_BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
     wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh && \
-    chmod 555 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && loadGlobEnvs
+    chmod 777 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && loadGlobEnvs
 fi
 
 # install golang if needed
@@ -20,7 +20,7 @@ if  ($(isNullOrEmpty "$GO_VER")) || ($(isNullOrEmpty "$GOBIN")) ; then
     GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
      GO_TAR=go${GO_VERSION}.linux-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
      wget https://dl.google.com/go/${GO_TAR} && \
-     tar -C /usr/local -xvf $GO_TAR && \
+     tar -C /usr/local -xvf $GO_TAR && rm -fv ./$GO_TAR && \
      setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT" && \
      setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN" && \
      setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH" && \
@@ -36,7 +36,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.1"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.2"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -112,11 +112,13 @@ for dir in $proto_dirs; do
 		  -I third_party/proto/ \
           --go_out=paths=source_relative:./proto-gen \
           --go-grpc_out=paths=source_relative:./proto-gen \
-          --gocosmos_out=plugins=interfacetype+grpc,\
-Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types:./proto-gen \
           --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto-gen \
           $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
     done
 done
+
+#TODO: Currently it is not possible for go to dicover the gocosmos_out plugin (might require to resolve some issues with path)
+#--gocosmos_out=plugins=interfacetype+grpc,\
+#Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types:./proto-gen \
 
 echoInfo "INFO: Success, all proto files were compiled!"

@@ -13,5 +13,4 @@ start:
 
 publish:
 	./scripts/proto-gen.sh
-	./scripts/build.sh
-	nfpm pkg --packager deb --target . -f ./nfpm.yaml
+	./scripts/publish.sh
