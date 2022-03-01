@@ -30,8 +30,8 @@ if  ($(isNullOrEmpty "$GO_VER")) || ($(isNullOrEmpty "$GOBIN")) ; then
      setGlobEnv GOPATH "/home/go" && setGlobPath "\$GOPATH" && \
      setGlobEnv GOCACHE "/home/go/cache" && \
      loadGlobEnvs && \
-     mkdir -p "$GOPATH/src" "$GOPATH/bin" && \
-     chmod -R 777 "$GOPATH" && chmod -R 777 "$GOROOT"
+     mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOCACHE" && \
+     chmod -R 777 "$GOPATH" && chmod -R 777 "$GOROOT" && chmod -R 777 "$GOCACHE"
 
     echoInfo "INFO: Sucessfully intalled $(go version)"
 fi
