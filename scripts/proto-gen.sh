@@ -27,8 +27,8 @@ if  ($(isNullOrEmpty "$GO_VER")) || ($(isNullOrEmpty "$GOBIN")) ; then
      tar -C /usr/local -xvf $GO_TAR && rm -fv ./$GO_TAR && \
      setGlobEnv GOROOT "/usr/local/go" && setGlobPath "\$GOROOT" && \
      setGlobEnv GOBIN "/usr/local/go/bin" && setGlobPath "\$GOBIN" && \
-     setGlobEnv GOPATH "/usr/home/go" && setGlobPath "\$GOPATH" && \
-     setGlobEnv GOCACHE "/usr/home/go/cache" && \
+     setGlobEnv GOPATH "$HOME/go" && setGlobPath "\$GOPATH" && \
+     setGlobEnv GOCACHE "$HOME/go/cache" && \
      loadGlobEnvs && \
      mkdir -p "$GOPATH/src" "$GOPATH/bin" "$GOCACHE" && \
      chmod -R 777 "$GOPATH" && chmod -R 777 "$GOROOT" && chmod -R 777 "$GOCACHE"
