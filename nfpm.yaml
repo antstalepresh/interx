@@ -1,6 +1,6 @@
 name: "interx"
 arch: "${ARCH}"
-platform: "linux"
+platform: "${PLATFORM}"
 version: "${VERSION}"
 section: "default"
 priority: "extra"
@@ -10,8 +10,8 @@ provides:
 - interxd
 maintainer: "KIRA <partners@kira.global>"
 description: "INTERX is an interchain engine, proxy, load balancer & security gateway service for communication between backend and frontend. It connects to KIRA sentry & validator nodes using the GRPC & RPC endpoints"
-homepage: "http://github.com/KiraCore/interx"
+homepage: "https://github.com/KiraCore/interx"
 license: "AGPL-3.0 license"
 contents:
-- src: ./bin/${ARCH}
+- src: ${SOURCE}
   dst: ./bin/

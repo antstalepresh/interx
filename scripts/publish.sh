@@ -3,37 +3,61 @@ set -e
 set -x
 . /etc/profile
 
-rm -rfv ./bin 
-mkdir -p ./bin/arm64 ./bin/amd64 ./bin/deb
-
 go mod tidy
 go mod verify
 
-# To see available archotectures, run: go tool dist list 
-env GOOS=linux GOARCH=arm64 go build -o ./bin/arm64
-env GOOS=linux GOARCH=amd64 go build -o ./bin/amd64
-
-PKG_CONFIG_FILE=./nfpm.yaml && \
- PKG_CONFIG_FILE_amd64=./nfpm_amd64.yaml && \
- PKG_CONFIG_FILE_arm64=./nfpm_arm64.yaml
-
-rm -rfv $PKG_CONFIG_FILE_amd64 && cp -v $PKG_CONFIG_FILE $PKG_CONFIG_FILE_amd64
-rm -rfv $PKG_CONFIG_FILE_arm64 && cp -v $PKG_CONFIG_FILE $PKG_CONFIG_FILE_arm64
+PKG_CONFIG_FILE=./nfpm.yaml 
 
 function pcgConfigure() {
     local ARCH="$1"
     local VERSION="$2"
-    local FILE="$3"
-    sed -i "s/\${ARCH}/$ARCH/" $FILE
-    sed -i "s/\${VERSION}/$VERSION/" $FILE
+    local PLATFORM="$3"
+    local SOURCE="$4"
+    local CONFIG="$5"
+    SOURCE=${SOURCE//"/"/"\/"}
+    sed -i "s/\${ARCH}/$ARCH/" $CONFIG
+    sed -i "s/\${VERSION}/$VERSION/" $CONFIG
+    sed -i "s/\${PLATFORM}/$PLATFORM/" $CONFIG
+    sed -i "s/\${SOURCE}/$SOURCE/" $CONFIG
 }
 
-VERSION="v0.1.18.15"
+BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD || echo "???")
+echoInfo "INFO: Reading InterxVersion from constans file, branch $BRANCH"
 
-pcgConfigure "amd64" "$VERSION" $PKG_CONFIG_FILE_amd64
-pcgConfigure "arm64" "$VERSION" $PKG_CONFIG_FILE_arm64
+FILE=./config/constants.go
+LINES=$(grep -Fn 'InterxVersion =' $FILE | cut -d : -f 1)
+mapfile -t LINES_ARR < <(echo "$LINES")
+LINE_NR=$(echo ${LINES_ARR[0]}) && (! $(isNaturalNumber $LINE_NR)) && LINE_NR="-1"
+[[ $LINE_NR -ge 0 ]] && LINE_CONTENT=$(sed "${LINE_NR}q;d" "$FILE") || LINE_CONTENT="InterxVersion = v0.0.0.0"
+CONTENT_ARR=(${LINE_CONTENT//=/ })
+VERSION=$(echo ${CONTENT_ARR[1]} | xargs || echo "v0.0.0.0")
 
-nfpm pkg --packager deb --target ./bin/deb/ -f $PKG_CONFIG_FILE_amd64
-nfpm pkg --packager deb --target ./bin/deb/ -f $PKG_CONFIG_FILE_arm64
+function pcgRelease() {
+    local ARCH="$1"
+    local VERSION="$2"
+    local PLATFORM="$3"
+
+    local BIN_PATH=./bin/$ARCH/$PLATFORM
+    local RELEASE_PATH=./bin/deb/$PLATFORM
+    mkdir -p $BIN_PATH $RELEASE_PATH
+
+    echoInfo "INFO: Building $ARCH package for $PLATFORM..."
+    env GOOS=$PLATFORM GOARCH=$ARCH go build -o $BIN_PATH
+    TMP_PKG_CONFIG_FILE=./nfpm_${ARCH}_${PLATFORM}.yaml
+    rm -rfv $TMP_PKG_CONFIG_FILE && cp -v $PKG_CONFIG_FILE $TMP_PKG_CONFIG_FILE
+
+    pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
+    nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+}
+
+rm -rfv ./bin
+
+# NOTE: To see available build architectures, run: go tool dist list
+pcgRelease "amd64" "$VERSION" "linux"
+pcgRelease "amd64" "$VERSION" "darwin"
+pcgRelease "amd64" "$VERSION" "windows"
+pcgRelease "arm64" "$VERSION" "linux"
+pcgRelease "arm64" "$VERSION" "darwin"
+pcgRelease "arm64" "$VERSION" "windows"
 
 echoInfo "INFO: Sucessfully published INTERX deb packages into ./bin"

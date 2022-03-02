@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.1"
+	InterxVersion = "v0.4.1.1"
 
 	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
 	QueryTotalSupply     = "/api/cosmos/bank/supply"
