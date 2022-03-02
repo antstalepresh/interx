@@ -14,7 +14,7 @@ if [ "$UTILS_OLD_VER" == "true" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..." && sleep 2
     KIRA_UTILS_BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
     wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh && \
-    chmod 777 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && loadGlobEnvs
+    chmod 777 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && . /etc/profile && loadGlobEnvs
 else
     echoInfo "INFO: KIRA utils are up to date, latest version $UTILS_VER" && sleep 2
 fi
