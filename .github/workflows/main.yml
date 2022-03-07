@@ -5,27 +5,30 @@ on:
     branches: [ master, dev, v* ]
   pull_request:
     branches: [ master, dev, v* ]
-env:
-  WORKING_DIRECTORY: /home/runner/work/interx/interx
+
 jobs:
   setup:
+    name: Repo Setup
     runs-on: ubuntu-20.04
     permissions:
       contents: read
       packages: write
       id-token: write
     steps:
-          - name: Checkout repository
-            uses: actions/checkout@v3.0.0
           - name: Install cosign
             uses: sigstore/cosign-installer@v2.1.0
             with:
               cosign-release: 'v1.6.0'
+          - name: Checkout repository
+            uses: actions/checkout@v3.0.0
           - name: Verify repo content
             run: |
               echo "(current dir): $PWD" && ls -l
   build:
+    name: Repo Build
     runs-on: ubuntu-20.04
+    env:
+      WORKING_DIRECTORY: /home/runner/work/interx/interx
     permissions:
       contents: read
       packages: write
@@ -34,7 +37,7 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - ${{ env.WORKING_DIRECTORY }}:/host
+        - ${{env.WORKING_DIRECTORY}}:/host
     steps:
           - name: Checking dependency versions
             run: |
