@@ -25,12 +25,12 @@ jobs:
           - name: Verify repo content
             run: |
               echo "(current dir): $PWD" && ls -l
-              zip --version
+              zip -r src.zip .
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
             with:
-              name: repo-content
-              path: ./
+              name: src
+              path: ./src.zip
   build:
     name: Repo Build
     runs-on: ubuntu-20.04
@@ -56,13 +56,13 @@ jobs:
           - name: Download artifacts
             uses: actions/download-artifact@v3.0.0
             with:
-              name: repo-content
-              path: ./
+              name: src
+              path: ./src.zip
           - name: Testing INTERX
-            working-directory: /home/runner/work/interx/interx
             run: |
+              unzip ./src.zip
               echo "(current dir): $PWD" && ls -l
-              echo "(current /host):" && ls -l /host
+              chmod -Rv 555 ./scripts
               make install
               interxd version
               ls -l
