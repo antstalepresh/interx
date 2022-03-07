@@ -7,6 +7,7 @@ on:
     branches: [ master, dev, v* ]
 
 jobs:
+  # isolate signing & repo cloning from docker image
   setup:
     name: Repo Setup
     runs-on: ubuntu-20.04
@@ -24,6 +25,11 @@ jobs:
           - name: Verify repo content
             run: |
               echo "(current dir): $PWD" && ls -l
+          - name: Uploading artifacts
+          - uses: actions/upload-artifact@v3.0.0
+            with:
+              name: repo-content
+              path: ./
   build:
     name: Repo Build
     runs-on: ubuntu-20.04
@@ -46,6 +52,11 @@ jobs:
               dart --version
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
+          - name: Download artifacts
+          - uses: actions/download-artifact@v3.0.0
+            with:
+              name: repo-content
+              path: ./
           - name: Testing INTERX
             working-directory: /home/runner/work/interx/interx
             run: |
