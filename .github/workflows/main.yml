@@ -7,10 +7,16 @@ on:
     branches: [ master, dev, v* ]
 
 jobs:
-  main:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-20.04
+    needs: [build]
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      credentials:
+        username: ${{ secrets.CI_REGISTRY_USER }}
+        password: ${{ secrets.CI_REGISTRY_PASSWORD }
     steps:
           - name: Checking dependency versions
             run: |
@@ -27,7 +33,7 @@ jobs:
               ls -l || echo "NOT FOUND (current dir): $PWD"
               ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
               ls -l $HOME || echo "NOT FOUND (HOME): $HOME"
-              ls -l /github || echo "NOT FOUND: /github"
+              ls -l /github/home || echo "NOT FOUND: /github"
               ls -l /github/workflow || echo "NOT FOUND: /github/workflow"
               ls -l / || echo "NOT FOUND (/): /"
               ls -l /tmp || echo "NOT FOUND (/tmp): /tmp"
