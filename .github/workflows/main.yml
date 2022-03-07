@@ -100,7 +100,7 @@ jobs:
           # Release creator info: https://github.com/actions/create-release
           - name: Publish release
             if: github.event_name != 'pull_request'
-            id: INTERX Releaser
+            id: interx
             uses: actions/create-release@v1.1.4
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
