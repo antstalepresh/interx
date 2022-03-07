@@ -1,0 +1,24 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ master, dev, v* ]
+  pull_request:
+    branches: [ master, dev, v* ]
+
+jobs:
+  main_job:
+    runs-on: ubuntu-latest
+    container: 
+      image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
+    steps:
+          - name: Checking dependency versions
+            run: |
+              echo "Utils Version: $(utilsVersion)"
+              go version
+              CDHelper version
+              flutter --version
+              dart --version
+
+
+
