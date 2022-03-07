@@ -56,21 +56,18 @@ jobs:
             uses: actions/download-artifact@v3.0.0
             with:
               name: src
-              path: ./src.zip
+              path: /self/home/src.zip
           - name: Testing INTERX
+            working-directory: /self/home
             run: |
               echo "(current dir): $PWD" && ls -l
-              chmod 555 ./src.zip
-              unzip ./src.zip
-              chmod -Rv 555 ./scripts
+              chmod 555 $PWD/src.zip
+              unzip $PWD/src.zip
+              chmod -Rv 555 $PWD/scripts
               make install
               interxd version
           - name: Publishing INTERX binaries
+            working-directory: /self/home
             run: |
               make publish
               ls -l
-
-
-
-
-
