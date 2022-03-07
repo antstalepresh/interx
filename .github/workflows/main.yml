@@ -27,6 +27,8 @@ jobs:
               ls -l || echo "NOT FOUND (current dir): $PWD"
               ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
               ls -l $HOME || echo "NOT FOUND (HOME): $HOME"
+              ls -l /github || echo "NOT FOUND: /github"
+              ls -l /github/workflow || echo "NOT FOUND: /github/workflow"
               ls -l / || echo "NOT FOUND (/): /"
               ls -l /tmp || echo "NOT FOUND (/tmp): /tmp"
               ls -l $GITHUB_ENV || echo "NOT FOUND (GITHUB_ENV): $GITHUB_ENV"
