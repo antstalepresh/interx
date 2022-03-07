@@ -12,7 +12,6 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
         - /:/host
     steps:
           - name: Checking dependency versions
@@ -25,12 +24,12 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: ${{ env.RUNNER_WORKSPACE }}
+            working-directory: /github/workflow
             run: |
               ls -l || echo "NOT FOUND (current dir): $PWD"
               ls -l /host || echo "NOT FOUND: /host"
               ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
-              ls -l $HOME || echo "NOT FOUND (HOME): $HOME"
+              ls -l /__w || echo "NOT FOUND: /__w"
               ls -l /github/home || echo "NOT FOUND: /github"
               ls -l /github/workflow || echo "NOT FOUND: /github/workflow"
               ls -l / || echo "NOT FOUND (/): /"
