@@ -24,12 +24,13 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: /github/workflow
+            working-directory: ${{ github.workspace }} 
             run: |
               ls -l || echo "NOT FOUND (current dir): $PWD"
               ls -l /host || echo "NOT FOUND: /host"
               ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
               ls -l /__w || echo "NOT FOUND: /__w"
+              ls -l /__w/interx || echo "NOT FOUND: /__w/interx"
               ls -l /github/home || echo "NOT FOUND: /github"
               ls -l /github/workflow || echo "NOT FOUND: /github/workflow"
               ls -l / || echo "NOT FOUND (/): /"
@@ -40,7 +41,7 @@ jobs:
               ls -l $RUNNER_WORKSPACE || echo "NOT FOUND (RUNNER_WORKSPACE): $RUNNER_WORKSPACE"
               ls -l $GITHUB_STEP_SUMMARY || echo "NOT FOUND (GITHUB_STEP_SUMMARY): $GITHUB_STEP_SUMMARY"
               ls -l $RUNNER_WORKSPACE/interx || echo "NOT FOUND (RUNNER_WORKSPACE/interx): $RUNNER_WORKSPACE/interx"
-              ls -l $GITHUB_STEP_SUMMARY/interx || echo "NOT FOUND (GITHUB_STEP_SUMMARY/interx): $GITHUB_STEP_SUMMARY/interx"
+              ls -l ${{ github.workspace }} || echo "NOT FOUND ${{ github.workspace }}""
               make install
               interxd version
               ls -l
