@@ -22,11 +22,18 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: ${{ env.HOME }}
+            working-directory: ${{ env.RUNNER_WORKSPACE }}
             run: |
-              cd $GITHUB_WORKSPACE && ls -l
-              cd $HOME && ls -l
-              ll
+              ls -l || echo "NOT FOUND (current dir): $PWD"
+              ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
+              ls -l $HOME || echo "NOT FOUND (HOME): $HOME"
+              ls -l / || echo "NOT FOUND (/): /"
+              ls -l /tmp || echo "NOT FOUND (/tmp): /tmp"
+              ls -l $GITHUB_ENV || echo "NOT FOUND (GITHUB_ENV): $GITHUB_ENV"
+              ls -l $GITHUB_PATH || echo "NOT FOUND (GITHUB_PATH): $GITHUB_PATH"
+              ls -l $RUNNER_TOOL_CACHE || echo "NOT FOUND (RUNNER_TOOL_CACHE): $RUNNER_TOOL_CACHE"
+              ls -l $RUNNER_WORKSPACE || echo "NOT FOUND (RUNNER_WORKSPACE): $RUNNER_WORKSPACE"
+              ls -l $GITHUB_STEP_SUMMARY || echo "NOT FOUND (GITHUB_STEP_SUMMARY): $GITHUB_STEP_SUMMARY"
               make install
               interxd version
               ls -l
