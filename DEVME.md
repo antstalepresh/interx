@@ -1,5 +1,11 @@
 # Local Development on Windows
 
+# Workflows
+
+In order to have ability to modify & push workflows to github from the local machines
+*  Generate a "Personal Access Token" with workflow rights
+*  Change Remote url to https://YOUR_USERNAME:YOUR_TOKEN@github.com/KiraCore/interx.git
+
 ## Re/Install WSL on Windows 10 (PowerShell)
 
 ```

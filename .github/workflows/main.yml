@@ -84,6 +84,7 @@ jobs:
       id-token: write
     steps:
           - name: Download artifacts
+            if: github.event_name != 'pull_request'
             uses: actions/download-artifact@v3.0.0
             with:
               name: deb
