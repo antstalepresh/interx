@@ -7,18 +7,29 @@ on:
     branches: [ master, dev, v* ]
 
 jobs:
-  main_job:
+  main:
     runs-on: ubuntu-latest
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
     steps:
           - name: Checking dependency versions
             run: |
-              echo "Utils Version: $(utilsVersion)"
+              . /etc/profile && echo "Utils Version: $(utilsVersion)"
               go version
               CDHelper version
               flutter --version
               dart --version
+          - name: Testing INTERX
+            run: |
+              make install
+              interxd version
+              ls
+          - name: Publishing INTERX binaries
+            run: |
+              make publish
+              ls
+
+
 
 
 
