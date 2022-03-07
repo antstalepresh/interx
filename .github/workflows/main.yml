@@ -12,7 +12,7 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - /home/runner/work/interx:/github/workspace2
+        - /home/runner/work/interx/interx:/github/workspace3
         - /var/run/docker.sock:/var/run/docker.sock
     steps:
           - name: Checking dependency versions
@@ -25,10 +25,10 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: /github/workflow
+            working-directory: /home/runner/work/interx/interx
             run: |
               echo "(current dir): $PWD" && ls -l
-              echo "(/github/workspace2):" && ls -l /github/workspace2
+              echo "(/github/workspace3):" && ls -l /github/workspace3
               echo "(GITHUB_WORKSPACE): $GITHUB_WORKSPACE" && ls -l $GITHUB_WORKSPACE
               echo "(/__w): $PWD" && ls -l /__w
               echo "(/__w/interx): $PWD" && ls -l /__w/interx
@@ -41,7 +41,6 @@ jobs:
               ls -l $RUNNER_WORKSPACE || echo "NOT FOUND (RUNNER_WORKSPACE): $RUNNER_WORKSPACE"
               ls -l $GITHUB_STEP_SUMMARY || echo "NOT FOUND (GITHUB_STEP_SUMMARY): $GITHUB_STEP_SUMMARY"
               ls -l $RUNNER_WORKSPACE/interx || echo "NOT FOUND (RUNNER_WORKSPACE/interx): $RUNNER_WORKSPACE/interx"
-              ls -l ${{ github.workspace }} || echo "NOT FOUND ${{ github.workspace }}"
               make install
               interxd version
               ls -l
