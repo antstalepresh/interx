@@ -12,7 +12,8 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - /:/host
+        - /home/runner/work/interx:/github/workspace2
+        - /var/run/docker.sock:/var/run/docker.sock
     steps:
           - name: Checking dependency versions
             run: |
@@ -24,16 +25,15 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: ${{ github.workspace }} 
+            working-directory: /github/workflow
             run: |
-              ls -l || echo "NOT FOUND (current dir): $PWD"
-              ls -l /host || echo "NOT FOUND: /host"
-              ls -l $GITHUB_WORKSPACE || echo "NOT FOUND (GITHUB_WORKSPACE): $GITHUB_WORKSPACE"
-              ls -l /__w || echo "NOT FOUND: /__w"
-              ls -l /__w/interx || echo "NOT FOUND: /__w/interx"
+              echo "(current dir): $PWD" && ls -l
+              echo "(/github/workspace2):" && ls -l /github/workspace2
+              echo "(GITHUB_WORKSPACE): $GITHUB_WORKSPACE" && ls -l $GITHUB_WORKSPACE
+              echo "(/__w): $PWD" && ls -l /__w
+              echo "(/__w/interx): $PWD" && ls -l /__w/interx
               ls -l /github/home || echo "NOT FOUND: /github"
               ls -l /github/workflow || echo "NOT FOUND: /github/workflow"
-              ls -l / || echo "NOT FOUND (/): /"
               ls -l /tmp || echo "NOT FOUND (/tmp): /tmp"
               ls -l $GITHUB_ENV || echo "NOT FOUND (GITHUB_ENV): $GITHUB_ENV"
               ls -l $GITHUB_PATH || echo "NOT FOUND (GITHUB_PATH): $GITHUB_PATH"
@@ -41,7 +41,7 @@ jobs:
               ls -l $RUNNER_WORKSPACE || echo "NOT FOUND (RUNNER_WORKSPACE): $RUNNER_WORKSPACE"
               ls -l $GITHUB_STEP_SUMMARY || echo "NOT FOUND (GITHUB_STEP_SUMMARY): $GITHUB_STEP_SUMMARY"
               ls -l $RUNNER_WORKSPACE/interx || echo "NOT FOUND (RUNNER_WORKSPACE/interx): $RUNNER_WORKSPACE/interx"
-              ls -l ${{ github.workspace }} || echo "NOT FOUND ${{ github.workspace }}""
+              ls -l ${{ github.workspace }} || echo "NOT FOUND ${{ github.workspace }}"
               make install
               interxd version
               ls -l
