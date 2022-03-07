@@ -5,7 +5,8 @@ on:
     branches: [ master, dev, v* ]
   pull_request:
     branches: [ master, dev, v* ]
-
+env:
+  WORKING_DIRECTORY: /home/runner/work/interx/interx
 jobs:
   setup:
     runs-on: ubuntu-20.04
@@ -33,7 +34,7 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - /home/runner/work/interx/interx:/host
+        - ${{ env.WORKING_DIRECTORY }}:/host
     steps:
           - name: Checking dependency versions
             run: |
@@ -45,7 +46,7 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: /host
+            working-directory: ${{ env.WORKING_DIRECTORY }}
             run: |
               echo "(current dir): $PWD" && ls -l
               echo "(current /host):" && ls -l /host
