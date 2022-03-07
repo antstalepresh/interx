@@ -23,12 +23,6 @@ jobs:
           - name: Verify repo content
             run: |
               echo "(current dir): $PWD" && ls -l
-              echo "(current /home/runner/work/interx/interx):" && ls -l /home/runner/work/interx/interx
-              echo "(/github/workspace):" && ls -l /github/workspace
-              echo "(GITHUB_WORKSPACE): $GITHUB_WORKSPACE" && ls -l $GITHUB_WORKSPACE
-              echo "(GITHUB_HOME): $GITHUB_HOME" && ls -l $GITHUB_HOME
-              echo "(GITHUB_PATH): $GITHUB_PATH" && ls -l $GITHUB_PATH
-              echo "(HOME): $HOME" && ls -l $HOME
   build:
     runs-on: ubuntu-20.04
     permissions:
@@ -39,8 +33,7 @@ jobs:
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
       volumes:
-        - /home/runner/work/interx/interx:/github/workspace3
-        - /var/run/docker.sock:/var/run/docker.sock
+        - /home/runner/work/interx/interx:/host
     steps:
           - name: Checking dependency versions
             run: |
@@ -52,12 +45,10 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: /home/runner/work/interx/interx
+            working-directory: /host
             run: |
               echo "(current dir): $PWD" && ls -l
-              echo "(current /home/runner/work/interx/interx):" && ls -l /home/runner/work/interx/interx
-              echo "(/github/workspace3):" && ls -l /github/workspace3
-              echo "(GITHUB_WORKSPACE): $GITHUB_WORKSPACE" && ls -l $GITHUB_WORKSPACE
+              echo "(current /host):" && ls -l /host
               make install
               interxd version
               ls -l
