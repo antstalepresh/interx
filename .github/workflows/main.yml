@@ -60,6 +60,7 @@ jobs:
           - name: Testing INTERX
             run: |
               echo "(current dir): $PWD" && ls -l
+              chmod 555 ./src.zip
               unzip ./src.zip
               chmod -Rv 555 ./scripts
               make install
