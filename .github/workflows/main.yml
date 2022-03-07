@@ -25,6 +25,7 @@ jobs:
           - name: Verify repo content
             run: |
               echo "(current dir): $PWD" && ls -l
+              zip --version
           - name: Uploading artifacts
           - uses: actions/upload-artifact@v3.0.0
             with:
