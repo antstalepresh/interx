@@ -19,13 +19,17 @@ jobs:
               CDHelper version
               flutter --version
               dart --version
+              echo "HOME: $HOME"
+              echo "ENVS: $(env)"
           - name: Testing INTERX
+            working-directory: /github/workspace
             run: |
-              ls -l
+              ls -l || cd / && ls -l || cd /github/workspace && ls -l 
               make install
               interxd version
               ls -l
           - name: Publishing INTERX binaries
+            working-directory: /github/workspace
             run: |
               make publish
               ls -l
