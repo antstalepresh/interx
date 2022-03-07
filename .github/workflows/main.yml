@@ -22,14 +22,16 @@ jobs:
               echo "HOME: $HOME"
               echo "ENVS: $(env)"
           - name: Testing INTERX
-            working-directory: ${{ env.GITHUB_WORKSPACE }}
+            working-directory: ${{ env.HOME }}
             run: |
               cd $GITHUB_WORKSPACE && ls -l
+              cd $HOME && ls -l
+              ll
               make install
               interxd version
               ls -l
           - name: Publishing INTERX binaries
-            working-directory: ${{ env.GITHUB_WORKSPACE }}
+            working-directory: ${{ env.HOME }}
             run: |
               make publish
               ls -l
