@@ -1,4 +1,4 @@
-name: Makefile CI
+name: INTERX Build & Release
 
 on:
   push:
@@ -21,13 +21,14 @@ jobs:
               dart --version
           - name: Testing INTERX
             run: |
+              ls -l
               make install
               interxd version
-              ls
+              ls -l
           - name: Publishing INTERX binaries
             run: |
               make publish
-              ls
+              ls -l
 
 
 
