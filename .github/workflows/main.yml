@@ -41,8 +41,6 @@ jobs:
     needs: [setup]
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
-      volumes:
-        - /home/runner/work/interx/interx:/host
     steps:
           - name: Checking dependency versions
             run: |
@@ -51,8 +49,9 @@ jobs:
               CDHelper version
               flutter --version
               dart --version
-              echo "HOME: $HOME"
               echo "ENVS: $(env)"
+              echo "HOME: $HOME"
+              echo " PWD: $PWD"
           - name: Download artifacts
             uses: actions/download-artifact@v3.0.0
             with:
@@ -60,14 +59,12 @@ jobs:
               path: ./src.zip
           - name: Testing INTERX
             run: |
-              unzip ./src.zip
               echo "(current dir): $PWD" && ls -l
+              unzip ./src.zip
               chmod -Rv 555 ./scripts
               make install
               interxd version
-              ls -l
           - name: Publishing INTERX binaries
-            working-directory: ${{ env.HOME }}
             run: |
               make publish
               ls -l
