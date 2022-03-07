@@ -67,4 +67,25 @@ jobs:
           - name: Publishing INTERX binaries
             run: |
               make publish
-              ls -l
+              cp -fv ./RELEASE.md ./bin/deb
+              ls -l ./bin/deb
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: deb
+              path: ./bin/deb
+  release:
+    name: Build Release
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: ./bin/deb
+          - name: Inspecting artifacts
+            run: |
+              echo "(current dir): $PWD" && ls -l $PWD
