@@ -2,9 +2,9 @@ name: INTERX Build & Release
 
 on:
   push:
-    branches: [ master, dev, v* ]
+    branches: [ v* ]
   pull_request:
-    branches: [ master, dev, v* ]
+    branches: [ v* ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -77,6 +77,7 @@ jobs:
   release:
     name: Build Release
     runs-on: ubuntu-20.04
+    needs: [build]
     permissions:
       contents: read
       packages: write
@@ -85,7 +86,19 @@ jobs:
           - name: Download artifacts
             uses: actions/download-artifact@v3.0.0
             with:
-              name: ./bin/deb
-          - name: Inspecting artifacts
+              name: deb
+          - name: Inspecting & organizing artifacts
             run: |
               echo "(current dir): $PWD" && ls -l $PWD
+          # Release creator info: https://github.com/actions/create-release
+          - name: Publish release
+            uses: actions/create-release@v1.1.4
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              BRANCH_NAME: ${GITHUB_REF##*/}
+            with:
+              tag_name: ${{ env.BRANCH_NAME }}
+              release_name: Release ${{ env.BRANCH_NAME }}
+              body_path: RELEASE.md
+              draft: false
+              prerelease: false
