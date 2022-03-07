@@ -68,12 +68,13 @@ jobs:
             run: |
               make publish
               cp -fv ./RELEASE.md ./bin/deb
+              cd ./bin/deb && zip -r deb.zip .
               ls -l ./bin/deb
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
             with:
               name: deb
-              path: ./bin/deb
+              path: ./bin/deb/deb.zip
   release:
     name: Build Release
     runs-on: ubuntu-20.04
@@ -84,15 +85,22 @@ jobs:
       id-token: write
     steps:
           - name: Download artifacts
-            if: github.event_name != 'pull_request'
             uses: actions/download-artifact@v3.0.0
             with:
-              name: deb
+              name: |
+                deb
+                src
           - name: Inspecting & organizing artifacts
             run: |
               echo "(current dir): $PWD" && ls -l $PWD
+              chmod -v 555 $PWD/deb.zip
+              chmod -v 555 $PWD/src.zip
+              unzip $PWD/deb.zip
+              echo "(current dir): $PWD" && ls -l $PWD
           # Release creator info: https://github.com/actions/create-release
           - name: Publish release
+            if: github.event_name != 'pull_request'
+            id: INTERX Releaser
             uses: actions/create-release@v1.1.4
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
