@@ -15,10 +15,10 @@ function pcgConfigure() {
     local SOURCE="$4"
     local CONFIG="$5"
     SOURCE=${SOURCE//"/"/"\/"}
-    sed -i '' "s/\${ARCH}/$ARCH/" $CONFIG
-    sed -i '' "s/\${VERSION}/$VERSION/" $CONFIG
-    sed -i '' "s/\${PLATFORM}/$PLATFORM/" $CONFIG
-    sed -i '' "s/\${SOURCE}/$SOURCE/" $CONFIG
+    sed -i="" "s/\${ARCH}/$ARCH/" $CONFIG
+    sed -i="" "s/\${VERSION}/$VERSION/" $CONFIG
+    sed -i="" "s/\${PLATFORM}/$PLATFORM/" $CONFIG
+    sed -i="" "s/\${SOURCE}/$SOURCE/" $CONFIG
 }
 
 BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD || echo "???")
