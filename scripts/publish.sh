@@ -51,7 +51,7 @@ function pcgRelease() {
         nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
     else
         # deb is not supported on windows, simly copy the executables
-        cp -fv "$BIN_PATH" "$RELEASE_PATH/interx_${VERSION}_${$ARCH}.exe"
+        cp -fv "$BIN_PATH/interx.exe" "$RELEASE_PATH/interx_${VERSION}_${$ARCH}.exe"
     fi
 }
 
