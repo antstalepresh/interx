@@ -90,18 +90,20 @@ jobs:
               name: interx-bin-deb
           - name: Inspecting & organizing artifacts
             run: |
-              echo "(current dir): $PWD" && ls -l $PWD
-              chmod -v 555 $PWD/deb.zip
-              unzip $PWD/deb.zip
-              cp -fv  $PWD/bin/deb/RELEASE.md $PWD/RELEASE.md
-              cp -fv   $PWD/bin/deb/darwin/interx_*_amd64.deb $PWD/interx_darwin_amd64.deb
-              cp -fv   $PWD/bin/deb/darwin/interx_*_arm64.deb $PWD/interx_darwin_arm64.deb
-              cp -fv    $PWD/bin/deb/linux/interx_*_amd64.deb $PWD/interx_linux_amd64.deb
-              cp -fv    $PWD/bin/deb/linux/interx_*_arm64.deb $PWD/interx_linux_arm64.deb
-              cp -fv  $PWD/bin/deb/windows/interx_*_amd64.deb $PWD/interx_windows_amd64.deb
-              cp -fv  $PWD/bin/deb/windows/interx_*_arm64.deb $PWD/interx_windows_arm64.deb
-              rm -rfv $PWD/bin
-              echo "(current dir): $PWD" && ls -l $PWD
+              echo "(current dir): $PWD" && ls -l
+              chmod -v 555 ./deb.zip
+              unzip ./deb.zip
+              chmod -Rv 555 ./
+              echo "(current dir): $PWD" && ls -l
+              cp -fv  ./bin/deb/RELEASE.md ./RELEASE.md
+              cp -fv   ./bin/deb/darwin/interx_*_amd64.deb ./interx_darwin_amd64.deb
+              cp -fv   ./bin/deb/darwin/interx_*_arm64.deb ./interx_darwin_arm64.deb
+              cp -fv    ./bin/deb/linux/interx_*_amd64.deb ./interx_linux_amd64.deb
+              cp -fv    ./bin/deb/linux/interx_*_arm64.deb ./interx_linux_arm64.deb
+              cp -fv  ./bin/deb/windows/interx_*_amd64.deb ./interx_windows_amd64.deb
+              cp -fv  ./bin/deb/windows/interx_*_arm64.deb ./interx_windows_arm64.deb
+              rm -rfv ./bin
+              echo "(current dir): $PWD" && ls -l
           # Release creator info: https://github.com/actions/create-release
           - name: Publish release
             if: github.event_name != 'pull_request'
