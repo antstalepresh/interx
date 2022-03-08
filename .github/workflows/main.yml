@@ -69,12 +69,12 @@ jobs:
               make publish
               cp -fv $PWD/RELEASE.md $PWD/bin/deb
               chmod -Rv 555 $PWD/bin/deb 
-              cd $PWD/bin/deb && zip -r deb.zip .
+              zip -r deb.zip $PWD/bin/deb
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
             with:
               name: deb
-              path: $PWD/bin/deb/deb.zip
+              path: ./deb.zip
   release:
     name: Build Release
     runs-on: ubuntu-20.04
@@ -94,7 +94,6 @@ jobs:
             run: |
               echo "(current dir): $PWD" && ls -l $PWD
               chmod -v 555 $PWD/deb.zip
-              chmod -v 555 $PWD/src.zip
               unzip $PWD/deb.zip
               echo "(current dir): $PWD" && ls -l $PWD
           # Release creator info: https://github.com/actions/create-release
