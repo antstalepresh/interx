@@ -94,8 +94,8 @@ jobs:
             run: |
               echo "(current dir): $PWD" && ls -l
               tar xvf ./deb.tar.gz
-              chmod -Rv 555 ./
-              rm -rfv ./windows ./linux ./darwin ./deb.tar.gz
+              chmod -Rv 777 ./
+              rm -fv ./deb.tar.gz
               echo "" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---" >> ./RELEASE.md
               echo " interx_darwin_amd64.deb: $(sha256 ./interx_darwin_amd64.deb)" >> ./RELEASE.md
               echo " interx_darwin_arm64.deb: $(sha256 ./interx_darwin_arm64.deb)" >> ./RELEASE.md

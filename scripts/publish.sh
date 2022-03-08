@@ -66,5 +66,5 @@ pcgRelease "arm64" "$VERSION" "linux"
 pcgRelease "arm64" "$VERSION" "darwin"
 pcgRelease "arm64" "$VERSION" "windows"
 
-rm -rfv ./amd64 ./arm64 ./deb
+rm -rfv ./bin/amd64 ./bin/arm64 ./bin/deb
 echoInfo "INFO: Sucessfully published INTERX deb packages into ./bin"
