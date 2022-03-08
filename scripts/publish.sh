@@ -46,8 +46,13 @@ function pcgRelease() {
     TMP_PKG_CONFIG_FILE=./nfpm_${ARCH}_${PLATFORM}.yaml
     rm -rfv $TMP_PKG_CONFIG_FILE && cp -v $PKG_CONFIG_FILE $TMP_PKG_CONFIG_FILE
 
-    pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
-    nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+    if [ "${PLATFORM,,}" != "windows" ] ; then
+        pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
+        nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+    else
+        # deb is not supported on windows, simly copy the executables
+        cp -fv "$BIN_PATH" "$RELEASE_PATH/interx_${VERSION}_${$ARCH}.exe"
+    fi
 }
 
 rm -rfv ./bin

@@ -15,6 +15,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
+      pull-requests: write
     steps:
           - name: Install cosign
             uses: sigstore/cosign-installer@v2.1.0
@@ -38,6 +39,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
+      pull-requests: write
     needs: [setup]
     container: 
       image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
@@ -82,6 +84,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
+      pull-requests: write
     steps:
           - name: Download artifacts
             uses: actions/download-artifact@v3.0.0
@@ -97,33 +100,52 @@ jobs:
               cp -fv   ./darwin/interx_*_arm64.deb ./interx_darwin_arm64.deb
               cp -fv    ./linux/interx_*_amd64.deb ./interx_linux_amd64.deb
               cp -fv    ./linux/interx_*_arm64.deb ./interx_linux_arm64.deb
-              cp -fv  ./windows/interx_*_amd64.deb ./interx_windows_amd64.deb
-              cp -fv  ./windows/interx_*_arm64.deb ./interx_windows_arm64.deb
+              cp -fv  ./windows/interx_*_amd64.exe ./interx_windows_amd64.exe
+              cp -fv  ./windows/interx_*_arm64.exe ./interx_windows_arm64.exe
               rm -rfv ./windows ./linux ./darwin ./deb.tar.gz
               echo "(current dir): $PWD" && ls -l
-          # Release creator info: https://github.com/actions/create-release
           - name: Publish release
-            if: github.event_name != 'pull_request'
-            id: interx-release
-            uses: actions/create-release@v1.1.4
+            uses: softprops/action-gh-release@v0.1.14
+            if: startsWith(github.ref, 'refs/tags/')
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               BRANCH_NAME: ${GITHUB_REF##*/}
             with:
-              tag_name: ${{ env.BRANCH_NAME }}
-              release_name: Release ${{ env.BRANCH_NAME }}
               body_path: RELEASE.md
-              draft: false
+              tag_name: ${{ env.BRANCH_NAME }}
+              release_name: INTERX ${{ env.BRANCH_NAME }}
               prerelease: false
-          - name: Upload release assets
-            if: github.event_name != 'pull_request'
-            id: interx-release-assets
-            uses: actions/upload-release-asset@v1.0.2
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              upload_url: ${{ steps.interx-release.outputs.upload_url }} 
-              asset_path: ./interx_linux_amd64.deb
-              asset_name: interx_linux_amd64.deb
-              # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
-              asset_content_type: application/octet-stream
+              draft: false
+              token: ${{ env.GITHUB_TOKEN }}
+              files: |
+                interx_linux_amd64.deb
+                interx_linux_arm64.deb
+                interx_darwin_amd64.deb
+                interx_darwin_arm64.deb
+                interx_windows_amd64.exe
+                interx_windows_arm64.exe
+
+          # Release creator info: https://github.com/actions/create-release
+#          - name: Publish release
+#            id: interx-release
+#            uses: actions/create-release@v1.1.4
+#            env:
+#              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#              BRANCH_NAME: ${GITHUB_REF##*/}
+#            with:
+#              tag_name: ${{ env.BRANCH_NAME }}
+#              release_name: Release ${{ env.BRANCH_NAME }}
+#              body_path: RELEASE.md
+#              draft: false
+#              prerelease: false
+#          - name: Upload release assets
+#            id: interx-release-assets
+#            uses: actions/upload-release-asset@v1.0.2
+#            env:
+#              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#            with:
+#              upload_url: ${{ steps.interx-release.outputs.upload_url }} 
+#              asset_path: ./interx_linux_amd64.deb
+#              asset_name: interx_linux_amd64.deb
+#              # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+#              asset_content_type: application/octet-stream
