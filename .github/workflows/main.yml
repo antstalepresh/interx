@@ -96,16 +96,15 @@ jobs:
               tar xvf ./deb.tar.gz
               chmod -Rv 777 ./
               echo "" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---" >> ./RELEASE.md
-              echo " interx_darwin_amd64.deb: $(sha256 ./interx_darwin_amd64.deb)" >> ./RELEASE.md
-              echo " interx_darwin_arm64.deb: $(sha256 ./interx_darwin_arm64.deb)" >> ./RELEASE.md
-              echo "  interx_linux_amd64.deb: $(sha256 ./interx_linux_amd64.deb)" >> ./RELEASE.md
-              echo "  interx_linux_arm64.deb: $(sha256 ./interx_linux_arm64.deb)" >> ./RELEASE.md
-              echo "interx_windows_amd64.exe: $(sha256 ./interx_windows_amd64.exe)" >> ./RELEASE.md
-              echo "interx_windows_arm64.exe: $(sha256 ./interx_windows_arm64.exe)" >> ./RELEASE.md
+              echo " interx_darwin_amd64.deb: $(sha256sum ./interx_darwin_amd64.deb | awk '{ print $1 }')" >> ./RELEASE.md
+              echo " interx_darwin_arm64.deb: $(sha256sum ./interx_darwin_arm64.deb | awk '{ print $1 }')" >> ./RELEASE.md
+              echo "  interx_linux_amd64.deb: $(sha256sum ./interx_linux_amd64.deb | awk '{ print $1 }')" >> ./RELEASE.md
+              echo "  interx_linux_arm64.deb: $(sha256sum ./interx_linux_arm64.deb | awk '{ print $1 }')" >> ./RELEASE.md
+              echo "interx_windows_amd64.exe: $(sha256sum ./interx_windows_amd64.exe | awk '{ print $1 }')" >> ./RELEASE.md
+              echo "interx_windows_arm64.exe: $(sha256sum ./interx_windows_arm64.exe | awk '{ print $1 }')" >> ./RELEASE.md
               echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
           - name: Publish release
             uses: softprops/action-gh-release@v0.1.14
-            if: startsWith(github.ref, 'refs/tags/')
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               BRANCH_NAME: ${GITHUB_REF##*/}
