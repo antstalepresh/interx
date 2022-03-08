@@ -49,9 +49,10 @@ function pcgRelease() {
     if [ "${PLATFORM,,}" != "windows" ] ; then
         pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
         nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+        cp -fv "${RELEASE_PATH}/interx_${VERSION}_${ARCH}.deb" ./bin/interx-${PLATFORM}-${ARCH}.deb
     else
-        # deb is not supported on windows, simly copy the executables
-        cp -fv "$BIN_PATH/interx.exe" "$RELEASE_PATH/interx_${VERSION}_${$ARCH}.exe"
+        # deb is not supported on windows, simply copy the executables
+        cp -fv $BIN_PATH/interx.exe ./bin/interx-${PLATFORM}-${ARCH}.exe
     fi
 }
 
@@ -65,4 +66,5 @@ pcgRelease "arm64" "$VERSION" "linux"
 pcgRelease "arm64" "$VERSION" "darwin"
 pcgRelease "arm64" "$VERSION" "windows"
 
+rm -rfv ./amd64 ./arm64 ./deb
 echoInfo "INFO: Sucessfully published INTERX deb packages into ./bin"
