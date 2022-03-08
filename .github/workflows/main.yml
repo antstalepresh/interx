@@ -69,7 +69,15 @@ jobs:
             run: |
               make publish
               cp -fv $PWD/RELEASE.md $PWD/bin
-              chmod -Rv 555 $PWD/bin
+              chmod -Rv 777 $PWD/bin
+              echo -e "\n\n" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---"   >> ./bin/RELEASE.md
+              echo " interx_darwin_amd64.deb: $(sha256 ./bin/interx_darwin_amd64.deb)"  >> ./bin/RELEASE.md
+              echo " interx_darwin_arm64.deb: $(sha256 ./bin/interx_darwin_arm64.deb)"  >> ./bin/RELEASE.md
+              echo "  interx_linux_amd64.deb: $(sha256 ./bin/interx_linux_amd64.deb)"   >> ./bin/RELEASE.md
+              echo "  interx_linux_arm64.deb: $(sha256 ./bin/interx_linux_arm64.deb)"   >> ./bin/RELEASE.md
+              echo "interx_windows_amd64.exe: $(sha256 ./bin/interx_windows_amd64.exe)" >> ./bin/RELEASE.md
+              echo "interx_windows_arm64.exe: $(sha256 ./bin/interx_windows_arm64.exe)" >> ./bin/RELEASE.md
+              echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
               tar -czvf deb.tar.gz -C $PWD/bin .
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
@@ -95,14 +103,6 @@ jobs:
               echo "(current dir): $PWD" && ls -l
               tar xvf ./deb.tar.gz
               chmod -Rv 777 ./
-              echo "" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---" >> ./RELEASE.md
-              echo " interx_darwin_amd64.deb: $(sha256sum ./interx_darwin_amd64.deb | awk '{ print $1 }')" >> ./RELEASE.md
-              echo " interx_darwin_arm64.deb: $(sha256sum ./interx_darwin_arm64.deb | awk '{ print $1 }')" >> ./RELEASE.md
-              echo "  interx_linux_amd64.deb: $(sha256sum ./interx_linux_amd64.deb | awk '{ print $1 }')" >> ./RELEASE.md
-              echo "  interx_linux_arm64.deb: $(sha256sum ./interx_linux_arm64.deb | awk '{ print $1 }')" >> ./RELEASE.md
-              echo "interx_windows_amd64.exe: $(sha256sum ./interx_windows_amd64.exe | awk '{ print $1 }')" >> ./RELEASE.md
-              echo "interx_windows_arm64.exe: $(sha256sum ./interx_windows_arm64.exe | awk '{ print $1 }')" >> ./RELEASE.md
-              echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
           # Branch name is also a version of the release
           # ref: https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
           - name: Extract branch name on push
@@ -132,28 +132,3 @@ jobs:
                 ./interx_darwin_arm64.deb
                 ./interx_windows_amd64.exe
                 ./interx_windows_arm64.exe
-
-          # Release creator info: https://github.com/actions/create-release
-#          - name: Publish release
-#            id: interx-release
-#            uses: actions/create-release@v1.1.4
-#            env:
-#              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#              BRANCH_NAME: ${GITHUB_REF##*/}
-#            with:
-#              tag_name: ${{ env.BRANCH_NAME }}
-#              release_name: Release ${{ env.BRANCH_NAME }}
-#              body_path: RELEASE.md
-#              draft: false
-#              prerelease: false
-#          - name: Upload release assets
-#            id: interx-release-assets
-#            uses: actions/upload-release-asset@v1.0.2
-#            env:
-#              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#            with:
-#              upload_url: ${{ steps.interx-release.outputs.upload_url }} 
-#              asset_path: ./interx_linux_amd64.deb
-#              asset_name: interx_linux_amd64.deb
-#              # https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
-#              asset_content_type: application/octet-stream
