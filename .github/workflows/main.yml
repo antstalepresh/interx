@@ -1,10 +1,12 @@
-name: INTERX Build & Release
+name: INTERX Build, Release & Publish
 
 on:
   push:
-    branches: [ v* ]
+    branches: [ v*, feature*, master, dev, latest ]
   pull_request:
-    branches: [ v* ]
+    branches: [ v*, bugfix*, master, dev, latest ]
+  pull_request_target:
+    branches: [ v*, bugfix*, master, dev, latest ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -113,10 +115,21 @@ jobs:
             if: github.event_name == 'pull_request'
             shell: bash
             run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
-          - name: Print branch name
+          - name: Print debug data before publishing
             run: |
               echo "Branch name: ${{ env.BRANCH_NAME }}"
           - name: Publish release
+            if: |
+              github.event_name != 'pull_request' &&
+              contains(env.BRANCH_NAME, 'v') &&
+              contains(env.BRANCH_NAME, '.') &&
+              !contains(env.BRANCH_NAME, 'feature') &&
+              !contains(env.BRANCH_NAME, 'bugfix') &&
+              !contains(env.BRANCH_NAME, '-') &&
+              !contains(env.BRANCH_NAME, '+') &&
+              !contains(env.BRANCH_NAME, 'rc') &&
+              !contains(env.BRANCH_NAME, 'alpha') &&
+              !contains(env.BRANCH_NAME, 'beta')
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
@@ -132,3 +145,8 @@ jobs:
                 ./interx_darwin_arm64.deb
                 ./interx_windows_amd64.exe
                 ./interx_windows_arm64.exe
+          - name: Approve pull request on success
+            uses: hmarr/auto-approve-action@v2.1.0
+            if: github.event_name == 'pull_request'
+            with:
+              github-token: "${{ secrets.GITHUB_TOKEN }}"
