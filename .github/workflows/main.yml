@@ -68,14 +68,15 @@ jobs:
             run: |
               make publish
               cp -fv $PWD/RELEASE.md $PWD/bin/deb
-              chmod -Rv 555 $PWD/bin/deb 
-              cd $PWD/bin/deb && zip -r deb.zip ./
-              cp -fv $PWD/bin/deb/deb.zip ./deb.zip
+              chmod -Rv 555 $PWD/bin/deb
+              tar -czvf deb.tar.gz -C $PWD/bin/deb .
+              echo "(current dir): $PWD" && ls -l $PWD
+              echo "(\$PWD/bin/deb): $PWD/bin/deb" && ls -l $PWD/bin/deb
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
             with:
               name: interx-bin-deb
-              path: ./deb.zip
+              path: ./deb.tar.gz
   release:
     name: Build Release
     runs-on: ubuntu-20.04
@@ -92,8 +93,8 @@ jobs:
           - name: Inspecting & organizing artifacts
             run: |
               echo "(current dir): $PWD" && ls -l
-              chmod -v 555 ./deb.zip
-              unzip ./deb.zip
+              chmod -v 555 ./deb.tar.gz
+              tar xvf ./deb.tar.gz
               chmod -Rv 555 ./
               echo "(current dir): $PWD" && ls -l
               cp -fv  ./bin/deb/RELEASE.md ./RELEASE.md
@@ -104,6 +105,7 @@ jobs:
               cp -fv  ./bin/deb/windows/interx_*_amd64.deb ./interx_windows_amd64.deb
               cp -fv  ./bin/deb/windows/interx_*_arm64.deb ./interx_windows_arm64.deb
               rm -rfv ./bin
+              rm -fv ./deb.tar.gz
               echo "(current dir): $PWD" && ls -l
           # Release creator info: https://github.com/actions/create-release
           - name: Publish release
