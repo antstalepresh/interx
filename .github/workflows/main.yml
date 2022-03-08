@@ -69,7 +69,8 @@ jobs:
               make publish
               cp -fv $PWD/RELEASE.md $PWD/bin/deb
               chmod -Rv 555 $PWD/bin/deb 
-              zip -r deb.zip $PWD/bin/deb
+              cd $PWD/bin/deb && zip -r deb.zip ./
+              cp -fv $PWD/bin/deb/deb.zip ./deb.zip
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
             with:
