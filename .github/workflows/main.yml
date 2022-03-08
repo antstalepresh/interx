@@ -94,15 +94,14 @@ jobs:
             run: |
               echo "(current dir): $PWD" && ls -l
               tar xvf ./deb.tar.gz
-              chmod -Rv 777 ./deb.tar.gz ./RELEASE.md
-              rm -fv ./deb.tar.gz
+              chmod -Rv 777 ./
               echo "" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---" >> ./RELEASE.md
               echo " interx_darwin_amd64.deb: $(sha256 ./interx_darwin_amd64.deb)" >> ./RELEASE.md
               echo " interx_darwin_arm64.deb: $(sha256 ./interx_darwin_arm64.deb)" >> ./RELEASE.md
               echo "  interx_linux_amd64.deb: $(sha256 ./interx_linux_amd64.deb)" >> ./RELEASE.md
               echo "  interx_linux_arm64.deb: $(sha256 ./interx_linux_arm64.deb)" >> ./RELEASE.md
               echo "interx_windows_amd64.exe: $(sha256 ./interx_windows_amd64.exe)" >> ./RELEASE.md
-              echo "interx_windows_arm64.exe: $(sha256 ./interx_windows_arm64.deb)" >> ./RELEASE.md
+              echo "interx_windows_arm64.exe: $(sha256 ./interx_windows_arm64.exe)" >> ./RELEASE.md
               echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
           - name: Publish release
             uses: softprops/action-gh-release@v0.1.14
