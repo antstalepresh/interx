@@ -124,7 +124,7 @@ jobs:
               contains(env.BRANCH_NAME, 'v') &&
               contains(env.BRANCH_NAME, '.') &&
               !contains(env.BRANCH_NAME, 'feature') &&
-              !contains(env.BRANCH_NAME, 'bugfix') &&
+              !contains(env.BRANCH_NAME, 'bugfix')
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
