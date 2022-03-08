@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build]
     permissions:
-      contents: read
+      contents: write
       packages: write
       id-token: write
       pull-requests: write
@@ -118,22 +118,20 @@ jobs:
               echo "Branch name: ${{ env.BRANCH_NAME }}"
           - name: Publish release
             uses: softprops/action-gh-release@v0.1.14
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             with:
               body_path: RELEASE.md
               tag_name: ${{ env.BRANCH_NAME }}
-              release_name: INTERX ${{ env.BRANCH_NAME }}
+              name: INTERX ${{ env.BRANCH_NAME }}
               prerelease: false
               draft: false
-              token: ${{ env.GITHUB_TOKEN }}
+              fail_on_unmatched_files: false
               files: |
-                interx_linux_amd64.deb
-                interx_linux_arm64.deb
-                interx_darwin_amd64.deb
-                interx_darwin_arm64.deb
-                interx_windows_amd64.exe
-                interx_windows_arm64.exe
+                ./interx_linux_amd64.deb
+                ./interx_linux_arm64.deb
+                ./interx_darwin_amd64.deb
+                ./interx_darwin_arm64.deb
+                ./interx_windows_amd64.exe
+                ./interx_windows_arm64.exe
 
           # Release creator info: https://github.com/actions/create-release
 #          - name: Publish release
