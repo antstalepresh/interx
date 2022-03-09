@@ -1,4 +1,4 @@
-name: INTERX Build, Release & Publish
+name: Build, Release & Publish
 
 on:
   push:

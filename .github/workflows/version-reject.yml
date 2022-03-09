@@ -1,8 +1,8 @@
-name: Reject PRs to master, dev & latest branches NOT originating from version branches
+name: Reject PRs to version branches NOT originating from feature/* or debug/* 
 
 on:
   pull_request:
-    branches: [ master, dev, latest ]
+    branches: [ v* ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -33,8 +33,8 @@ jobs:
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
             uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
             if: |
-              !contains(env.SOURCE_BRANCH, 'v') &&
-              !contains(env.SOURCE_BRANCH, '.')
+              !contains(env.SOURCE_BRANCH, 'feature') &&
+              !contains(env.SOURCE_BRANCH, 'bugfix')
             with:
               spam_label: "Invalid Target"
               close_spam_prs: "yes"
