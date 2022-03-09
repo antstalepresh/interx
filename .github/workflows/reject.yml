@@ -1,8 +1,8 @@
-name: Reject PRs to master, dev & latest branches NOT originating from version branches
+name: Reject invalid PRs
 
 on:
   pull_request:
-    branches: [ master, dev, latest ]
+    branches: [ master, dev, latest, v*.*.* ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -23,20 +23,28 @@ jobs:
           - name: Extract branch name on pull request
             shell: bash
             run: |
-              echo "$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
-              echo "$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
-              if [[ $(echo ${{ env.REF_BRANCH }} | tr / -) =~ ^v[0-9]+\.[0-9]+\.[0-9]+(.*)$ ]] ; then echo "SOURCE_VERSIONED=true" >> $GITHUB_ENV ; else echo "SOURCE_VERSIONED=false" >> $GITHUB_ENV ; fi
-              if [[ $(echo ${{ env.BASE_REF_BRANCH }} | tr / -) =~ ^v[0-9]+\.[0-9]+\.[0-9]+(.*)$ ]] ; then echo "DESTINATION_VERSIONED=true" >> $GITHUB_ENV ; else echo "DESTINATION_VERSIONED=false" >> $GITHUB_ENV ; fi
+              echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
+              echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
           - name: Print debug data before publishing
             run: |
               echo "Source branch name: ${{ env.SOURCE_BRANCH }}"
-              echo "Source versioned: ${{ env.SOURCE_VERSIONED }}"
               echo "Destination branch name: ${{ env.DESTINATION_BRANCH }}"
-              echo "Destination versioned: ${{ env.DESTINATION_VERSIONED }}"
-          - name: Reject if PR target is invalid
+          - name: Reject invalid PRs to master, dev or latest
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
             uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
-            if: ${{ env.SOURCE_BRANCH }} != true
+            if: |
+              ( env.DESTINATION_BRANCH == 'master' || env.DESTINATION_BRANCH == 'dev' || env.DESTINATION_BRANCH == 'latest' ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'v') && !contains(env.SOURCE_BRANCH, '.') )
+            with:
+              spam_label: "Invalid Target"
+              close_spam_prs: "yes"
+              access_token: ${{ secrets.GITHUB_TOKEN }} 
+          - name: Reject invalid PRs to version branches
+            # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
+            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
+            if: |
+              ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
               spam_label: "Invalid Target"
               close_spam_prs: "yes"
