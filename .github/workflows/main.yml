@@ -119,7 +119,7 @@ jobs:
             run: |
               echo "Branch name: ${{ env.BRANCH_NAME }}"
           - name: Reject on error
-            uses: andrewslotin/rummelsnuff@v1.1.0
+            uses: andrewslotin/rummelsnuff@1.1.0
             if: ${{ failure() }}
             with:
               spam_label: "Build Errors"
