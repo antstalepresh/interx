@@ -24,6 +24,7 @@ func printUsage() {
 	fmt.Println("Available Commands:")
 	fmt.Printf("    init	:	Generate interx configuration file.\n")
 	fmt.Printf("    start	:	Start interx with configuration file.\n")
+	fmt.Printf("    version	:	Shows INTERX release version.\n")
 	fmt.Println()
 
 	fmt.Println("Flags:")
@@ -36,6 +37,7 @@ func printUsage() {
 func main() {
 	initCommand := flag.NewFlagSet("init", flag.ExitOnError)
 	startCommand := flag.NewFlagSet("start", flag.ExitOnError)
+	versionCommand := flag.NewFlagSet("version", flag.ExitOnError)
 
 	homeDir, _ := os.UserHomeDir()
 	initHomePtr := initCommand.String("home", homeDir+"/.interxd", "The interx configuration path.")
@@ -168,6 +170,13 @@ func main() {
 				err := gateway.Run(configFilePath, log)
 
 				log.Fatalln(err)
+				return
+			}
+		case "version":
+			versionCommand.Parse(os.Args[2:])
+
+			if versionCommand.Parsed() {
+				fmt.Println(config.InterxVersion)
 				return
 			}
 		default:

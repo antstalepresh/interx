@@ -1,7 +1,6 @@
 package cosmos
 
 import (
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,7 +8,6 @@ import (
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 )
@@ -78,13 +76,7 @@ func queryBalancesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interf
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
-	_, err := sdk.AccAddressFromBech32(bech32addr)
-	if err != nil {
-		common.GetLogger().Error("[query-balances] Invalid bech32addr: ", bech32addr)
-		return common.ServeError(0, "", err.Error(), http.StatusBadRequest)
-	}
-
-	r.URL.Path = fmt.Sprintf("/api/cosmos/bank/balances/%s", base64.URLEncoding.EncodeToString([]byte(bech32addr)))
+	r.URL.Path = fmt.Sprintf("/cosmos/bank/v1beta1/balances/%s", bech32addr)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

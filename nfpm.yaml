@@ -1,21 +1,17 @@
 name: "interx"
-arch: "amd64"
-platform: "linux"
-version: "v0.1.18.15"
+arch: "${ARCH}"
+platform: "${PLATFORM}"
+version: "${VERSION}"
 section: "default"
 priority: "extra"
 replaces:
 - interxd
 provides:
 - interxd
-maintainer: "Yevhen Yakubovskyi <yaievgeniy@gmail.com>"
-description: "INTERX is an interchain engine, proxy, 
-load balancer & security gateway service for communication between backend and frontend. 
-It will connect to the node using the GRPC endpoint as well as the RPC endpoint"
-
-homepage: "http://github.com/KiraCore/interx"
+maintainer: "KIRA <partners@kira.global>"
+description: "INTERX is an interchain engine, proxy, load balancer & security gateway service for communication between backend and frontend. It connects to KIRA sentry & validator nodes using the GRPC & RPC endpoints"
+homepage: "https://github.com/KiraCore/interx"
 license: "AGPL-3.0 license"
-
 contents:
-- src: ./interxd
-  dst: ./interxd
+- src: ${SOURCE}
+  dst: ./bin/
