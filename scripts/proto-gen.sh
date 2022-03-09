@@ -118,13 +118,20 @@ sed '/proto\.RegisterType/d' codec/types/any.pb.go > tmp && mv tmp codec/types/a
 
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
+echoInfo "Updating proto files to include relative paths..."
+fil=./proto/cosmos/base/v1beta1/coin.proto && \
+# fil=$(realpath ./proto/cosmos/base/v1beta1/coin.proto) && \
+ sed -i="" 's/ = \"github.com\/cosmos\/cosmos-sdk\/types/ = \"github.com\/KiraCore\/interx\/proto-gen\/cosmos\/base\/v1beta1/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+for dir in $proto_dirs; do
+    proto_fils=$(find "${dir}" -maxdepth 1 -name '*.proto') 
+    for fil in $proto_fils; do
+        sed -i="" 's/, (gogoproto.castrepeated) = \"github.com\/cosmos\/cosmos-sdk\/types.Coins\"//g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+        sed -i="" 's/github.com\/cosmos\/cosmos-sdk\/x/github.com\/KiraCore\/interx\/proto-gen\/cosmos/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+        sed -i="" 's/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/types/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/v1beta1/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+    done
+done
+
 echoInfo "Generating protobuf files..."
-
-find ./proto -path -prune -o -name '*.proto' | xargs -n1 -IX bash -c "sed -i '' -e 's/, (gogoproto.castrepeated) = \"github.com\/cosmos\/cosmos-sdk\/types.Coins\"//' X"
-find ./proto -path -prune -o -name '*.proto' | xargs -n1 -IX bash -c "sed -i '' -e 's/github.com\/cosmos\/cosmos-sdk\/x/github.com\/KiraCore\/interx\/proto-gen\/cosmos/' X"
-sed -i '' -e 's/   = \"github.com\/cosmos\/cosmos-sdk\/types/   = \"github.com\/KiraCore\/interx\/proto-gen\/cosmos\/base\/v1beta1/' './proto/cosmos/base/v1beta1/coin.proto'
-find ./proto -path -prune -o -name '*.proto' | xargs -n1 -IX bash -c "sed -i '' -e 's/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/types/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/v1beta1/' X"
-
 for dir in $proto_dirs; do
     proto_fils=$(find "${dir}" -maxdepth 1 -name '*.proto') 
     for fil in $proto_fils; do

@@ -15,10 +15,10 @@ function pcgConfigure() {
     local SOURCE="$4"
     local CONFIG="$5"
     SOURCE=${SOURCE//"/"/"\/"}
-    sed -i '' "s/\${ARCH}/$ARCH/" $CONFIG
-    sed -i '' "s/\${VERSION}/$VERSION/" $CONFIG
-    sed -i '' "s/\${PLATFORM}/$PLATFORM/" $CONFIG
-    sed -i '' "s/\${SOURCE}/$SOURCE/" $CONFIG
+    sed -i="" "s/\${ARCH}/$ARCH/" $CONFIG
+    sed -i="" "s/\${VERSION}/$VERSION/" $CONFIG
+    sed -i="" "s/\${PLATFORM}/$PLATFORM/" $CONFIG
+    sed -i="" "s/\${SOURCE}/$SOURCE/" $CONFIG
 }
 
 BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD || echo "???")
@@ -46,8 +46,14 @@ function pcgRelease() {
     TMP_PKG_CONFIG_FILE=./nfpm_${ARCH}_${PLATFORM}.yaml
     rm -rfv $TMP_PKG_CONFIG_FILE && cp -v $PKG_CONFIG_FILE $TMP_PKG_CONFIG_FILE
 
-    pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
-    nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+    if [ "${PLATFORM,,}" != "windows" ] ; then
+        pcgConfigure "$ARCH" "$VERSION" "$PLATFORM" "$BIN_PATH" $TMP_PKG_CONFIG_FILE
+        nfpm pkg --packager deb --target $RELEASE_PATH -f $TMP_PKG_CONFIG_FILE
+        cp -fv "${RELEASE_PATH}/interx_${VERSION}_${ARCH}.deb" ./bin/interx-${PLATFORM}-${ARCH}.deb
+    else
+        # deb is not supported on windows, simply copy the executables
+        cp -fv $BIN_PATH/interx.exe ./bin/interx-${PLATFORM}-${ARCH}.exe
+    fi
 }
 
 rm -rfv ./bin
@@ -60,4 +66,5 @@ pcgRelease "arm64" "$VERSION" "linux"
 pcgRelease "arm64" "$VERSION" "darwin"
 pcgRelease "arm64" "$VERSION" "windows"
 
+rm -rfv ./bin/amd64 ./bin/arm64 ./bin/deb
 echoInfo "INFO: Sucessfully published INTERX deb packages into ./bin"

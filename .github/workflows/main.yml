@@ -1,0 +1,152 @@
+name: INTERX Build, Release & Publish
+
+on:
+  push:
+    branches: [ v*, feature*, master, dev, latest ]
+  pull_request:
+    branches: [ v*, bugfix*, master, dev, latest ]
+  pull_request_target:
+    branches: [ v*, bugfix*, master, dev, latest ]
+
+jobs:
+  # isolate signing & repo cloning from docker image
+  setup:
+    name: Repo Setup
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Install cosign
+            uses: sigstore/cosign-installer@v2.1.0
+            with:
+              cosign-release: 'v1.6.0'
+          - name: Checkout repository
+            uses: actions/checkout@v3.0.0
+          - name: Verify repo content
+            run: |
+              echo "(current dir): $PWD" && ls -l
+              cd ../ && tar -czvf src.tar.gz -C ./interx . && cp ./src.tar.gz ./interx/src.tar.gz
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-src
+              path: ./src.tar.gz
+  build:
+    name: Repo Build
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    needs: [setup]
+    container: 
+      image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
+    steps:
+          - name: Checking dependency versions
+            run: |
+              . /etc/profile && echo "Utils Version: $(utilsVersion)"
+              go version
+              CDHelper version
+              flutter --version
+              dart --version
+              echo "ENVS: $(env)"
+              echo "HOME: $HOME"
+              echo " PWD: $PWD"
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-src
+          - name: Testing INTERX
+            run: |
+              echo "(current dir): $PWD" && ls -l $PWD
+              tar xvf ./src.tar.gz
+              chmod -Rv 555 $PWD/scripts
+              make install
+              interxd version
+          - name: Publishing INTERX binaries
+            run: |
+              make publish
+              cp -fv $PWD/RELEASE.md $PWD/bin
+              chmod -Rv 777 $PWD/bin
+              echo -e "\n\n" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---"   >> ./bin/RELEASE.md
+              echo " interx_darwin_amd64.deb: $(sha256 ./bin/interx_darwin_amd64.deb)"  >> ./bin/RELEASE.md
+              echo " interx_darwin_arm64.deb: $(sha256 ./bin/interx_darwin_arm64.deb)"  >> ./bin/RELEASE.md
+              echo "  interx_linux_amd64.deb: $(sha256 ./bin/interx_linux_amd64.deb)"   >> ./bin/RELEASE.md
+              echo "  interx_linux_arm64.deb: $(sha256 ./bin/interx_linux_arm64.deb)"   >> ./bin/RELEASE.md
+              echo "interx_windows_amd64.exe: $(sha256 ./bin/interx_windows_amd64.exe)" >> ./bin/RELEASE.md
+              echo "interx_windows_arm64.exe: $(sha256 ./bin/interx_windows_arm64.exe)" >> ./bin/RELEASE.md
+              echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
+              tar -czvf deb.tar.gz -C $PWD/bin .
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+              path: ./deb.tar.gz
+  release:
+    name: Build Release
+    runs-on: ubuntu-20.04
+    needs: [build]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+          - name: Inspecting & organizing artifacts
+            run: |
+              echo "(current dir): $PWD" && ls -l
+              tar xvf ./deb.tar.gz
+              chmod -Rv 777 ./
+          # Branch name is also a version of the release
+          # ref: https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
+          - name: Extract branch name on push
+            if: github.event_name != 'pull_request'
+            shell: bash
+            run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+          - name: Extract branch name on pull request
+            if: github.event_name == 'pull_request'
+            shell: bash
+            run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+          - name: Print debug data before publishing
+            run: |
+              echo "Branch name: ${{ env.BRANCH_NAME }}"
+          - name: Publish release
+            if: |
+              github.event_name != 'pull_request' &&
+              contains(env.BRANCH_NAME, 'v') &&
+              contains(env.BRANCH_NAME, '.') &&
+              !contains(env.BRANCH_NAME, 'feature') &&
+              !contains(env.BRANCH_NAME, 'bugfix') &&
+              !contains(env.BRANCH_NAME, '-') &&
+              !contains(env.BRANCH_NAME, '+') &&
+              !contains(env.BRANCH_NAME, 'rc') &&
+              !contains(env.BRANCH_NAME, 'alpha') &&
+              !contains(env.BRANCH_NAME, 'beta')
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.BRANCH_NAME }}
+              name: ${{ env.BRANCH_NAME }}
+              prerelease: false
+              draft: false
+              fail_on_unmatched_files: false
+              files: |
+                ./interx_linux_amd64.deb
+                ./interx_linux_arm64.deb
+                ./interx_darwin_amd64.deb
+                ./interx_darwin_arm64.deb
+                ./interx_windows_amd64.exe
+                ./interx_windows_arm64.exe
+          - name: Approve pull request on success
+            uses: hmarr/auto-approve-action@v2.1.0
+            if: github.event_name == 'pull_request'
+            with:
+              github-token: "${{ secrets.GITHUB_TOKEN }}"
