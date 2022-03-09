@@ -177,12 +177,12 @@ jobs:
             if: github.event_name == 'pull_request'
             with:
               github-token: "${{ secrets.GITHUB_TOKEN }}"
-          - name: Create latest release
+          - name: Create latest release from a version branch
             # ref: https://github.com/technote-space/create-pr-action
             if: |
               github.event_name != 'pull_request' &&
               contains(env.BRANCH_NAME, 'v') &&
-              contains(env.BRANCH_NAME, '.') &&
+              contains(env.BRANCH_NAME, '.')
             uses: technote-space/create-pr-action@v2.0.35
             with:
               COMMIT_MESSAGE: 'Updating latest release'
