@@ -2,11 +2,11 @@ name: INTERX Build, Release & Publish
 
 on:
   push:
-    branches: [ v*.*.*, feature/*, master, dev, latest ]
+    branches: [ v*.*.*, feature/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
   pull_request:
-    branches: [ v*.*.*, bugfix/*, master, dev, latest ]
-  pull_request_target:
-    branches: [ v*.*.*, bugfix/*, master, dev, latest ]
+    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+#  pull_request_target:
+#    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -73,12 +73,12 @@ jobs:
               cp -fv $PWD/RELEASE.md $PWD/bin
               chmod -Rv 777 $PWD/bin
               echo -e "\n\n" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---"   >> ./bin/RELEASE.md
-              echo " interx_darwin_amd64.deb: $(sha256 ./bin/interx_darwin_amd64.deb)"  >> ./bin/RELEASE.md
-              echo " interx_darwin_arm64.deb: $(sha256 ./bin/interx_darwin_arm64.deb)"  >> ./bin/RELEASE.md
-              echo "  interx_linux_amd64.deb: $(sha256 ./bin/interx_linux_amd64.deb)"   >> ./bin/RELEASE.md
-              echo "  interx_linux_arm64.deb: $(sha256 ./bin/interx_linux_arm64.deb)"   >> ./bin/RELEASE.md
-              echo "interx_windows_amd64.exe: $(sha256 ./bin/interx_windows_amd64.exe)" >> ./bin/RELEASE.md
-              echo "interx_windows_arm64.exe: $(sha256 ./bin/interx_windows_arm64.exe)" >> ./bin/RELEASE.md
+              echo " interx-darwin-amd64.deb: $(sha256 ./bin/interx-darwin-amd64.deb)"  >> ./bin/RELEASE.md
+              echo " interx-darwin-arm64.deb: $(sha256 ./bin/interx-darwin-arm64.deb)"  >> ./bin/RELEASE.md
+              echo "  interx-linux-amd64.deb: $(sha256 ./bin/interx-linux-amd64.deb)"   >> ./bin/RELEASE.md
+              echo "  interx-linux-arm64.deb: $(sha256 ./bin/interx-linux-arm64.deb)"   >> ./bin/RELEASE.md
+              echo "interx-windows-amd64.exe: $(sha256 ./bin/interx-windows-amd64.exe)" >> ./bin/RELEASE.md
+              echo "interx-windows-arm64.exe: $(sha256 ./bin/interx-windows-arm64.exe)" >> ./bin/RELEASE.md
               echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
               tar -czvf deb.tar.gz -C $PWD/bin .
           - name: Uploading artifacts
@@ -143,12 +143,12 @@ jobs:
               draft: false
               fail_on_unmatched_files: true
               files: |
-                ./interx_linux_amd64.deb
-                ./interx_linux_arm64.deb
-                ./interx_darwin_amd64.deb
-                ./interx_darwin_arm64.deb
-                ./interx_windows_amd64.exe
-                ./interx_windows_arm64.exe
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
           - name: Publish pre-release
             if: |
               github.event_name != 'pull_request' &&
@@ -166,14 +166,26 @@ jobs:
               draft: false
               fail_on_unmatched_files: true
               files: |
-                ./interx_linux_amd64.deb
-                ./interx_linux_arm64.deb
-                ./interx_darwin_amd64.deb
-                ./interx_darwin_arm64.deb
-                ./interx_windows_amd64.exe
-                ./interx_windows_arm64.exe
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
           - name: Approve pull request on success
             uses: hmarr/auto-approve-action@v2.1.0
             if: github.event_name == 'pull_request'
             with:
               github-token: "${{ secrets.GITHUB_TOKEN }}"
+          - name: Create latest release from a version branch
+            # ref: https://github.com/technote-space/create-pr-action
+            if: |
+              github.event_name != 'pull_request' &&
+              contains(env.BRANCH_NAME, 'v') &&
+              contains(env.BRANCH_NAME, '.')
+            uses: technote-space/create-pr-action@v2.0.35
+            with:
+              COMMIT_MESSAGE: 'Updating latest release'
+              COMMIT_NAME: 'GitHub Actions'
+              PR_BRANCH_NAME: 'latest'
+              PR_TITLE: "${{ env.BRANCH_NAME }} -> latest"
