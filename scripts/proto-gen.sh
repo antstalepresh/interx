@@ -74,8 +74,21 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
     setGlobEnv INTERX_PROTO_DEP_VER "$EXPECTED_INTERX_PROTO_DEP_VER"
 fi
 
-COSMOS_BRANCH="v0.45.1"
-SEKAI_BRANCH="master"
+FILE=./config/constants.go
+LINES=$(grep -Fn 'CosmosVersion =' $FILE | cut -d : -f 1)
+mapfile -t LINES_ARR < <(echo "$LINES")
+LINE_NR=$(echo ${LINES_ARR[0]}) && (! $(isNaturalNumber $LINE_NR)) && LINE_NR="-1"
+[[ $LINE_NR -ge 0 ]] && LINE_CONTENT=$(sed "${LINE_NR}q;d" "$FILE") || LINE_CONTENT="CosmosVersion = v0.0.0.0"
+CONTENT_ARR=(${LINE_CONTENT//=/ })
+COSMOS_BRANCH=$(echo ${CONTENT_ARR[1]} | xargs || echo "v0.0.0.0")
+
+FILE=./config/constants.go
+LINES=$(grep -Fn 'SekaiVersion  =' $FILE | cut -d : -f 1)
+mapfile -t LINES_ARR < <(echo "$LINES")
+LINE_NR=$(echo ${LINES_ARR[0]}) && (! $(isNaturalNumber $LINE_NR)) && LINE_NR="-1"
+[[ $LINE_NR -ge 0 ]] && LINE_CONTENT=$(sed "${LINE_NR}q;d" "$FILE") || LINE_CONTENT="SekaiVersion  = v0.0.0.0"
+CONTENT_ARR=(${LINE_CONTENT//=/ })
+SEKAI_BRANCH=$(echo ${CONTENT_ARR[1]} | xargs || echo "v0.0.0.0")
 
 go get github.com/KiraCore/sekai@$SEKAI_BRANCH
 go get github.com/cosmos/cosmos-sdk@$COSMOS_BRANCH

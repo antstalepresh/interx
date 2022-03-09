@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -30,6 +31,8 @@ func queryPermissionsByAddressHandler(r *http.Request, gwCosmosmux *runtime.Serv
 	}
 
 	r.URL.Path = fmt.Sprintf("/api/kira/gov/permissions_by_address/%s", base64.URLEncoding.EncodeToString(accAddr.Bytes()))
+
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

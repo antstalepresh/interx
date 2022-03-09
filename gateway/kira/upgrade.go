@@ -2,6 +2,7 @@ package kira
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -19,6 +20,7 @@ func RegisterKiraUpgradeRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpc
 }
 
 func QueryCurrentPlanHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/upgrade", "/kira/upgrade", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -53,6 +55,7 @@ func QueryCurrentPlanRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http
 }
 
 func QueryNextPlanHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/upgrade", "/kira/upgrade", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

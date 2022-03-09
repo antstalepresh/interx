@@ -173,6 +173,8 @@ func queryValidatorInfosHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/valoperinfos", "/kira/slashing/v1beta1/signing_infos", -1)
+
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
