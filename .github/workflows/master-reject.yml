@@ -23,8 +23,8 @@ jobs:
           - name: Extract branch name on pull request
             shell: bash
             run: |
-              SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)
-              DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)
+              SOURCE_BRANCH="$(echo ${{ env.REF_BRANCH }} | tr / -)"
+              DESTINATION_BRANCH="$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)"
               echo $SOURCE_BRANCH >> $GITHUB_ENV
               echo $DESTINATION_BRANCH >> $GITHUB_ENV
               if [[ $SOURCE_BRANCH =~ ^v[0-9]+\.[0-9]+\.[0-9]+(.*)$ ]] ; then echo "SOURCE_VERSIONED=true" >> $GITHUB_ENV ; else echo "SOURCE_VERSIONED=false" >> $GITHUB_ENV ; fi
