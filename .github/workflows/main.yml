@@ -119,7 +119,8 @@ jobs:
             run: |
               echo "Branch name: ${{ env.BRANCH_NAME }}"
           - name: Reject on error
-            uses: andrewslotin/rummelsnuff@1.1.0
+            # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
+            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
             if: ${{ failure() }}
             with:
               spam_label: "Build Errors"
@@ -130,6 +131,7 @@ jobs:
               github.event_name != 'pull_request' &&
               contains(env.BRANCH_NAME, 'v') &&
               contains(env.BRANCH_NAME, '.') &&
+              !contains(env.BRANCH_NAME, '-rc') &&
               !contains(env.BRANCH_NAME, 'feature') &&
               !contains(env.BRANCH_NAME, 'bugfix')
             uses: softprops/action-gh-release@v0.1.14
@@ -139,7 +141,30 @@ jobs:
               name: ${{ env.BRANCH_NAME }}
               prerelease: false
               draft: false
-              fail_on_unmatched_files: false
+              fail_on_unmatched_files: true
+              files: |
+                ./interx_linux_amd64.deb
+                ./interx_linux_arm64.deb
+                ./interx_darwin_amd64.deb
+                ./interx_darwin_arm64.deb
+                ./interx_windows_amd64.exe
+                ./interx_windows_arm64.exe
+          - name: Publish pre-release
+            if: |
+              github.event_name != 'pull_request' &&
+              contains(env.BRANCH_NAME, 'v') &&
+              contains(env.BRANCH_NAME, '.') &&
+              contains(env.BRANCH_NAME, '-rc') &&
+              !contains(env.BRANCH_NAME, 'feature') &&
+              !contains(env.BRANCH_NAME, 'bugfix')
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.BRANCH_NAME }}
+              name: ${{ env.BRANCH_NAME }}
+              prerelease: true
+              draft: false
+              fail_on_unmatched_files: true
               files: |
                 ./interx_linux_amd64.deb
                 ./interx_linux_arm64.deb
