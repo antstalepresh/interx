@@ -1,4 +1,4 @@
-name: Reject invalid PRs
+name: Clean spam PRs
 
 on:
   pull_request:
@@ -31,21 +31,19 @@ jobs:
               echo "Destination branch name: ${{ env.DESTINATION_BRANCH }}"
           - name: Reject invalid PRs to master, dev or latest
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: asmodat/rummelsnuff@d65e1c4a0da3a155675bee1cc7ca48a80b0d1d2c
+            uses: maximelafarie/spamtoberfest@eb55a9c0f9bd857a44833caa39a5ee1bf1e4f0f2
             if: |
               ( env.DESTINATION_BRANCH == 'master' || env.DESTINATION_BRANCH == 'dev' || env.DESTINATION_BRANCH == 'latest' ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'v') && !contains(env.SOURCE_BRANCH, '.') )
             with:
-              spam_label: "Invalid Target"
-              close_spam_prs: "yes"
-              access_token: ${{ secrets.GITHUB_TOKEN }} 
+              action-type: close
+              repo-token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Reject invalid PRs to version branches
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: asmodat/rummelsnuff@d65e1c4a0da3a155675bee1cc7ca48a80b0d1d2c
+            uses: maximelafarie/spamtoberfest@eb55a9c0f9bd857a44833caa39a5ee1bf1e4f0f2
             if: |
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             with:
-              spam_label: "Invalid Target"
-              close_spam_prs: "yes"
-              access_token: ${{ secrets.GITHUB_TOKEN }} 
+              action-type: close
+              repo-token: ${{ secrets.GITHUB_TOKEN }} 
