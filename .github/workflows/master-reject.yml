@@ -15,7 +15,8 @@ jobs:
       id-token: write
       pull-requests: write
     env:
-      REF_BRANCH: ${{ github.ref }}
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+      REF_BRANCH: ${{ github.event.pull_request.head.ref }}
       BASE_REF_BRANCH: ${{ github.base_ref }}
     steps:
           # Branch name is also a version of the release
@@ -29,6 +30,7 @@ jobs:
             run: |
               echo "Source branch name: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch name: ${{ env.DESTINATION_BRANCH }}"
+              echo "Github Context: ${{ env.GITHUB_CONTEXT }}"
           - name: Reject on error
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
             uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
