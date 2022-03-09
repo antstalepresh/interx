@@ -118,6 +118,13 @@ jobs:
           - name: Print debug data before publishing
             run: |
               echo "Branch name: ${{ env.BRANCH_NAME }}"
+          - name: Reject on error
+            uses: andrewslotin/rummelsnuff@v1.1.0
+            if: ${{ failure() }}
+            with:
+              spam_label: "Build Errors"
+              close_spam_prs: "yes"
+              access_token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Publish release
             if: |
               github.event_name != 'pull_request' &&
@@ -145,3 +152,10 @@ jobs:
             if: github.event_name == 'pull_request'
             with:
               github-token: "${{ secrets.GITHUB_TOKEN }}"
+          - name: Comment on success
+            uses: andrewslotin/rummelsnuff@v1.1.0
+            if: ${{ failure() }}
+            with:
+              spam_label: "Build Errors"
+              close_spam_prs: "yes"
+              access_token: ${{ secrets.GITHUB_TOKEN }}
