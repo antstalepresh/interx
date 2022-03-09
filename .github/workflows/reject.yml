@@ -3,11 +3,12 @@ name: Reject invalid PRs
 on:
   pull_request:
     branches: [ master, dev, latest, v*.*.* ]
+    types: [opened, reopened]
 
 jobs:
   # isolate signing & repo cloning from docker image
   setup:
-    name: Build Release
+    name: Verify PR validity
     runs-on: ubuntu-20.04
     permissions:
       contents: write
@@ -31,7 +32,7 @@ jobs:
               echo "Destination branch name: ${{ env.DESTINATION_BRANCH }}"
           - name: Reject invalid PRs to master, dev or latest
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: asmodat/rummelsnuff@ab86b403b1250990474e29c91bb940cbf46229ab
+            uses: asmodat/rummelsnuff@47aac63bbd6215a7adc86c92bf8eca9794bef873
             if: |
               ( env.DESTINATION_BRANCH == 'master' || env.DESTINATION_BRANCH == 'dev' || env.DESTINATION_BRANCH == 'latest' ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'v') && !contains(env.SOURCE_BRANCH, '.') )
@@ -41,7 +42,7 @@ jobs:
               access_token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Reject invalid PRs to version branches
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: asmodat/rummelsnuff@ab86b403b1250990474e29c91bb940cbf46229ab
+            uses: asmodat/rummelsnuff@47aac63bbd6215a7adc86c92bf8eca9794bef873
             if: |
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
