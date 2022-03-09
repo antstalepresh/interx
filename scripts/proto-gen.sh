@@ -106,7 +106,8 @@ sed '/proto\.RegisterType/d' codec/types/any.pb.go > tmp && mv tmp codec/types/a
 proto_dirs=$(find ./proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 
 echoInfo "Updating proto files to include relative paths..."
-fil=$(realpath ./proto/cosmos/base/v1beta1/coin.proto) && \
+fil=./proto/cosmos/base/v1beta1/coin.proto && \
+# fil=$(realpath ./proto/cosmos/base/v1beta1/coin.proto) && \
  sed -i="" 's/ = \"github.com\/cosmos\/cosmos-sdk\/types/ = \"github.com\/KiraCore\/interx\/proto-gen\/cosmos\/base\/v1beta1/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
 for dir in $proto_dirs; do
     proto_fils=$(find "${dir}" -maxdepth 1 -name '*.proto') 
