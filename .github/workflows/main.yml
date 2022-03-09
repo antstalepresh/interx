@@ -72,14 +72,13 @@ jobs:
               make publish
               cp -fv $PWD/RELEASE.md $PWD/bin
               chmod -Rv 777 $PWD/bin
-              echo -e "\n\n" >> ./RELEASE.md && echo "--- CHECKSUMS SHA256 START ---"   >> ./bin/RELEASE.md
-              echo " interx-darwin-amd64.deb: $(sha256 ./bin/interx-darwin-amd64.deb)"  >> ./bin/RELEASE.md
-              echo " interx-darwin-arm64.deb: $(sha256 ./bin/interx-darwin-arm64.deb)"  >> ./bin/RELEASE.md
-              echo "  interx-linux-amd64.deb: $(sha256 ./bin/interx-linux-amd64.deb)"   >> ./bin/RELEASE.md
-              echo "  interx-linux-arm64.deb: $(sha256 ./bin/interx-linux-arm64.deb)"   >> ./bin/RELEASE.md
-              echo "interx-windows-amd64.exe: $(sha256 ./bin/interx-windows-amd64.exe)" >> ./bin/RELEASE.md
-              echo "interx-windows-arm64.exe: $(sha256 ./bin/interx-windows-arm64.exe)" >> ./bin/RELEASE.md
-              echo "--- CHECKSUMS SHA256 END ---" >> ./RELEASE.md
+              echo -e "\n\r\n\r"   >> ./bin/RELEASE.md
+              echo -e ">  interx-darwin-amd64.deb: sha256:$(sha256 ./bin/interx-darwin-amd64.deb)"  >> ./bin/RELEASE.md
+              echo -e ">  interx-darwin-arm64.deb: sha256:$(sha256 ./bin/interx-darwin-arm64.deb)"  >> ./bin/RELEASE.md
+              echo -e ">   interx-linux-amd64.deb: sha256:$(sha256 ./bin/interx-linux-amd64.deb)"   >> ./bin/RELEASE.md
+              echo -e ">   interx-linux-arm64.deb: sha256:$(sha256 ./bin/interx-linux-arm64.deb)"   >> ./bin/RELEASE.md
+              echo -e "> interx-windows-amd64.exe: sha256:$(sha256 ./bin/interx-windows-amd64.exe)" >> ./bin/RELEASE.md
+              echo -e "> interx-windows-arm64.exe: sha256:$(sha256 ./bin/interx-windows-arm64.exe)" >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C $PWD/bin .
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
@@ -180,11 +179,12 @@ jobs:
           - name: Create latest release from a version branch
             # ref: https://github.com/technote-space/create-pr-action
             if: |
-              github.event_name != 'pull_request' &&
+              github.event.pull_request.merged == true &&
               contains(env.BRANCH_NAME, 'v') &&
               contains(env.BRANCH_NAME, '.')
             uses: technote-space/create-pr-action@v2.0.35
             with:
+              github-token: "${{ secrets.GITHUB_TOKEN }}"
               COMMIT_MESSAGE: 'Updating latest release'
               COMMIT_NAME: 'GitHub Actions'
               PR_BRANCH_NAME: 'latest'
