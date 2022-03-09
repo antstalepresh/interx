@@ -31,7 +31,7 @@ jobs:
               echo "Destination branch name: ${{ env.DESTINATION_BRANCH }}"
           - name: Reject invalid PRs to master, dev or latest
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
+            uses: asmodat/rummelsnuff@974308b64b470d644eb61ad50df8c50f850f513b
             if: |
               ( env.DESTINATION_BRANCH == 'master' || env.DESTINATION_BRANCH == 'dev' || env.DESTINATION_BRANCH == 'latest' ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'v') && !contains(env.SOURCE_BRANCH, '.') )
@@ -41,7 +41,7 @@ jobs:
               access_token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Reject invalid PRs to version branches
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
-            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
+            uses: asmodat/rummelsnuff@974308b64b470d644eb61ad50df8c50f850f513b
             if: |
               ( startsWith(env.DESTINATION_BRANCH, 'v') && contains(env.DESTINATION_BRANCH, '.') ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
