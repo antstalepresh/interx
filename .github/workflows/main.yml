@@ -1,0 +1,196 @@
+name: Build, Release & Publish
+
+on:
+  push:
+    branches: [ v*.*.*, feature/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+  pull_request:
+    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+#  pull_request_target:
+#    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+
+jobs:
+  # isolate signing & repo cloning from docker image
+  setup:
+    name: Repo Setup
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Install cosign
+            uses: sigstore/cosign-installer@v2.1.0
+            with:
+              cosign-release: 'v1.6.0'
+          - name: Checkout repository
+            uses: actions/checkout@v3.0.0
+          - name: Verify repo content
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              cd ../ && tar -czvf src.tar.gz -C ./interx . && cp ./src.tar.gz ./interx/src.tar.gz
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-src
+              path: ./src.tar.gz
+  build:
+    name: Repo Build
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    needs: [setup]
+    container: 
+      image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
+    steps:
+          - name: Checking dependency versions
+            run: |
+              . /etc/profile && echo "Utils Version: $(utilsVersion)"
+              go version
+              CDHelper version
+              flutter --version
+              dart --version
+              echo "ENVS: $(env)"
+              echo "HOME: $HOME"
+              echo " PWD: $PWD"
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-src
+          - name: Testing INTERX
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              tar xvf ./src.tar.gz
+              chmod -Rv 555 ./scripts
+              make install
+              interxd version
+          - name: Publishing INTERX binaries
+            shell: bash
+            run: |
+              make publish
+              cp -fv ./RELEASE.md ./bin
+              chmod -Rv 777 ./bin
+              echo "\n\r\n\r```"   >> ./bin/RELEASE.md
+              echo ">  interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo ">  interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo ">   interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo ">   interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "> interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "> interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "```"   >> ./bin/RELEASE.md
+              tar -czvf deb.tar.gz -C ./bin .
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+              path: ./deb.tar.gz
+  release:
+    name: Build Release
+    runs-on: ubuntu-20.04
+    needs: [build]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+          - name: Inspecting & organizing artifacts
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              tar xvf ./deb.tar.gz
+              chmod -Rv 777 ./
+          # Branch name is also a version of the release
+          # ref: https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
+          - name: Extract branch name on push
+            if: github.event_name != 'pull_request'
+            shell: bash
+            run: |
+              echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+              echo "SOURCE_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+              echo "DESTINATION_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+          - name: Extract branch name on pull request
+            if: github.event_name == 'pull_request'
+            env:
+              REF_BRANCH: ${{ github.event.pull_request.head.ref }}
+              BASE_REF_BRANCH: ${{ github.base_ref }}
+            shell: bash
+            run: |
+              echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+              echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
+              echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
+          - name: Print debug data before publishing
+            run: |
+              echo "Branch name: ${{ env.BRANCH_NAME }}"
+              echo "Source branch: ${{ env.SOURCE_BRANCH }}"
+              echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
+          - name: Reject on error
+            # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
+            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
+            if: ${{ failure() }}
+            with:
+              spam_label: "Build Errors"
+              close_spam_prs: "yes"
+              access_token: ${{ secrets.GITHUB_TOKEN }} 
+          - name: Publish release
+            if: |
+              github.event_name != 'pull_request' &&
+              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') ) &&
+              ( !contains(env.BRANCH_NAME, '-rc') && !contains(env.BRANCH_NAME, 'feature') && !contains(env.BRANCH_NAME, 'bugfix') )
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.BRANCH_NAME }}
+              name: ${{ env.BRANCH_NAME }}
+              prerelease: false
+              draft: false
+              fail_on_unmatched_files: true
+              files: |
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
+          - name: Publish pre-release
+            if: |
+              github.event_name != 'pull_request' &&
+              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') && contains(env.BRANCH_NAME, '-rc') ) &&
+              ( !startsWith(env.BRANCH_NAME, 'feature') && !startsWith(env.BRANCH_NAME, 'bugfix') )
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.BRANCH_NAME }}
+              name: ${{ env.BRANCH_NAME }}
+              prerelease: true
+              draft: false
+              fail_on_unmatched_files: true
+              files: |
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
+          - name: Approve pull request on success
+            uses: hmarr/auto-approve-action@v2.1.0
+            if: github.event_name == 'pull_request'
+            with:
+              github-token: "${{ secrets.GITHUB_TOKEN }}"
+          - name: Create latest release from a version branch
+            # ref: https://github.com/technote-space/create-pr-action
+            if: |
+              github.event_name != 'pull_request' &&
+              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') )
+            uses: technote-space/create-pr-action@v2.0.35
+            with:
+              COMMIT_MESSAGE: 'Updating latest release'
+              COMMIT_NAME: 'GitHub Actions'
+              PR_BRANCH_NAME: 'latest'
+              PR_TITLE: "${{ env.BRANCH_NAME }} -> latest"
