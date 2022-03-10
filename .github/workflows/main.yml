@@ -125,7 +125,6 @@ jobs:
             run: |
               echo "Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
-              echo "Event merge: ${{ github.event.pull_request.merged }}"
               echo "Event name: ${{ github.event_name }}"
           - name: Reject on error
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
@@ -136,11 +135,11 @@ jobs:
               close_spam_prs: "yes"
               access_token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Publish release
-            # Release on merge only, do not use (github.event_name != 'pull_request')
+            # Release on merge only
             if: |
-              ( github.event_name == 'pull_request' && github.event.pull_request.merged == true ) &&
-              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') ) &&
-              ( !contains(env.SOURCE_BRANCH, '-rc') && !contains(env.SOURCE_BRANCH, 'feature') && !contains(env.SOURCE_BRANCH, 'bugfix') )
+              github.event_name != 'pull_request' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && !contains(env.SOURCE_BRANCH, '-rc' ) ) &&
+              ( !contains(env.SOURCE_BRANCH, 'feature') && !contains(env.SOURCE_BRANCH, 'bugfix') )
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
@@ -158,7 +157,7 @@ jobs:
                 ./interx-windows-arm64.exe
           - name: Publish pre-release
             if: |
-              ( github.event_name == 'pull_request' && github.event.pull_request.merged == true ) &&
+              github.event_name != 'pull_request' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
               ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             uses: softprops/action-gh-release@v0.1.14
@@ -203,9 +202,8 @@ jobs:
               pr_allow_empty: true
           - name: Create PR from a version branch to master after version branch merge
             if: |
-              ( github.event_name == 'pull_request' && github.event.pull_request.merged == true ) &&
-              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
-              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+              github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'master' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
             with:
               github_token: ${{ secrets.REPO_ACCESS }}
