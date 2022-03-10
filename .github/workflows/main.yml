@@ -218,5 +218,5 @@ jobs:
             if: github.event_name == 'pull_request' && github.event.action == 'opened' && env.DESTINATION_BRANCH != 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             env:
-              GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+              GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
               LOG: "TRACE"
