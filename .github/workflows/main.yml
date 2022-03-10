@@ -125,6 +125,8 @@ jobs:
             run: |
               echo "Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
+              echo "Event action: ${{ github.event.action }}"
+              echo "Event name: ${{ github.event_name }}"
           - name: Reject on error
             # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
             uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
@@ -215,7 +217,7 @@ jobs:
               pr_allow_empty: true
           - name: Auto-merge version branch to latest branch
             uses: pascalgn/automerge-action@04dfc9eae2586d19b7362d4f6413c48135d9c25a
-            if: github.event_name == 'pull_request' && github.event.action == 'opened' && env.DESTINATION_BRANCH != 'latest' &&
+            if: github.event_name == 'pull_request' && env.DESTINATION_BRANCH == 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             env:
               GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
