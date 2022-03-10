@@ -112,7 +112,6 @@ jobs:
             if: github.event_name != 'pull_request'
             shell: bash
             run: |
-              echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
               echo "SOURCE_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
               echo "DESTINATION_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
           - name: Extract branch name on pull request
@@ -122,12 +121,10 @@ jobs:
               BASE_REF_BRANCH: ${{ github.base_ref }}
             shell: bash
             run: |
-              echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
               echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
               echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
           - name: Print debug data before publishing
             run: |
-              echo "Branch name: ${{ env.BRANCH_NAME }}"
               echo "Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
           - name: Reject on error
@@ -139,15 +136,16 @@ jobs:
               close_spam_prs: "yes"
               access_token: ${{ secrets.GITHUB_TOKEN }} 
           - name: Publish release
+            # Release on merge only, do not use (github.event_name != 'pull_request')
             if: |
-              github.event_name != 'pull_request' &&
-              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') ) &&
-              ( !contains(env.BRANCH_NAME, '-rc') && !contains(env.BRANCH_NAME, 'feature') && !contains(env.BRANCH_NAME, 'bugfix') )
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') ) &&
+              ( !contains(env.SOURCE_BRANCH, '-rc') && !contains(env.SOURCE_BRANCH, 'feature') && !contains(env.SOURCE_BRANCH, 'bugfix') )
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
-              tag_name: ${{ env.BRANCH_NAME }}
-              name: ${{ env.BRANCH_NAME }}
+              tag_name: ${{ env.SOURCE_BRANCH }}
+              name: ${{ env.SOURCE_BRANCH }}
               prerelease: false
               draft: false
               fail_on_unmatched_files: true
@@ -160,14 +158,14 @@ jobs:
                 ./interx-windows-arm64.exe
           - name: Publish pre-release
             if: |
-              github.event_name != 'pull_request' &&
-              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') && contains(env.BRANCH_NAME, '-rc') ) &&
-              ( !startsWith(env.BRANCH_NAME, 'feature') && !startsWith(env.BRANCH_NAME, 'bugfix') )
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
-              tag_name: ${{ env.BRANCH_NAME }}
-              name: ${{ env.BRANCH_NAME }}
+              tag_name: ${{ env.SOURCE_BRANCH }}
+              name: ${{ env.SOURCE_BRANCH }}
               prerelease: true
               draft: false
               fail_on_unmatched_files: true
@@ -186,11 +184,11 @@ jobs:
           - name: Create latest release from a version branch
             # ref: https://github.com/technote-space/create-pr-action
             if: |
-              github.event_name != 'pull_request' &&
-              ( startsWith(env.BRANCH_NAME, 'v') && contains(env.BRANCH_NAME, '.') )
+              github.event_name != 'pull_request' && env.SOURCE_BRANCH != latest &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             uses: technote-space/create-pr-action@v2.0.35
             with:
               COMMIT_MESSAGE: 'Updating latest release'
               COMMIT_NAME: 'GitHub Actions'
               PR_BRANCH_NAME: 'latest'
-              PR_TITLE: "${{ env.BRANCH_NAME }} -> latest"
+              PR_TITLE: "${{ env.SOURCE_BRANCH }} -> latest"
