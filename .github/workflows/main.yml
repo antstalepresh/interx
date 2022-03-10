@@ -1,0 +1,224 @@
+name: Build, Release & Publish
+
+on:
+  push:
+    branches: [ v*.*.*, feature/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+  pull_request:
+    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+#  pull_request_target:
+#    branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
+
+jobs:
+  # isolate signing & repo cloning from docker image
+  setup:
+    name: Repo Setup
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Install cosign
+            uses: sigstore/cosign-installer@v2.1.0
+            with:
+              cosign-release: 'v1.6.0'
+          - name: Checkout repository
+            uses: actions/checkout@v3.0.0
+          - name: Verify repo content
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              cd ../ && tar -czvf src.tar.gz -C ./interx . && cp ./src.tar.gz ./interx/src.tar.gz
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-src
+              path: ./src.tar.gz
+  build:
+    name: Repo Build
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      pull-requests: write
+    needs: [setup]
+    container: 
+      image: ghcr.io/kiracore/docker/base-image:v0.0.2.0
+    steps:
+          - name: Checking dependency versions
+            run: |
+              . /etc/profile && echo "Utils Version: $(utilsVersion)"
+              go version
+              CDHelper version
+              flutter --version
+              dart --version
+              echo "ENVS: $(env)"
+              echo "HOME: $HOME"
+              echo " PWD: $PWD"
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-src
+          - name: Testing INTERX
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              tar xvf ./src.tar.gz
+              chmod -Rv 555 ./scripts
+              make install
+              interxd version
+          - name: Publishing INTERX binaries
+            shell: bash
+            run: |
+              make publish
+              cp -fv ./RELEASE.md ./bin
+              chmod -Rv 777 ./bin
+              echo -e "\n\r\n\r```" >> ./bin/RELEASE.md
+              echo " interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo " interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "  interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "```"   >> ./bin/RELEASE.md
+              tar -czvf deb.tar.gz -C ./bin .
+          - name: Uploading artifacts
+            uses: actions/upload-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+              path: ./deb.tar.gz
+  release:
+    name: Build Release
+    runs-on: ubuntu-20.04
+    needs: [build]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+    steps:
+          - name: Download artifacts
+            uses: actions/download-artifact@v3.0.0
+            with:
+              name: interx-bin-deb
+          - name: Inspecting & organizing artifacts
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              tar xvf ./deb.tar.gz
+              chmod -Rv 777 ./
+          # Branch name is also a version of the release
+          # ref: https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
+          - name: Extract branch name on push
+            if: github.event_name != 'pull_request'
+            shell: bash
+            run: |
+              echo "SOURCE_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+              echo "DESTINATION_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+          - name: Extract branch name on pull request
+            if: github.event_name == 'pull_request'
+            env:
+              REF_BRANCH: ${{ github.event.pull_request.head.ref }}
+              BASE_REF_BRANCH: ${{ github.base_ref }}
+            shell: bash
+            run: |
+              echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
+              echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
+          - name: Print debug data before publishing
+            run: |
+              echo "Source branch: ${{ env.SOURCE_BRANCH }}"
+              echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
+          - name: Reject on error
+            # ref.: https://github.com/andrewslotin/rummelsnuff, v1.1.0
+            uses: andrewslotin/rummelsnuff@a0c9c1929f44eefff922aced1ee4dd64eddf12d6
+            if: ${{ failure() }}
+            with:
+              spam_label: "Build Errors"
+              close_spam_prs: "yes"
+              access_token: ${{ secrets.GITHUB_TOKEN }} 
+          - name: Publish release
+            # Release on merge only, do not use (github.event_name != 'pull_request')
+            if: |
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') ) &&
+              ( !contains(env.SOURCE_BRANCH, '-rc') && !contains(env.SOURCE_BRANCH, 'feature') && !contains(env.SOURCE_BRANCH, 'bugfix') )
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.SOURCE_BRANCH }}
+              name: ${{ env.SOURCE_BRANCH }}
+              prerelease: false
+              draft: false
+              fail_on_unmatched_files: true
+              files: |
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
+          - name: Publish pre-release
+            if: |
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+            uses: softprops/action-gh-release@v0.1.14
+            with:
+              body_path: RELEASE.md
+              tag_name: ${{ env.SOURCE_BRANCH }}
+              name: ${{ env.SOURCE_BRANCH }}
+              prerelease: true
+              draft: false
+              fail_on_unmatched_files: true
+              files: |
+                ./interx-linux-amd64.deb
+                ./interx-linux-arm64.deb
+                ./interx-darwin-amd64.deb
+                ./interx-darwin-arm64.deb
+                ./interx-windows-amd64.exe
+                ./interx-windows-arm64.exe
+          - name: Approve pull request on success
+            uses: hmarr/auto-approve-action@v2.1.0
+            if: github.event_name == 'pull_request'
+            with:
+              github-token: "${{ secrets.GITHUB_TOKEN }}"
+          - name: Cleanup all resources
+            shell: bash
+            run: |
+              rm -rfv ./*
+              echo "(current dir): $PWD" && ls -l ./
+          - name: Checkout repository
+            uses: actions/checkout@v3.0.0
+          - name: Create PR from a version branch to latest
+            # ref: https://github.com/repo-sync/pull-request
+            if: |
+              github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'latest' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
+            with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              source_branch: ${{ env.SOURCE_BRANCH }}
+              destination_branch: 'latest'
+              pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
+              pr_label: "kira-automation"
+              pr_allow_empty: true
+          - name: Create PR from a version branch to master after version branch merge
+            if: |
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
+            with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              source_branch: ${{ env.DESTINATION_BRANCH }}
+              destination_branch: 'master'
+              pr_assignee: "asmodat"
+              pr_title: "GithubActions ${{ env.DESTINATION_BRANCH }} -> master" 
+              pr_label: "kira-automation"
+              pr_allow_empty: true
+          - name: Auto-merge version branch to latest branch
+            uses: pascalgn/automerge-action@04dfc9eae2586d19b7362d4f6413c48135d9c25a
+            if: github.event_name == 'pull_request' && github.event.action == 'opened' && env.DESTINATION_BRANCH != 'latest' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
+            env:
+              GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+              LOG: "TRACE"

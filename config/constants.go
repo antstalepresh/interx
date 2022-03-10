@@ -1,11 +1,11 @@
 package config
 
 const (
-	InterxVersion = "v0.4.1"
+	InterxVersion = "v0.4.1.1"
 
-	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
-	QueryTotalSupply     = "/api/cosmos/bank/supply"
-	QueryBalances        = "/api/cosmos/bank/balances/{address}"
+	QueryAccounts        = "/cosmos/auth/v1beta1/accounts/{address}"
+	QueryTotalSupply     = "/cosmos/bank/v1beta1/supply"
+	QueryBalances        = "/cosmos/bank/v1beta1/balances/{address}"
 	PostTransaction      = "/api/cosmos/txs"
 	QueryTransactionHash = "/api/cosmos/txs/{hash}"
 	EncodeTransaction    = "/api/cosmos/txs/encode"
