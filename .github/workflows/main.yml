@@ -5,8 +5,6 @@ on:
     branches: [ v*.*.*, feature/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
   pull_request:
     branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
-  pull_request_target:
-    branches: [ latest ]
 
 jobs:
   # isolate signing & repo cloning from docker image
@@ -195,7 +193,7 @@ jobs:
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
             with:
-              github_token: ${{ secrets.GITHUB_TOKEN }}
+              github_token: ${{ secrets.REPO_ACCESS }}
               source_branch: ${{ env.SOURCE_BRANCH }}
               destination_branch: 'latest'
               pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
@@ -208,7 +206,7 @@ jobs:
               ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
             uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
             with:
-              github_token: ${{ secrets.GITHUB_TOKEN }}
+              github_token: ${{ secrets.REPO_ACCESS }}
               source_branch: ${{ env.DESTINATION_BRANCH }}
               destination_branch: 'master'
               pr_assignee: "asmodat"
