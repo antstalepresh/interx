@@ -182,13 +182,14 @@ jobs:
             with:
               github-token: "${{ secrets.GITHUB_TOKEN }}"
           - name: Create latest release from a version branch
-            # ref: https://github.com/technote-space/create-pr-action
+            # ref: https://github.com/repo-sync/pull-request
             if: |
               github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
-            uses: technote-space/create-pr-action@v2.0.35
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
             with:
-              COMMIT_MESSAGE: 'Updating latest release'
-              COMMIT_NAME: 'GitHub Actions'
-              PR_BRANCH_NAME: 'latest'
-              PR_TITLE: "${{ env.SOURCE_BRANCH }} -> latest"
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              source_branch: "${{ env.SOURCE_BRANCH }}"
+              destination_branch: 'latest'
+              pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
+              pr_label: "kira-automation" 
