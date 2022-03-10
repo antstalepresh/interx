@@ -178,7 +178,7 @@ jobs:
             uses: hmarr/auto-approve-action@v2.1.0
             if: github.event_name == 'pull_request'
             with:
-              github-token: "${{ secrets.GITHUB_TOKEN }}"
+              github-token: "${{ secrets.REPO_ACCESS }}"
           - name: Cleanup all resources
             shell: bash
             run: |
@@ -218,5 +218,5 @@ jobs:
             if: github.event_name == 'pull_request' && github.event.action == 'opened' && env.DESTINATION_BRANCH != 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             env:
-              GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+              GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
               LOG: "TRACE"
