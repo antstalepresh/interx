@@ -188,7 +188,7 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
           - name: Checkout repository
             uses: actions/checkout@v3.0.0
-          - name: Create latest release from a version branch
+          - name: Create PR from a version branch to latest
             # ref: https://github.com/repo-sync/pull-request
             if: |
               github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'latest' &&
@@ -201,3 +201,24 @@ jobs:
               pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
               pr_label: "kira-automation"
               pr_allow_empty: true
+          - name: Create PR from a version branch to master after version branch merge
+            if: |
+              ( github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true ) &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') ) &&
+              ( !startsWith(env.SOURCE_BRANCH, 'feature') && !startsWith(env.SOURCE_BRANCH, 'bugfix') )
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
+            with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              source_branch: ${{ env.DESTINATION_BRANCH }}
+              destination_branch: 'master'
+              pr_assignee: "asmodat"
+              pr_title: "GithubActions ${{ env.DESTINATION_BRANCH }} -> master" 
+              pr_label: "kira-automation"
+              pr_allow_empty: true
+          - name: Auto-merge version branch to latest branch
+            uses: pascalgn/automerge-action@04dfc9eae2586d19b7362d4f6413c48135d9c25a
+            if: github.event_name == 'pull_request' && github.event.action == 'opened' && env.DESTINATION_BRANCH != 'latest' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
+            env:
+              GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+              LOG: "TRACE"
