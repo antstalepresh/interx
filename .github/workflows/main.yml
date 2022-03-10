@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ v*.*.*, bugfix/*, master, dev, latest, testnet-*, mainnet-*, kira-* ]
   pull_request_target:
-    branches: [ latest ]
+    branches: [ latest, v*.*.* ]
 
 jobs:
   # isolate signing & repo cloning from docker image
