@@ -73,13 +73,13 @@ jobs:
               make publish
               cp -fv ./RELEASE.md ./bin
               chmod -Rv 777 ./bin
-              echo "\n\r\n\r```"   >> ./bin/RELEASE.md
-              echo ">  interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo ">  interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo ">   interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo ">   interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "> interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "> interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo -e "\n\r\n\r```" >> ./bin/RELEASE.md
+              echo " interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo " interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "  interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "```"   >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C ./bin .
           - name: Uploading artifacts
@@ -184,7 +184,7 @@ jobs:
           - name: Create latest release from a version branch
             # ref: https://github.com/technote-space/create-pr-action
             if: |
-              github.event_name != 'pull_request' && env.SOURCE_BRANCH != latest &&
+              github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             uses: technote-space/create-pr-action@v2.0.35
             with:
