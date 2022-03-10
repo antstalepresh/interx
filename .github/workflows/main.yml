@@ -199,7 +199,7 @@ jobs:
               source_branch: ${{ env.SOURCE_BRANCH }}
               destination_branch: 'latest'
               pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
-              pr_label: "kira-automation"
+              pr_label: "kira-automation,automerge"
               pr_allow_empty: true
           - name: Create PR from a version branch to master after version branch merge
             if: |
@@ -220,5 +220,6 @@ jobs:
             if: github.event_name == 'pull_request' && env.DESTINATION_BRANCH == 'latest' &&
               ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
             env:
+              MERGE_LABELS: "automerge"
               GITHUB_TOKEN: "${{ secrets.REPO_ACCESS }}"
               LOG: "TRACE"
