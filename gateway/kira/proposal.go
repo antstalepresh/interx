@@ -59,6 +59,7 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -93,6 +94,7 @@ func QueryProposalsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.H
 }
 
 func queryProposalHandler(r *http.Request, gwCosmosmux *runtime.ServeMux, proposal_id string) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -133,6 +135,7 @@ func QueryProposalRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Ha
 }
 
 func queryVotersHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	success, failure, statusCode := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {
@@ -226,6 +229,7 @@ func QueryVotersRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Hand
 }
 
 func queryVotesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	success, failure, statusCode := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {

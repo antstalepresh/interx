@@ -1,14 +1,12 @@
 package cosmos
 
 import (
-	"encoding/base64"
-	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 )
@@ -21,16 +19,7 @@ func RegisterCosmosAuthRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcA
 }
 
 func queryAccountsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	queries := mux.Vars(r)
-	bech32addr := queries["address"]
-
-	_, err := sdk.AccAddressFromBech32(bech32addr)
-	if err != nil {
-		common.GetLogger().Error("[query-account] Invalid bech32addr: ", bech32addr)
-		return common.ServeError(0, "", err.Error(), http.StatusBadRequest)
-	}
-
-	r.URL.Path = fmt.Sprintf("/api/cosmos/auth/accounts/%s", base64.URLEncoding.EncodeToString([]byte(bech32addr)))
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/cosmos/auth", "/cosmos/auth/v1beta1", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

@@ -7,24 +7,52 @@ It will connect to the node using the GRPC endpoint as well as the RPC endpoint 
 
 ## Setup
 
+### Local Development Dependencies
+
+#### Ubuntu
+
+```
+# install essential dependencies
+apt-get install -y curl && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
+ apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+ software-properties-common wget git nginx apt-transport-https file build-essential net-tools hashdeep \
+ protobuf-compiler golang-goprotobuf-dev golang-grpc-gateway golang-github-grpc-ecosystem-grpc-gateway-dev lsb-release \
+ clang cmake gcc g++ pkg-config libudev-dev libusb-1.0-0-dev iputils-ping nano jq python python3 python3-pip gnupg \
+ bash libglu1-mesa lsof bc dnsutils psmisc netcat  make nodejs tar unzip xz-utils yarn zip p7zip-full ca-certificates \
+ containerd docker.io dos2unix
+
+# install console helper
+BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
+wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install.sh -O ./i.sh && \
+ chmod 777 ./i.sh && ./i.sh "$BRANCH" "/var/kiraglob" && . /etc/profile && rm -fv ./i.sh && utilsVersion
+
+# install deb package manager
+echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | tee /etc/apt/sources.list.d/goreleaser.list && apt-get update -y && \
+	apt install nfpm
+```
+
 ### Installation
 
-Specify sekai commit hash
+Quick Git Clone (Old)
 
-```bash
-go get github.com/KiraCore/sekai@<commit hash here>
+```
+(docker rmi $(docker images "tendermintdev/sdk-proto-gen" -a -q) || echo "NO IMAGE TO WIPE" ) && \
+ cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
+ git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
+ cd ./interx && \
+ make generate && \
+ go mod tidy && \
+ make install && \
+ go mod verify && echo "SUCCESS" || echo "FAILED"
 ```
 
-example
+Quick Git Clone (New)
 
-```bash
-go get github.com/KiraCore/sekai@458f872e5ff8
 ```
-
-Use following command in the root respository of INTERX.
-
-```bash
-make install
+cd $HOME && rm -fvr ./interx && INTERX_BRANCH="asmodat-tmp" && \
+ git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
+ cd ./interx && chmod -R 777 ./scripts && \
+ make install && echo "SUCCESS" || echo "FAILED"
 ```
 
 It will install INTERX binary(`interxd`) to `$GOBIN`.

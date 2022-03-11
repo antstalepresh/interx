@@ -3,13 +3,12 @@ module github.com/KiraCore/interx
 go 1.16
 
 require (
-	github.com/KiraCore/sekai v0.0.0-20220131143706-3112b48b7386
+	github.com/KiraCore/sekai v0.0.0-20220308145139-346a1b6f68dc
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.0.1
 	github.com/iancoleman/strcase v0.1.2
 	github.com/inhies/go-bytesize v0.0.0-20200716184324-4fe85e9b81b2
 	github.com/rakyll/statik v0.1.7
