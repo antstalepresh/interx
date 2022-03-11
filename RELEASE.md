@@ -1,4 +1,5 @@
-This is INTERX test release
+This is a simple test release
 
 Features:
-* NONE, DO NOT USE, IT'S JUST A TEST
+* NONE, JUST A CI/CD TEST v2
+* DO NOT USE IN PRODUCTION
