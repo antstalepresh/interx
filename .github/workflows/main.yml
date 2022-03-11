@@ -72,14 +72,14 @@ jobs:
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
               chmod -Rv 777 ./bin
-              echo -e "\n\r\n\r\`\`\`" >> ./bin/RELEASE.md
+              echo -e "\n\r\n\r\`\`\`\n\r" >> ./bin/RELEASE.md
               echo " interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo " interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "```"   >> ./bin/RELEASE.md
+              echo -e "\n\r\`\`\`"   >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C ./bin .
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
