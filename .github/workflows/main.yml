@@ -109,7 +109,7 @@ jobs:
           # Branch name is also a version of the release
           # ref: https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
           - name: Extract branch name on push
-            if: github.event_name != 'pull_request'
+            if: github.event_name == 'push'
             shell: bash
             run: |
               echo "SOURCE_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
@@ -140,7 +140,7 @@ jobs:
           - name: Publish release
             if: |
               github.event_name == 'push' &&
-              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && !contains(env.SOURCE_BRANCH, '-rc' ) )
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && !contains(env.SOURCE_BRANCH, 'rc') && !contains(env.SOURCE_BRANCH, '-') )
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
@@ -160,7 +160,7 @@ jobs:
           - name: Publish pre-release
             if: |
               github.event_name == 'push' &&
-              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-rc') )
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') && contains(env.SOURCE_BRANCH, '-') )
             uses: softprops/action-gh-release@v0.1.14
             with:
               body_path: RELEASE.md
