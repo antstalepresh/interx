@@ -35,7 +35,7 @@ jobs:
               github_token: ${{ secrets.REPO_ACCESS }}
               source_branch: ${{ env.SOURCE_BRANCH }}
               destination_branch: 'master'
-              pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> master" 
+              pr_title: "${{ env.SOURCE_BRANCH }} -> master" 
               pr_label: "kira-automation"
               pr_assignee: "asmodat"
               pr_allow_empty: true
