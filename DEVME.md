@@ -26,7 +26,7 @@ wsl --install -d Ubuntu-20.04 && \
 
 sudo -s
 
-# Install Essential Dependecies
+# Install Essential Dependencies
 
 apt-get install -y curl && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && apt-get update -y && \
  apt-get install -y --allow-unauthenticated --allow-downgrades --allow-remove-essential --allow-change-held-packages \
@@ -42,7 +42,7 @@ wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/mas
  systemctl2 --version
 
 # install kira bash helper utils
-BRANCH="v0.0.1" && cd /tmp && rm -fv ./i.sh && \
+BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
 wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install.sh -O ./i.sh && \
  chmod 555 -v ./i.sh && ./i.sh "$BRANCH" "/var/kiraglob" && . /etc/profile && rm -fv ./i.sh
  
@@ -81,10 +81,8 @@ cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
 ```
 cd $INTERX_REPO
 
-chmod 777 ./scripts/protocgen.sh && \
- dos2unix ./scripts/protocgen.sh && \
- ./scripts/protocgen.sh
-
+chmod -Rv 777 ./scripts && \
+ dos2unix ./scripts/proto-gen.sh
 
 make install
 ```
