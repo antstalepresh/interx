@@ -32,6 +32,7 @@ func RegisterIdentityRegistrarRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMu
 }
 
 func QueryIdentityRecordHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -70,6 +71,8 @@ func QueryIdentityRecordsByAddressHandler(r *http.Request, gwCosmosmux *runtime.
 
 	accAddr, _ := sdk.AccAddressFromBech32(creator)
 	r.URL.Path = fmt.Sprintf("/api/kira/gov/identity_records/%s", base64.URLEncoding.EncodeToString(accAddr.Bytes()))
+
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -125,6 +128,7 @@ func QueryAllIdentityRecordsHandler(r *http.Request, gwCosmosmux *runtime.ServeM
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -158,6 +162,7 @@ func QueryAllIdentityRecordsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr strin
 }
 
 func QueryIdentityRecordVerifyRequestHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -218,6 +223,7 @@ func QueryIdentityRecordVerifyRequestsByRequesterHandler(r *http.Request, gwCosm
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -278,6 +284,7 @@ func QueryIdentityRecordVerifyRequestsByApproverHandler(r *http.Request, gwCosmo
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -333,6 +340,7 @@ func QueryAllIdentityRecordVerifyRequestsHandler(r *http.Request, gwCosmosmux *r
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

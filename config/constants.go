@@ -2,10 +2,12 @@ package config
 
 const (
 	InterxVersion = "v0.4.1.1"
+	SekaiVersion  = "v0.1.23.1"
+	CosmosVersion = "v0.45.1"
 
-	QueryAccounts        = "/cosmos/auth/v1beta1/accounts/{address}"
-	QueryTotalSupply     = "/cosmos/bank/v1beta1/supply"
-	QueryBalances        = "/cosmos/bank/v1beta1/balances/{address}"
+	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
+	QueryTotalSupply     = "/api/cosmos/bank/supply"
+	QueryBalances        = "/api/cosmos/bank/balances/{address}"
 	PostTransaction      = "/api/cosmos/txs"
 	QueryTransactionHash = "/api/cosmos/txs/{hash}"
 	EncodeTransaction    = "/api/cosmos/txs/encode"

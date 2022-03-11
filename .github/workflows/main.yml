@@ -72,14 +72,14 @@ jobs:
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
               chmod -Rv 777 ./bin
-              echo -e "\n\r\n\r\`\`\`\n\r" >> ./bin/RELEASE.md
+              echo -e "\n\r\n\r\`\`\`" >> ./bin/RELEASE.md
               echo " interx-darwin-amd64.deb: sha256:$(sha256sum ./bin/interx-darwin-amd64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo " interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo -e "\n\r\`\`\`"   >> ./bin/RELEASE.md
+              echo -e "\`\`\`"   >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C ./bin .
           - name: Uploading artifacts
             uses: actions/upload-artifact@v3.0.0
@@ -188,6 +188,18 @@ jobs:
               echo "(current dir): $PWD" && ls -l ./
           - name: Checkout repository
             uses: actions/checkout@v3.0.0
+          - name: Create PR from a version branch to master after version branch merge
+            if: |
+              github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'master' &&
+              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
+            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
+            with:
+              github_token: ${{ secrets.REPO_ACCESS }}
+              source_branch: ${{ env.SOURCE_BRANCH }}
+              destination_branch: 'master'
+              pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> master" 
+              pr_label: "kira-automation,automerge"
+              pr_allow_empty: true
           - name: Create PR from a version branch to latest
             # ref: https://github.com/repo-sync/pull-request
             if: |
@@ -200,19 +212,6 @@ jobs:
               destination_branch: 'latest'
               pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> latest" 
               pr_label: "kira-automation,automerge"
-              pr_allow_empty: true
-          - name: Create PR from a version branch to master after version branch merge
-            if: |
-              github.event_name != 'pull_request' && env.SOURCE_BRANCH != 'master' &&
-              ( startsWith(env.SOURCE_BRANCH, 'v') && contains(env.SOURCE_BRANCH, '.') )
-            uses: repo-sync/pull-request@5ba2c80b97c87b9174c1548141b7acd80f6376e1
-            with:
-              github_token: ${{ secrets.REPO_ACCESS }}
-              source_branch: ${{ env.SOURCE_BRANCH }}
-              destination_branch: 'master'
-              pr_assignee: "asmodat"
-              pr_title: "GithubActions ${{ env.SOURCE_BRANCH }} -> master" 
-              pr_label: "kira-automation"
               pr_allow_empty: true
           - name: Auto-merge version branch to latest branch
             uses: pascalgn/automerge-action@04dfc9eae2586d19b7362d4f6413c48135d9c25a

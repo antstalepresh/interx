@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -22,6 +23,7 @@ func RegisterKiraGovRoleRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpc
 }
 
 func queryRolesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -66,6 +68,8 @@ func queryRolesByAddressHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) 
 	}
 
 	r.URL.Path = fmt.Sprintf("/api/kira/gov/roles_by_address/%s", base64.URLEncoding.EncodeToString(accAddr.Bytes()))
+
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

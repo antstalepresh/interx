@@ -118,6 +118,11 @@ func main() {
 					cacheDir = *initHomePtr + "/cache"
 				}
 
+				nodeKey := *initNodeKey
+				if nodeKey == "" {
+					nodeKey = *initHomePtr + "/nodekey.json"
+				}
+
 				config.InitConfig(
 					*initVersion,
 					*initHomePtr+"/config.json",
@@ -148,7 +153,7 @@ func main() {
 					*initNodeDiscoveryInterxPort,
 					*initNodeDiscoveryTendermintPort,
 					*initNodeDiscoveryTimeout,
-					*initNodeKey,
+					nodeKey,
 				)
 
 				fmt.Printf("Created interx configuration file: %s\n", *initHomePtr+"/config.json")
