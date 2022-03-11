@@ -3,6 +3,7 @@ package kira
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -94,6 +95,7 @@ func QueryKiraTokensAliasesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/tokens", "/kira/tokens", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

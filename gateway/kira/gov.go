@@ -54,6 +54,8 @@ func queryDataReferenceKeysHandle(r *http.Request, gwCosmosmux *runtime.ServeMux
 
 	r.URL.RawQuery = strings.Join(events, "&")
 
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
+
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -88,6 +90,7 @@ func QueryDataReferenceKeysRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func queryDataReferenceHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, key string) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {
@@ -155,6 +158,7 @@ func QueryDataReferenceRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) ht
 }
 
 func QueryNetworkPropertiesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -189,6 +193,7 @@ func QueryNetworkPropertiesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func QueryExecutionFeeHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
@@ -223,6 +228,7 @@ func QueryExecutionFeeRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) htt
 }
 
 func QueryExecutionFeesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
