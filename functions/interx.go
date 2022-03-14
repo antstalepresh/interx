@@ -1642,4 +1642,17 @@ func RegisterInterxFunctions() {
 			"description": "QueryInterxFunctions is a function to query interx functions."
 		}`,
 	)
+
+	AddInterxFunction(
+		"QuerySpendingPools",
+		config.QuerySpendingPools,
+		`{
+			"description": "QuerySpendingPools is a function to query list of all spending pool names.",
+			"response": {
+				"names": {
+					"description": "The list of all spending pool names"
+				}
+			}
+		}`,
+	)
 }
