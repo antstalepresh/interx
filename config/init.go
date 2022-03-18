@@ -77,6 +77,7 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryIdentityRecordVerifyRequestsByApprover] = defaultRPCSetting
 	config.API["GET"][QueryAllIdentityRecordVerifyRequests] = defaultRPCSetting
 	config.API["GET"][QuerySpendingPools] = defaultRPCSetting
+	config.API["GET"][QuerySpendingPoolProposals] = defaultRPCSetting
 
 	// endpoints that never change
 	defaultRPCSetting.CachingDuration = -1
