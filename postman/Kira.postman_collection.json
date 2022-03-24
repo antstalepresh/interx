@@ -2405,7 +2405,7 @@
 			"name": "Spending",
 			"item": [
 				{
-					"name": "Query All Roles",
+					"name": "Query All Pool Names",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -2442,6 +2442,153 @@
 								"api",
 								"kira",
 								"spending-pools"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool By Name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pools?name=ValidatorBasicRewardsPool",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pools"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "ValidatorBasicRewardsPool"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool Names by account",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pools?account=kira1qveg288t6n7yar4mhhmw7kqvxzq8q08xtz56mm",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pools"
+							],
+							"query": [
+								{
+									"key": "account",
+									"value": "kira1qveg288t6n7yar4mhhmw7kqvxzq8q08xtz56mm"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool Proposals By Name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pool-proposals?name=ValidatorBasicRewardsPool",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pool-proposals"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "ValidatorBasicRewardsPool"
+								}
 							]
 						}
 					},

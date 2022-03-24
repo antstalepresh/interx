@@ -1648,9 +1648,34 @@ func RegisterInterxFunctions() {
 		config.QuerySpendingPools,
 		`{
 			"description": "QuerySpendingPools is a function to query list of all spending pool names.",
+			"parameters": {
+				"account": {
+					"type":        "string",
+					"description": "This represents the kira account address.",
+					"optional": true
+				},
+				"name": {
+					"type":        "string",
+					"description": "This represents the pool name.",
+					"optional": true
+				}
+			},
 			"response": {
 				"names": {
-					"description": "The list of all spending pool names"
+					"description": "The list of all spending pools"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
+		"QuerySpendingPoolProposals",
+		config.QuerySpendingPoolProposals,
+		`{
+			"description": "QuerySpendingPoolProposals is a function to query list of all spending pool proposals.",
+			"response": {
+				"names": {
+					"description": "The list of all spending pool proposals"
 				}
 			}
 		}`,
