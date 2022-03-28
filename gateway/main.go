@@ -18,6 +18,7 @@ import (
 	kiraSpending "github.com/KiraCore/interx/proto-gen/kira/spending"
 	kiraStaking "github.com/KiraCore/interx/proto-gen/kira/staking"
 	kiraTokens "github.com/KiraCore/interx/proto-gen/kira/tokens"
+	kiraUbi "github.com/KiraCore/interx/proto-gen/kira/ubi"
 	kiraUpgrades "github.com/KiraCore/interx/proto-gen/kira/upgrade"
 	"github.com/KiraCore/interx/tasks"
 	functionmeta "github.com/KiraCore/sekai/function_meta"
@@ -102,6 +103,11 @@ func GetGrpcServeMux(grpcAddr string) (*runtime.ServeMux, error) {
 	}
 
 	err = kiraSpending.RegisterQueryHandler(context.Background(), gwCosmosmux, conn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register gateway: %w", err)
+	}
+
+	err = kiraUbi.RegisterQueryHandler(context.Background(), gwCosmosmux, conn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register gateway: %w", err)
 	}
