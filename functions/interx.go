@@ -1680,4 +1680,29 @@ func RegisterInterxFunctions() {
 			}
 		}`,
 	)
+
+	AddInterxFunction(
+		"QueryUBIRecords",
+		config.QueryUBIRecords,
+		`{
+			"description": "QueryUBIRecords is a function to query ubi records.",
+			"parameters": {
+				"name": {
+					"type":        "string",
+					"description": "This represents the pool name.",
+					"optional": true
+				}
+			},
+			"response": {
+				"records": {
+					"description": "All ubi records",
+					"optional": true
+				},
+				"record": {
+					"description": "ubi record",
+					"optional": true
+				}
+			}
+		}`,
+	)
 }
