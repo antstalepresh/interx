@@ -43,6 +43,8 @@ const (
 	QuerySpendingPools         = "/api/kira/spending-pools"
 	QuerySpendingPoolProposals = "/api/kira/spending-pool-proposals"
 
+	QueryUBIRecords = "/api/kira/ubi-records"
+
 	QueryInterxFunctions = "/api/metadata"
 
 	FaucetRequestURL         = "/api/faucet"
