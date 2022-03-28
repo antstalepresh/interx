@@ -24,13 +24,9 @@ function pcgConfigure() {
 BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD || echo "???")
 echoInfo "INFO: Reading InterxVersion from constans file, branch $BRANCH"
 
-FILE=./config/constants.go
-LINES=$(grep -Fn 'InterxVersion =' $FILE | cut -d : -f 1)
-mapfile -t LINES_ARR < <(echo "$LINES")
-LINE_NR=$(echo ${LINES_ARR[0]}) && (! $(isNaturalNumber $LINE_NR)) && LINE_NR="-1"
-[[ $LINE_NR -ge 0 ]] && LINE_CONTENT=$(sed "${LINE_NR}q;d" "$FILE") || LINE_CONTENT="InterxVersion = v0.0.0.0"
-CONTENT_ARR=(${LINE_CONTENT//=/ })
-VERSION=$(echo ${CONTENT_ARR[1]} | xargs || echo "v0.0.0.0")
+CONSTANS_FILE=./config/constants.go
+VERSION=$(grep -Fn -m 1 'InterxVersion ' $CONSTANS_FILE | rev | cut -d "=" -f1 | rev | xargs | tr -dc '[:alnum:]\-\.' || echo '')
+($(isNullOrEmpty "$VERSION")) && ( echoErr "ERROR: InterexVersion was NOT found in contants '$CONSTANS_FILE' !" && sleep 5 && exit 1 )
 
 function pcgRelease() {
     local ARCH="$1"
