@@ -1642,4 +1642,67 @@ func RegisterInterxFunctions() {
 			"description": "QueryInterxFunctions is a function to query interx functions."
 		}`,
 	)
+
+	AddInterxFunction(
+		"QuerySpendingPools",
+		config.QuerySpendingPools,
+		`{
+			"description": "QuerySpendingPools is a function to query list of all spending pool names.",
+			"parameters": {
+				"account": {
+					"type":        "string",
+					"description": "This represents the kira account address.",
+					"optional": true
+				},
+				"name": {
+					"type":        "string",
+					"description": "This represents the pool name.",
+					"optional": true
+				}
+			},
+			"response": {
+				"names": {
+					"description": "The list of all spending pools"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
+		"QuerySpendingPoolProposals",
+		config.QuerySpendingPoolProposals,
+		`{
+			"description": "QuerySpendingPoolProposals is a function to query list of all spending pool proposals.",
+			"response": {
+				"names": {
+					"description": "The list of all spending pool proposals"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
+		"QueryUBIRecords",
+		config.QueryUBIRecords,
+		`{
+			"description": "QueryUBIRecords is a function to query ubi records.",
+			"parameters": {
+				"name": {
+					"type":        "string",
+					"description": "This represents the pool name.",
+					"optional": true
+				}
+			},
+			"response": {
+				"records": {
+					"description": "All ubi records",
+					"optional": true
+				},
+				"record": {
+					"description": "ubi record",
+					"optional": true
+				}
+			}
+		}`,
+	)
 }

@@ -1,8 +1,8 @@
 package config
 
 const (
-	InterxVersion = "v0.4.1.1"
-	SekaiVersion  = "v0.1.23.1"
+	InterxVersion = "v0.4.2-rc.1"
+	SekaiVersion  = "v0.1.23-rc.6"
 	CosmosVersion = "v0.45.1"
 
 	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
@@ -28,6 +28,22 @@ const (
 	QueryKiraTokensRates      = "/api/kira/tokens/rates"
 	QueryKiraFunctions        = "/api/kira/metadata"
 	QueryKiraStatus           = "/api/kira/status"
+
+	QueryCurrentPlan = "/api/kira/upgrade/current_plan"
+	QueryNextPlan    = "/api/kira/upgrade/next_plan"
+
+	QueryIdentityRecord                          = "/api/kira/gov/identity_record/{id}"
+	QueryIdentityRecordsByAddress                = "/api/kira/gov/identity_records/{creator}"
+	QueryAllIdentityRecords                      = "/api/kira/gov/all_identity_records"
+	QueryIdentityRecordVerifyRequest             = "/api/kira/gov/identity_verify_record/{request_id}"
+	QueryIdentityRecordVerifyRequestsByRequester = "/api/kira/gov/identity_verify_requests_by_requester/{requester}"
+	QueryIdentityRecordVerifyRequestsByApprover  = "/api/kira/gov/identity_verify_requests_by_approver/{approver}"
+	QueryAllIdentityRecordVerifyRequests         = "/api/kira/gov/all_identity_verify_requests"
+
+	QuerySpendingPools         = "/api/kira/spending-pools"
+	QuerySpendingPoolProposals = "/api/kira/spending-pool-proposals"
+
+	QueryUBIRecords = "/api/kira/ubi-records"
 
 	QueryInterxFunctions = "/api/metadata"
 
@@ -55,17 +71,6 @@ const (
 	QuerySnapList            = "/api/snap_list"
 	QueryAddrBook            = "/api/addrbook"
 	QueryNetInfo             = "/api/net_info"
-
-	QueryCurrentPlan = "/api/kira/upgrade/current_plan"
-	QueryNextPlan    = "/api/kira/upgrade/next_plan"
-
-	QueryIdentityRecord                          = "/api/kira/gov/identity_record/{id}"
-	QueryIdentityRecordsByAddress                = "/api/kira/gov/identity_records/{creator}"
-	QueryAllIdentityRecords                      = "/api/kira/gov/all_identity_records"
-	QueryIdentityRecordVerifyRequest             = "/api/kira/gov/identity_verify_record/{request_id}"
-	QueryIdentityRecordVerifyRequestsByRequester = "/api/kira/gov/identity_verify_requests_by_requester/{requester}"
-	QueryIdentityRecordVerifyRequestsByApprover  = "/api/kira/gov/identity_verify_requests_by_approver/{approver}"
-	QueryAllIdentityRecordVerifyRequests         = "/api/kira/gov/all_identity_verify_requests"
 
 	Download              = "/download"
 	DataReferenceRegistry = "DRR"
