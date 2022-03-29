@@ -7,6 +7,7 @@ go mod tidy
 go mod verify
 
 PKG_CONFIG_FILE=./nfpm.yaml 
+VERSION=$(./scripts/version.sh)
 
 function pcgConfigure() {
     local ARCH="$1"
@@ -20,13 +21,6 @@ function pcgConfigure() {
     sed -i="" "s/\${PLATFORM}/$PLATFORM/" $CONFIG
     sed -i="" "s/\${SOURCE}/$SOURCE/" $CONFIG
 }
-
-BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD || echo "???")
-echoInfo "INFO: Reading InterxVersion from constans file, branch $BRANCH"
-
-CONSTANS_FILE=./config/constants.go
-VERSION=$(grep -Fn -m 1 'InterxVersion ' $CONSTANS_FILE | rev | cut -d "=" -f1 | rev | xargs | tr -dc '[:alnum:]\-\.' || echo '')
-($(isNullOrEmpty "$VERSION")) && ( echoErr "ERROR: InterexVersion was NOT found in contants '$CONSTANS_FILE' !" && sleep 5 && exit 1 )
 
 function pcgRelease() {
     local ARCH="$1"
