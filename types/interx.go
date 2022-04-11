@@ -21,7 +21,8 @@ type InterxStatus struct {
 		FaucetAddr        string     `jsong:"faucet_addr"`
 		GenesisChecksum   string     `json:"genesis_checksum"`
 		ChainID           string     `json:"chain_id"`
-		Version           string     `json:"version"`
+		InterxVersion     string     `json:"version,omitempty"`
+		SekaiVersion      string     `json:"sekai_version,omitempty"`
 		LatestBlockHeight string     `json:"latest_block_height"`
 		CatchingUp        bool       `json:"catching_up"`
 		Node              NodeConfig `json:"node"`

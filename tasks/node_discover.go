@@ -221,6 +221,42 @@ func QueryStatus(ipAddr string) (tmTypes.ResultStatus, error) {
 	return result, err
 }
 
+func getLatestBlock(rpcAddr string) (*struct {
+	Chainid string `json:"chain_id"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	url := fmt.Sprintf("%s/block", rpcAddr)
+	resp, err := http.Get(url)
+	if err != nil {
+		common.GetLogger().Error("[node-status] Unable to connect to ", url)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	result := new(struct {
+		Jsonrpc string `json:"jsonrpc"`
+		ID      int    `json:"id"`
+		Result  struct {
+			Block struct {
+				Header struct {
+					Chainid string `json:"chain_id"`
+					Height  string `json:"height"`
+					Time    string `json:"time"`
+				} `json:"header"`
+			} `json:"block"`
+		} `json:"result"`
+		Error interface{} `json:"error"`
+	})
+	err = json.NewDecoder(resp.Body).Decode(result)
+	if err != nil {
+		common.GetLogger().Error("[node-status] Unexpected response: ", url)
+		return nil, err
+	}
+
+	return &result.Result.Block.Header, nil
+}
+
 func NodeDiscover(rpcAddr string, isLog bool) {
 	initPrivateIps()
 
@@ -293,19 +329,21 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				continue
 			}
 
-			synced := false
-			blockDiff := common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
-			if blockDiff >= -BLOCK_DIFF_LIMIT && blockDiff <= BLOCK_DIFF_LIMIT {
-				synced = true
-			}
-
 			nodeInfo := types.P2PNode{}
 			nodeInfo.ID = string(kiraStatus.NodeInfo.ID())
 			nodeInfo.IP = ipAddr
 			nodeInfo.Port, _ = getPort(kiraStatus.NodeInfo.ListenAddr)
 			nodeInfo.Peers = []string{}
 			nodeInfo.Alive = true
-			nodeInfo.Synced = synced
+			nodeInfo.Synced = false
+			nodeInfo.BlockHeightAtSync = kiraStatus.SyncInfo.LatestBlockHeight
+			nodeInfo.BlockDiff = common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
+			if nodeInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && nodeInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+				nodeInfo.Synced = true
+			}
+
+			// TODO check common block hash
+			nodeInfo.Safe = kiraStatus.NodeInfo.Network == common.NodeStatus.Chainid
 
 			// verify p2p node_id via p2p connect
 			peerNodeInfo, ping := connect(p2p.NewNetAddressIPPort(parseIP(nodeInfo.IP), uint16(nodeInfo.Port)), timeout())
@@ -336,7 +374,10 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					privNodeInfo.Peers = []string{}
 					privNodeInfo.Peers = append(privNodeInfo.Peers, nodeInfo.ID)
 					privNodeInfo.Alive = true
-					privNodeInfo.Synced = synced
+					privNodeInfo.Synced = nodeInfo.Synced
+					privNodeInfo.BlockHeightAtSync = nodeInfo.BlockHeightAtSync
+					privNodeInfo.BlockDiff = nodeInfo.BlockDiff
+					privNodeInfo.Safe = nodeInfo.Safe
 
 					if _, ok := isLocalPeer[privNodeInfo.ID]; ok {
 						privNodeInfo.Connected = true
@@ -385,9 +426,18 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				interxInfo.Moniker = interxStatus.InterxInfo.Moniker
 				interxInfo.Faucet = interxStatus.InterxInfo.FaucetAddr
 				interxInfo.Type = interxStatus.InterxInfo.Node.NodeType
-				interxInfo.Version = interxStatus.InterxInfo.Version
+				interxInfo.InterxVersion = interxStatus.InterxInfo.InterxVersion
+				interxInfo.SekaiVersion = interxStatus.InterxInfo.SekaiVersion
 				interxInfo.Alive = true
-				interxInfo.Synced = synced
+				interxInfo.Synced = false
+				interxInfo.BlockHeightAtSync, _ = strconv.ParseInt(interxStatus.SyncInfo.LatestBlockHeight, 10, 64)
+				interxInfo.BlockDiff = common.NodeStatus.Block - interxInfo.BlockHeightAtSync
+				if interxInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && interxInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+					interxInfo.Synced = true
+				}
+
+				// TODO check common block hash
+				interxInfo.Safe = interxStatus.InterxInfo.ChainID == common.NodeStatus.Chainid
 
 				global.Mutex.Lock()
 				if pid, isIn := idOfInterxList[interxInfo.ID]; isIn {
@@ -408,7 +458,7 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					snapNode.Checksum = snapshotInfo.Checksum
 					snapNode.Size = snapshotInfo.Size
 					snapNode.Alive = true
-					snapNode.Synced = synced
+					snapNode.Synced = interxInfo.Synced
 
 					global.Mutex.Lock()
 					if pid, isIn := idOfSnapshotList[snapNode.IP]; isIn {
