@@ -27,10 +27,14 @@ jobs:
             shell: bash
             run: |
               chmod -Rv 555 ./scripts
+              VERSION_REGEX="^(v?)([0-9]+)\.([0-9]+)\.([0-9]+)(-?)([a-zA-Z]+)?(\.?([0-9]+)?)$"
+              REPOSITORY_NAME=${{ github.event.repository.name }}
               RELEASE_VER=$(./scripts/version.sh) && echo "RELEASE_VER=$RELEASE_VER" >> $GITHUB_ENV
-              echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
-              echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }} | tr / -)" >> $GITHUB_ENV
-              git ls-remote https://github.com/kiracore/${{ github.event.repository.name }} | egrep -q "refs/tags/${RELEASE_VER}$" && echo "RELEASE_EXISTS=true" >> $GITHUB_ENV || echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+              SOURCE_BRANCH="$(echo ${{ env.REF_BRANCH }})" && echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
+              DESTINATION_BRANCH="$(echo ${{ env.BASE_REF_BRANCH }})" && echo "DESTINATION_BRANCH=$DESTINATION_BRANCH" >> $GITHUB_ENV
+              git ls-remote https://github.com/kiracore/$REPOSITORY_NAME | egrep -q "refs/tags/${RELEASE_VER}$" && echo "RELEASE_EXISTS=true" >> $GITHUB_ENV || echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+              [[ "$SOURCE_BRANCH" =~ $VERSION_REGEX ]] && echo "SOURCE_VERSIONED=true" >> $GITHUB_ENV || echo "SOURCE_VERSIONED=false" >> $GITHUB_ENV
+              [[ "$DESTINATION_BRANCH" =~ $VERSION_REGEX ]] && echo "DESTINATION_VERSIONED=true" >> $GITHUB_ENV || echo "DESTINATION_VERSIONED=false" >> $GITHUB_ENV
           - name: Print debug data before publishing
             run: |
               echo "     Source branch: ${{ env.SOURCE_BRANCH }}"
