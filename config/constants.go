@@ -1,8 +1,8 @@
 package config
 
 const (
-	InterxVersion = "v0.4.3-rc.2"
-	SekaiVersion  = "v0.1.25-rc.10"
+	InterxVersion = "v0.4.5-rc.4"
+	SekaiVersion  = "v0.1.26-rc.11"
 	CosmosVersion = "v0.45.1"
 
 	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"

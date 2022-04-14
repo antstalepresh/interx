@@ -4,17 +4,17 @@ set -x
 . /etc/profile
 
 CURRENT_DIR=$(pwd)
-UTILS_VER=$(utilsVersion 2> /dev/null || echo "")
 GO_VER=$(go version 2> /dev/null || echo "")
 
-UTILS_OLD_VER="false" && [[ $(versionToNumber "$UTILS_VER" || echo "0") -ge $(versionToNumber "v0.0.11" || echo "1") ]] || UTILS_OLD_VER="true" 
+UTILS_VER=$(bashUtilsVersion 2> /dev/null || echo "")
+UTILS_OLD_VER="false" && [[ $(versionToNumber "$UTILS_VER" || echo "0") -ge $(versionToNumber "v0.1.2.3" || echo "1") ]] || UTILS_OLD_VER="true" 
 
 # Installing utils is essential to simplify the setup steps
 if [ "$UTILS_OLD_VER" == "true" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..." && sleep 2
-    KIRA_UTILS_BRANCH="v0.0.2" && cd /tmp && rm -fv ./i.sh && \
-    wget https://raw.githubusercontent.com/KiraCore/tools/$KIRA_UTILS_BRANCH/bash-utils/install.sh -O ./i.sh && \
-    chmod 777 ./i.sh && ./i.sh "$KIRA_UTILS_BRANCH" "/var/kiraglob" && . /etc/profile && loadGlobEnvs
+    KIRA_TOOLS_BRANCH="v0.1.0.7" && cd /tmp && rm -fv ./i.sh && \
+    wget https://github.com/KiraCore/tools/releases/download/$KIRA_TOOLS_BRANCH/bash-utils.sh -O ./i.sh && \
+    chmod 777 ./i.sh && ./i.sh bashUtilsSetup "/var/kiraglob" && . /etc/profile
 else
     echoInfo "INFO: KIRA utils are up to date, latest version $UTILS_VER" && sleep 2
 fi
