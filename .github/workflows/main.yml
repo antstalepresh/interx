@@ -26,18 +26,6 @@ jobs:
           # ref.: https://github.com/actions/checkout, v3.0.0
           - name: Checkout repository
             uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
-          - name: Checking dependency versions
-            run: |
-              echo "(current dir): $PWD" && ls -l ./
-              . /etc/profile && echo "Utils Version: $(utilsVersion)"
-              WORK_DIR=$PWD
-              BASE_DIR=$(basename "$WORK_DIR")
-              cd ../ && tar -czvf src.tar.gz -C ./$BASE_DIR . && cp ./src.tar.gz ./$BASE_DIR/src.tar.gz && cd ./$BASE_DIR
-              echo "(current dir): $PWD" && ls -l ./
-              go version
-              echo "ENVS: $(env)"
-              echo "HOME: $HOME"
-              echo " PWD: $PWD"
           - name: Extract branch name on push
             if: github.event_name == 'push'
             shell: bash
@@ -53,8 +41,11 @@ jobs:
             run: |
               echo "SOURCE_BRANCH=$(echo ${{ env.REF_BRANCH }})" >> $GITHUB_ENV
               echo "DESTINATION_BRANCH=$(echo ${{ env.BASE_REF_BRANCH }})" >> $GITHUB_ENV
-          - name: Inspecting & organizing artifacts
+          - name: Organizing environment variables & archiving source code
             run: |
+              WORK_DIR=$PWD
+              BASE_DIR=$(basename "$WORK_DIR")
+              cd ../ && tar -czvf src.tar.gz -C ./$BASE_DIR . && cp ./src.tar.gz ./$BASE_DIR/src.tar.gz && cd ./$BASE_DIR
               echo "(current dir): $PWD" && ls -l ./
               chmod -Rv 555 ./scripts
               RELEASE_VER="$(./scripts/version.sh)" && echo "RELEASE_VER=$RELEASE_VER" >> $GITHUB_ENV
@@ -70,6 +61,7 @@ jobs:
             run: |
               . /etc/profile
               go version
+              echo "Bash Utils Version: $(bashUtilsVersion)"
               echo "     Source branch: ${{ env.SOURCE_BRANCH }}"
               echo "Destination branch: ${{ env.DESTINATION_BRANCH }}"
               echo "        Event name: ${{ github.event_name }}"
@@ -88,7 +80,7 @@ jobs:
               make publish
               touch ./RELEASE.md
               cp -fv ./RELEASE.md ./bin/RELEASE.md
-              cp -fv ./src.tar.gz ./bin/src.tar.gz
+              cp -fv ./src.tar.gz ./bin/source-code.tar.gz
               chmod -Rv 777 ./bin
               echo -e "\n\r\n\r\`\`\`" >> ./bin/RELEASE.md
               echo -e "        Release Versions: $RELEASE_VER" >> ./bin/RELEASE.md
@@ -99,7 +91,7 @@ jobs:
               echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "              src.tar.gz: sha256:$(sha256sum ./bin/src.tar.gz | awk '{ print $1 }')" >> ./bin/RELEASE.md
+              echo "      source-code.tar.gz: sha256:$(sha256sum ./bin/source-code.tar.gz | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo -e "\`\`\`"   >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C ./bin .
           - name: Uploading artifacts
@@ -213,6 +205,7 @@ jobs:
                 ./interx-windows-amd64.exe.sig
                 ./interx-windows-arm64.exe
                 ./interx-windows-arm64.exe.sig
+                ./source-code.tar.gz
           - name: Cleanup all resources
             if: always()
             shell: bash
