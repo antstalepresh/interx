@@ -1,4 +1,5 @@
 
 Features:
-* Workflows refactoring to enable automated PR's
-* Include signatures in the release files
+* Included source-code in the release files
+* Added explicit info to README regarding signature verification with cosign
+* Updated proto-gen script to support latest bash-utils
