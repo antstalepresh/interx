@@ -221,15 +221,16 @@ func QueryStatus(ipAddr string) (tmTypes.ResultStatus, error) {
 	return result, err
 }
 
-func getLatestBlock(rpcAddr string) (*struct {
+func getBlock(rpcAddr string, height string) (*struct {
 	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
 	Height  string `json:"height"`
 	Time    string `json:"time"`
 }, error) {
-	url := fmt.Sprintf("%s/block", rpcAddr)
+	url := fmt.Sprintf("%s/block?height=%s", rpcAddr, height)
+	common.GetLogger().Info("getBlock", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		common.GetLogger().Error("[node-status] Unable to connect to ", url)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -238,6 +239,9 @@ func getLatestBlock(rpcAddr string) (*struct {
 		Jsonrpc string `json:"jsonrpc"`
 		ID      int    `json:"id"`
 		Result  struct {
+			BlockId struct {
+				Hash string `json:"hash"`
+			} `json:"block_id"`
 			Block struct {
 				Header struct {
 					Chainid string `json:"chain_id"`
@@ -254,7 +258,105 @@ func getLatestBlock(rpcAddr string) (*struct {
 		return nil, err
 	}
 
-	return &result.Result.Block.Header, nil
+	response := new(struct {
+		Chainid string `json:"chain_id"`
+		Hash    string `json:"hash"`
+		Height  string `json:"height"`
+		Time    string `json:"time"`
+	})
+
+	response.Chainid = result.Result.Block.Header.Chainid
+	response.Hash = result.Result.BlockId.Hash
+	response.Height = result.Result.Block.Header.Height
+	response.Time = result.Result.Block.Header.Time
+
+	return response, nil
+}
+
+func QueryBlock(ipAddr string, height string) (*struct {
+	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	result, err := getBlock("http://"+ipAddr+":16657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":26657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":36657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":46657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":56657", height)
+	if err == nil {
+		return result, err
+	}
+
+	return result, err
+}
+
+func getBlockFromInterx(rpcAddr string, height string) (*struct {
+	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	url := fmt.Sprintf("%s/api/block/%s", rpcAddr, height)
+	common.GetLogger().Info("getBlockFromInterx", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	result := new(struct {
+		Jsonrpc string `json:"jsonrpc"`
+		ID      int    `json:"id"`
+		Result  struct {
+			BlockId struct {
+				Hash string `json:"hash"`
+			} `json:"block_id"`
+			Block struct {
+				Header struct {
+					Chainid string `json:"chain_id"`
+					Height  string `json:"height"`
+					Time    string `json:"time"`
+				} `json:"header"`
+			} `json:"block"`
+		} `json:"result"`
+		Error interface{} `json:"error"`
+	})
+	err = json.NewDecoder(resp.Body).Decode(result)
+	if err != nil {
+		common.GetLogger().Error("[node-status] Unexpected response: ", url)
+		return nil, err
+	}
+
+	response := new(struct {
+		Chainid string `json:"chain_id"`
+		Hash    string `json:"hash"`
+		Height  string `json:"height"`
+		Time    string `json:"time"`
+	})
+
+	response.Chainid = result.Result.Block.Header.Chainid
+	response.Hash = result.Result.BlockId.Hash
+	response.Height = result.Result.Block.Header.Height
+	response.Time = result.Result.Block.Header.Time
+
+	return response, nil
 }
 
 func NodeDiscover(rpcAddr string, isLog bool) {
@@ -342,8 +444,19 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				nodeInfo.Synced = true
 			}
 
-			// TODO check common block hash
 			nodeInfo.Safe = kiraStatus.NodeInfo.Network == common.NodeStatus.Chainid
+
+			if nodeInfo.Safe {
+				commonBlock := common.NodeStatus.Block
+				if commonBlock > kiraStatus.SyncInfo.LatestBlockHeight {
+					commonBlock = kiraStatus.SyncInfo.LatestBlockHeight
+				}
+
+				localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+				nodeBlockInfo, _ := QueryBlock(ipAddr, strconv.Itoa(int(commonBlock)))
+
+				nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+			}
 
 			// verify p2p node_id via p2p connect
 			peerNodeInfo, ping := connect(p2p.NewNetAddressIPPort(parseIP(nodeInfo.IP), uint16(nodeInfo.Port)), timeout())
@@ -436,8 +549,19 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					interxInfo.Synced = true
 				}
 
-				// TODO check common block hash
 				interxInfo.Safe = interxStatus.InterxInfo.ChainID == common.NodeStatus.Chainid
+
+				if nodeInfo.Safe {
+					commonBlock := common.NodeStatus.Block
+					if commonBlock > interxInfo.BlockHeightAtSync {
+						commonBlock = interxInfo.BlockHeightAtSync
+					}
+
+					localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+					nodeBlockInfo, _ := getBlockFromInterx(getInterxAddress(ipAddr), strconv.Itoa(int(commonBlock)))
+
+					nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+				}
 
 				global.Mutex.Lock()
 				if pid, isIn := idOfInterxList[interxInfo.ID]; isIn {
