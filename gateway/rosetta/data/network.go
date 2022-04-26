@@ -102,47 +102,14 @@ func QueryNetworkListRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http
 }
 
 func queryNetworkOptionsHandler(r *http.Request, request types.InterxRequest, rpcAddr string, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	var req dataapi.NetworkOptionsRequest
-
-	err := json.Unmarshal(request.Params, &req)
-	if err != nil {
-		common.GetLogger().Error("[rosetta-query-networkoptions] Failed to decode the request: ", err)
-		return common.RosettaServeError(0, "failed to unmarshal", err.Error(), http.StatusBadRequest)
-	}
-
 	var response dataapi.NetworkOptionsResponse
 
-	success, failure, status := common.MakeTendermintRPCRequest(rpcAddr, "/status", "")
-
-	if success != nil {
-		type TempResponse struct {
-			NodeInfo struct {
-				Version string `json:"version"`
-			} `json:"node_info"`
-		}
-		result := TempResponse{}
-
-		byteData, err := json.Marshal(success)
-		if err != nil {
-			common.GetLogger().Error("[rosetta-query-networkoptions] Invalid response format", err)
-			return common.RosettaServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		err = json.Unmarshal(byteData, &result)
-		if err != nil {
-			common.GetLogger().Error("[rosetta-query-networkoptions] Invalid response format", err)
-			return common.RosettaServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		response.Version = rosetta.Version{
-			NodeVersion:       result.NodeInfo.Version,
-			MiddlewareVersion: config.Config.Version,
-		}
-
-		return response, nil, http.StatusOK
+	response.Version = rosetta.Version{
+		NodeVersion:       config.Config.SekaiVersion,
+		MiddlewareVersion: config.Config.InterxVersion,
 	}
 
-	return nil, failure, status
+	return response, nil, http.StatusOK
 }
 
 // QueryNetworkOptionsRequest is a function to query network options.

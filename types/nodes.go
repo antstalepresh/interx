@@ -32,26 +32,33 @@ type AddrBookJSON struct {
 }
 
 type P2PNode struct {
-	ID        string   `json:"id"`
-	IP        string   `json:"ip"`
-	Port      uint16   `json:"port"`
-	Ping      int64    `json:"ping"`
-	Connected bool     `json:"connected"`
-	Peers     []string `json:"peers"`
-	Alive     bool     `json:"alive"`
-	Synced    bool     `json:"synced"`
+	ID                string   `json:"id"`
+	IP                string   `json:"ip"`
+	Port              uint16   `json:"port"`
+	Ping              int64    `json:"ping"`
+	Connected         bool     `json:"connected"`
+	Peers             []string `json:"peers"`
+	Alive             bool     `json:"alive"`
+	Synced            bool     `json:"synced"`
+	Safe              bool     `json:"safe"`
+	BlockHeightAtSync int64    `json:"block_height_at_sync"`
+	BlockDiff         int64    `json:"block_diff"`
 }
 
 type InterxNode struct {
-	ID      string `json:"id"`
-	IP      string `json:"ip"`
-	Ping    int64  `json:"ping"`
-	Moniker string `json:"moniker"`
-	Faucet  string `json:"faucet"`
-	Type    string `json:"type"`
-	Version string `json:"version"`
-	Alive   bool   `json:"alive"`
-	Synced  bool   `json:"synced"`
+	ID                string `json:"id"`
+	IP                string `json:"ip"`
+	Ping              int64  `json:"ping"`
+	Moniker           string `json:"moniker"`
+	Faucet            string `json:"faucet"`
+	Type              string `json:"type"`
+	InterxVersion     string `json:"interx_version"`
+	SekaiVersion      string `json:"sekai_version"`
+	Alive             bool   `json:"alive"`
+	Synced            bool   `json:"synced"`
+	Safe              bool   `json:"safe"`
+	BlockHeightAtSync int64  `json:"block_height_at_sync"`
+	BlockDiff         int64  `json:"block_diff"`
 }
 
 type SnapNode struct {

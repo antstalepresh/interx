@@ -221,6 +221,144 @@ func QueryStatus(ipAddr string) (tmTypes.ResultStatus, error) {
 	return result, err
 }
 
+func getBlock(rpcAddr string, height string) (*struct {
+	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	url := fmt.Sprintf("%s/block?height=%s", rpcAddr, height)
+	common.GetLogger().Info("getBlock", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	result := new(struct {
+		Jsonrpc string `json:"jsonrpc"`
+		ID      int    `json:"id"`
+		Result  struct {
+			BlockId struct {
+				Hash string `json:"hash"`
+			} `json:"block_id"`
+			Block struct {
+				Header struct {
+					Chainid string `json:"chain_id"`
+					Height  string `json:"height"`
+					Time    string `json:"time"`
+				} `json:"header"`
+			} `json:"block"`
+		} `json:"result"`
+		Error interface{} `json:"error"`
+	})
+	err = json.NewDecoder(resp.Body).Decode(result)
+	if err != nil {
+		common.GetLogger().Error("[node-status] Unexpected response: ", url)
+		return nil, err
+	}
+
+	response := new(struct {
+		Chainid string `json:"chain_id"`
+		Hash    string `json:"hash"`
+		Height  string `json:"height"`
+		Time    string `json:"time"`
+	})
+
+	response.Chainid = result.Result.Block.Header.Chainid
+	response.Hash = result.Result.BlockId.Hash
+	response.Height = result.Result.Block.Header.Height
+	response.Time = result.Result.Block.Header.Time
+
+	return response, nil
+}
+
+func QueryBlock(ipAddr string, height string) (*struct {
+	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	result, err := getBlock("http://"+ipAddr+":16657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":26657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":36657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":46657", height)
+	if err == nil {
+		return result, err
+	}
+
+	result, err = getBlock("http://"+ipAddr+":56657", height)
+	if err == nil {
+		return result, err
+	}
+
+	return result, err
+}
+
+func getBlockFromInterx(rpcAddr string, height string) (*struct {
+	Chainid string `json:"chain_id"`
+	Hash    string `json:"hash"`
+	Height  string `json:"height"`
+	Time    string `json:"time"`
+}, error) {
+	url := fmt.Sprintf("%s/api/block/%s", rpcAddr, height)
+	common.GetLogger().Info("getBlockFromInterx", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	result := new(struct {
+		Jsonrpc string `json:"jsonrpc"`
+		ID      int    `json:"id"`
+		Result  struct {
+			BlockId struct {
+				Hash string `json:"hash"`
+			} `json:"block_id"`
+			Block struct {
+				Header struct {
+					Chainid string `json:"chain_id"`
+					Height  string `json:"height"`
+					Time    string `json:"time"`
+				} `json:"header"`
+			} `json:"block"`
+		} `json:"result"`
+		Error interface{} `json:"error"`
+	})
+	err = json.NewDecoder(resp.Body).Decode(result)
+	if err != nil {
+		common.GetLogger().Error("[node-status] Unexpected response: ", url)
+		return nil, err
+	}
+
+	response := new(struct {
+		Chainid string `json:"chain_id"`
+		Hash    string `json:"hash"`
+		Height  string `json:"height"`
+		Time    string `json:"time"`
+	})
+
+	response.Chainid = result.Result.Block.Header.Chainid
+	response.Hash = result.Result.BlockId.Hash
+	response.Height = result.Result.Block.Header.Height
+	response.Time = result.Result.Block.Header.Time
+
+	return response, nil
+}
+
 func NodeDiscover(rpcAddr string, isLog bool) {
 	initPrivateIps()
 
@@ -293,19 +431,32 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				continue
 			}
 
-			synced := false
-			blockDiff := common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
-			if blockDiff >= -BLOCK_DIFF_LIMIT && blockDiff <= BLOCK_DIFF_LIMIT {
-				synced = true
-			}
-
 			nodeInfo := types.P2PNode{}
 			nodeInfo.ID = string(kiraStatus.NodeInfo.ID())
 			nodeInfo.IP = ipAddr
 			nodeInfo.Port, _ = getPort(kiraStatus.NodeInfo.ListenAddr)
 			nodeInfo.Peers = []string{}
 			nodeInfo.Alive = true
-			nodeInfo.Synced = synced
+			nodeInfo.Synced = false
+			nodeInfo.BlockHeightAtSync = kiraStatus.SyncInfo.LatestBlockHeight
+			nodeInfo.BlockDiff = common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
+			if nodeInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && nodeInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+				nodeInfo.Synced = true
+			}
+
+			nodeInfo.Safe = kiraStatus.NodeInfo.Network == common.NodeStatus.Chainid
+
+			if nodeInfo.Safe {
+				commonBlock := common.NodeStatus.Block
+				if commonBlock > kiraStatus.SyncInfo.LatestBlockHeight {
+					commonBlock = kiraStatus.SyncInfo.LatestBlockHeight
+				}
+
+				localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+				nodeBlockInfo, _ := QueryBlock(ipAddr, strconv.Itoa(int(commonBlock)))
+
+				nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+			}
 
 			// verify p2p node_id via p2p connect
 			peerNodeInfo, ping := connect(p2p.NewNetAddressIPPort(parseIP(nodeInfo.IP), uint16(nodeInfo.Port)), timeout())
@@ -336,7 +487,10 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					privNodeInfo.Peers = []string{}
 					privNodeInfo.Peers = append(privNodeInfo.Peers, nodeInfo.ID)
 					privNodeInfo.Alive = true
-					privNodeInfo.Synced = synced
+					privNodeInfo.Synced = nodeInfo.Synced
+					privNodeInfo.BlockHeightAtSync = nodeInfo.BlockHeightAtSync
+					privNodeInfo.BlockDiff = nodeInfo.BlockDiff
+					privNodeInfo.Safe = nodeInfo.Safe
 
 					if _, ok := isLocalPeer[privNodeInfo.ID]; ok {
 						privNodeInfo.Connected = true
@@ -385,9 +539,29 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				interxInfo.Moniker = interxStatus.InterxInfo.Moniker
 				interxInfo.Faucet = interxStatus.InterxInfo.FaucetAddr
 				interxInfo.Type = interxStatus.InterxInfo.Node.NodeType
-				interxInfo.Version = interxStatus.InterxInfo.Version
+				interxInfo.InterxVersion = interxStatus.InterxInfo.InterxVersion
+				interxInfo.SekaiVersion = interxStatus.InterxInfo.SekaiVersion
 				interxInfo.Alive = true
-				interxInfo.Synced = synced
+				interxInfo.Synced = false
+				interxInfo.BlockHeightAtSync, _ = strconv.ParseInt(interxStatus.SyncInfo.LatestBlockHeight, 10, 64)
+				interxInfo.BlockDiff = common.NodeStatus.Block - interxInfo.BlockHeightAtSync
+				if interxInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && interxInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+					interxInfo.Synced = true
+				}
+
+				interxInfo.Safe = interxStatus.InterxInfo.ChainID == common.NodeStatus.Chainid
+
+				if nodeInfo.Safe {
+					commonBlock := common.NodeStatus.Block
+					if commonBlock > interxInfo.BlockHeightAtSync {
+						commonBlock = interxInfo.BlockHeightAtSync
+					}
+
+					localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+					nodeBlockInfo, _ := getBlockFromInterx(getInterxAddress(ipAddr), strconv.Itoa(int(commonBlock)))
+
+					nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+				}
 
 				global.Mutex.Lock()
 				if pid, isIn := idOfInterxList[interxInfo.ID]; isIn {
@@ -408,7 +582,7 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					snapNode.Checksum = snapshotInfo.Checksum
 					snapNode.Size = snapshotInfo.Size
 					snapNode.Alive = true
-					snapNode.Synced = synced
+					snapNode.Synced = interxInfo.Synced
 
 					global.Mutex.Lock()
 					if pid, isIn := idOfSnapshotList[snapNode.IP]; isIn {

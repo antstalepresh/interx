@@ -108,7 +108,8 @@ func queryStatusHandle(rpcAddr string) (interface{}, interface{}, int) {
 	result.InterxInfo.GenesisChecksum = checksum
 	result.InterxInfo.ChainID = genesis.ChainID
 
-	result.InterxInfo.Version = config.Config.Version
+	result.InterxInfo.InterxVersion = config.Config.InterxVersion
+	result.InterxInfo.SekaiVersion = config.Config.SekaiVersion
 
 	return result, nil, http.StatusOK
 }

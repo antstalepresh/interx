@@ -41,7 +41,6 @@ func main() {
 
 	homeDir, _ := os.UserHomeDir()
 	initHomePtr := initCommand.String("home", homeDir+"/.interxd", "The interx configuration path.")
-	initVersion := initCommand.String("version", config.InterxVersion, "The interxd version")
 	initServeHTTPS := initCommand.Bool("serve_https", false, "http or https.")
 	initGrpcPtr := initCommand.String("grpc", "dns:///0.0.0.0:9090", "The grpc endpoint of the sekaid.")
 	initRPCPtr := initCommand.String("rpc", "http://0.0.0.0:26657", "The rpc endpoint of the sekaid.")
@@ -124,7 +123,6 @@ func main() {
 				}
 
 				config.InitConfig(
-					*initVersion,
 					*initHomePtr+"/config.json",
 					*initServeHTTPS,
 					*initGrpcPtr,
