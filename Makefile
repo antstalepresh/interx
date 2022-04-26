@@ -1,3 +1,5 @@
+.PHONY: proto-gen build publish install start
+
 proto-gen:
 	./scripts/proto-gen.sh
 

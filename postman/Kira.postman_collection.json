@@ -33,7 +33,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/auth/accounts/kira1gaadckc6g8ne62dzmscgyqkx3sd5p26wrapekd",
+							"raw": "http://0.0.0.0:11000/api/cosmos/auth/accounts/kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -47,7 +47,7 @@
 								"cosmos",
 								"auth",
 								"accounts",
-								"kira1gaadckc6g8ne62dzmscgyqkx3sd5p26wrapekd"
+								"kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2"
 							]
 						}
 					},
@@ -78,7 +78,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/bank/balances/kira1gaadckc6g8ne62dzmscgyqkx3sd5p26wrapekd",
+							"raw": "http://0.0.0.0:11000/api/cosmos/bank/balances/kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2?offset=3",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -92,7 +92,13 @@
 								"cosmos",
 								"bank",
 								"balances",
-								"kira1gaadckc6g8ne62dzmscgyqkx3sd5p26wrapekd"
+								"kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "3"
+								}
 							]
 						}
 					},
@@ -2301,6 +2307,10 @@
 			"name": "Role",
 			"item": [
 				{
+					"name": "New Folder",
+					"item": []
+				},
+				{
 					"name": "Query All Roles",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -2384,6 +2394,298 @@
 								"gov",
 								"roles_by_address",
 								"kira1s7g4hmm6zjr5pk6zjvmxc654nntdahecr9cqej"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Spending",
+			"item": [
+				{
+					"name": "Query All Pool Names",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pools",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pools"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool By Name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pools?name=ValidatorBasicRewardsPool",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pools"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "ValidatorBasicRewardsPool"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool Names by account",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pools?account=kira1qveg288t6n7yar4mhhmw7kqvxzq8q08xtz56mm",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pools"
+							],
+							"query": [
+								{
+									"key": "account",
+									"value": "kira1qveg288t6n7yar4mhhmw7kqvxzq8q08xtz56mm"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Pool Proposals By Name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/spending-pool-proposals?name=ValidatorBasicRewardsPool",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"spending-pool-proposals"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "ValidatorBasicRewardsPool"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ubi",
+			"item": [
+				{
+					"name": "Query UBI records",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/ubi-records",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"ubi-records"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query UBI record by name",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/kira/ubi-records?name=ValidatorBasicRewardsPoolUBI",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"kira",
+								"ubi-records"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "ValidatorBasicRewardsPoolUBI"
+								}
 							]
 						}
 					},
