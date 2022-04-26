@@ -495,3 +495,18 @@ POST http://0.0.0.0:11000/api/cosmos/txs
 | contact           | `string` | Email address or URL to a submission form                                                                         |
 | validator-node-id | `string` | node id of your validator node (required if you want your node to be present in the network visualizer)           |
 | sentry-node-id    | `string` | comma separated list of sentry node ids (required if you want your nodes to be present in the network visualizer) |
+
+## Caching Configurations of RPC methods
+
+### `/api/rpc_methods` contains caching information for all endpoints
+- caching_blocks: integer defining number of blocks that the response data will  be preserved
+- caching_time: integer defining time in seconds that the response data will be preserved for
+- caching_enabled: boolean if caching is enabled or not
+Here `0` represents no caching, `-1` represents infinit caching, `positive integer` represetns the caching time or number of blocks
+Remember this settings when you set/update manually from `config.json`.
+
+### Additionally `config.json` file contains `cache-size-limit` config param which represents the cache size limit in bytes. If cache reaches the limit, it will randomly delete folders/files.
+
+### How to update caching configurations
+All caching configurations are set in `config.json` file.
+`config.json` file includes `rpc_methods` field and there you can set/update caching config of each endpoint.

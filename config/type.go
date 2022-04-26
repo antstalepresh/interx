@@ -55,7 +55,8 @@ type NodeDiscoveryConfig struct {
 
 // InterxConfig is a struct to be used for interx configuration
 type InterxConfig struct {
-	Version       string              `json:"version"`
+	InterxVersion string              `json:"interx_version"`
+	SekaiVersion  string              `json:"sekai_version"`
 	ServeHTTPS    bool                `json:"serve_https"`
 	GRPC          string              `json:"grpc"`
 	RPC           string              `json:"rpc"`
@@ -77,7 +78,6 @@ type InterxConfig struct {
 
 // InterxConfigFromFile is a struct to be used for interx configuration file
 type InterxConfigFromFile struct {
-	Version       string              `json:"version"`
 	ServeHTTPS    bool                `json:"serve_https"`
 	GRPC          string              `json:"grpc"`
 	RPC           string              `json:"rpc"`

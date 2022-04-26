@@ -79,7 +79,7 @@ func LoadConfig(configFilePath string) {
 	}
 
 	// Interx Main Configuration
-	Config.Version = configFromFile.Version
+	Config.InterxVersion = InterxVersion
 	Config.ServeHTTPS = configFromFile.ServeHTTPS
 	Config.GRPC = configFromFile.GRPC
 	Config.RPC = configFromFile.RPC
@@ -88,7 +88,7 @@ func LoadConfig(configFilePath string) {
 
 	Config.Node = configFromFile.Node
 
-	fmt.Println("Interx Version: ", Config.Version)
+	fmt.Println("Interx Version: ", Config.InterxVersion)
 	fmt.Println("Interx GRPC: ", Config.GRPC)
 	fmt.Println("Interx RPC : ", Config.RPC)
 	fmt.Println("Interx PORT: ", Config.PORT)
