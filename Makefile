@@ -16,3 +16,6 @@ start:
 publish:
 	./scripts/proto-gen.sh
 	./scripts/publish.sh
+
+test:
+	./scripts/test.sh
