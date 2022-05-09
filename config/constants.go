@@ -5,6 +5,8 @@ const (
 	SekaiVersion  = "v0.1.26-rc.11"
 	CosmosVersion = "v0.45.1"
 
+	QueryDashboard = "/api/dashboard"
+
 	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
 	QueryTotalSupply     = "/api/cosmos/bank/supply"
 	QueryBalances        = "/api/cosmos/bank/balances/{address}"
