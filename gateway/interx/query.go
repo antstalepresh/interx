@@ -208,7 +208,14 @@ func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime
 			CurrentTransactions int     `json:"current_transactions"`
 			LatestTime          float64 `json:"latest_time"`
 			AverageTime         float64 `json:"average_time"`
-		}
+		} `json:"blocks"`
+		Proposals struct {
+			Total      int `json:"total"`
+			Active     int `json:"active"`
+			Enacting   int `json:"enacting"`
+			Finished   int `json:"finished"`
+			Successful int `json:"successful"`
+		} `json:"proposals"`
 	}{}
 
 	result, failure, status := queryConsensusHandle(r.Clone(r.Context()), gwCosmosmux, rpcAddr)
@@ -266,6 +273,12 @@ func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime
 
 	// average time
 	res.Blocks.AverageTime = consensus.AverageBlockTime
+
+	res.Proposals.Total = tasks.AllProposals.Status.TotalProposals
+	res.Proposals.Active = tasks.AllProposals.Status.ActiveProposals
+	res.Proposals.Enacting = tasks.AllProposals.Status.EnactingProposals
+	res.Proposals.Finished = tasks.AllProposals.Status.FinishedProposals
+	res.Proposals.Successful = tasks.AllProposals.Status.SuccessfulProposals
 
 	return res, nil, http.StatusOK
 }
