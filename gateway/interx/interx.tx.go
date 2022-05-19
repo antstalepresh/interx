@@ -460,6 +460,44 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 			}
 		}
 
+		if len(txResponses) == 0 {
+			for _, event := range transaction.TxResult.GetEvents() {
+				if event.GetType() == "transfer" {
+					tx := types.DepositWithdrawTransaction{
+						Address: "",
+						Type:    txType,
+						Denom:   "",
+						Amount:  0,
+					}
+
+					attributes := event.GetAttributes()
+					for _, attribute := range attributes {
+						key := string(attribute.GetKey())
+						value := string(attribute.GetValue())
+						if key == "sender" {
+							if isWithdraw {
+								tx.Address = value
+							}
+						} else if key == "recipient" {
+							if !isWithdraw {
+								tx.Address = value
+							}
+						} else if key == "amount" {
+
+							coin, err := sdk.ParseCoinNormalized(value)
+							if err == nil {
+								tx.Denom = coin.Denom
+								tx.Amount = coin.Amount.Int64()
+							}
+
+						}
+					}
+
+					txResponses = append(txResponses, tx)
+				}
+			}
+		}
+
 		txResults[fmt.Sprintf("0x%X", transaction.Hash)] = types.DepositWithdrawResult{
 			Time: blockTime,
 			Txs:  txResponses,
