@@ -39,3 +39,25 @@ type Vote struct {
 	Voter      string `json:"voter"`
 	Option     string `json:"option"`
 }
+
+type Proposal struct {
+	ProposalID string `json:"proposal_id"`
+	Result     string `json:"result"`
+}
+
+type ProposalUserCount struct {
+	Proposers string `json:"proposers"`
+	Voters    string `json:"voters"`
+}
+
+type AllProposals struct {
+	Status struct {
+		TotalProposals      int `json:"total_proposals"`
+		ActiveProposals     int `json:"active_proposals"`
+		EnactingProposals   int `json:"enacting_proposals"`
+		FinishedProposals   int `json:"finished_proposals"`
+		SuccessfulProposals int `json:"successful_proposals"`
+	} `json:"status"`
+	Proposals []Proposal        `json:"proposals"`
+	Users     ProposalUserCount `json:"users"`
+}

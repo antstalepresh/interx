@@ -453,3 +453,36 @@ func GetSnapshotInfo(interxAddr string) *types.SnapShotChecksumResponse {
 
 	return nil
 }
+
+// GetBlockchain is a function to get block nano time
+func GetBlockchain(rpcAddr string) (*tmTypes.ResultBlockchainInfo, error) {
+	endpoint := fmt.Sprintf("%s/blockchain", rpcAddr)
+	resp, err := http.Get(endpoint)
+	if err != nil {
+		GetLogger().Error("[rpc-call] Unable to connect to ", endpoint)
+		return nil, fmt.Errorf("Blockchain query error")
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(resp.Body)
+
+	response := new(tmJsonRPCTypes.RPCResponse)
+
+	if err := json.Unmarshal(respBody, response); err != nil {
+		GetLogger().Error("[rpc-call] Unable to decode response: ", err)
+		return nil, err
+	}
+
+	if response.Error != nil {
+		GetLogger().Error("[rpc-call] Blockchain query fail ")
+		return nil, fmt.Errorf("Blockchain query error")
+	}
+
+	result := new(tmTypes.ResultBlockchainInfo)
+	if err := tmjson.Unmarshal(response.Result, result); err != nil {
+		GetLogger().Error("[rpc-call] Unable to decode response: ", err)
+		return nil, err
+	}
+
+	return result, nil
+}

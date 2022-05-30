@@ -310,12 +310,14 @@ func queryConsensusHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, rpcAdd
 		response.Noncommits = make([]string, 0)
 
 		for i, vote := range roundState.LastCommit.Votes {
-			if strings.Contains(vote, "PRECOMMIT") {
-				response.Precommits = append(response.Precommits, validators[i])
-			} else if strings.Contains(vote, "PREVOTE") {
-				response.Prevotes = append(response.Prevotes, validators[i])
-			} else {
-				response.Noncommits = append(response.Noncommits, validators[i])
+			if i < len(validators) {
+				if strings.Contains(vote, "PRECOMMIT") {
+					response.Precommits = append(response.Precommits, validators[i])
+				} else if strings.Contains(vote, "PREVOTE") {
+					response.Prevotes = append(response.Prevotes, validators[i])
+				} else {
+					response.Noncommits = append(response.Noncommits, validators[i])
+				}
 			}
 		}
 

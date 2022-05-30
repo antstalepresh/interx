@@ -4,12 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	functions "github.com/KiraCore/interx/functions"
 	"github.com/KiraCore/interx/tasks"
 	"github.com/KiraCore/interx/types"
+	"github.com/KiraCore/interx/types/kira"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 )
@@ -21,6 +23,7 @@ func RegisterInterxQueryRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpc
 	r.HandleFunc(config.QueryStatus, QueryStatusRequest(rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryAddrBook, QueryAddrBook(rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryNetInfo, QueryNetInfo(rpcAddr)).Methods("GET")
+	r.HandleFunc(config.QueryDashboard, QueryDashboard(rpcAddr, gwCosmosmux)).Methods("GET")
 
 	common.AddRPCMethod("GET", config.QueryInterxFunctions, "This is an API to query interx functions.", true)
 	common.AddRPCMethod("GET", config.QueryStatus, "This is an API to query interx status.", true)
@@ -178,6 +181,120 @@ func QueryNetInfo(rpcAddr string) http.HandlerFunc {
 		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryNetInfoHandler(rpcAddr)
+
+		common.WrapResponse(w, request, *response, statusCode, false)
+	}
+}
+
+func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	res := struct {
+		ConsensusHealth       string `json:"consensus_health"`
+		CurrentBlockValidator struct {
+			Moniker string `json:"moniker"`
+			Address string `json:"address"`
+		} `json:"current_block_validator"`
+		Validators struct {
+			ActiveValidators   int `json:"active_validators"`
+			PausedValidators   int `json:"paused_validators"`
+			InactiveValidators int `json:"inactive_validators"`
+			JailedValidators   int `json:"jailed_validators"`
+			TotalValidators    int `json:"total_validators"`
+			WaitingValidators  int `json:"waiting_validators"`
+		} `json:"validators"`
+		Blocks struct {
+			CurrentHeight       int     `json:"current_height"`
+			SinceGenesis        int     `json:"since_genesis"`
+			PendingTransactions int     `json:"pending_transactions"`
+			CurrentTransactions int     `json:"current_transactions"`
+			LatestTime          float64 `json:"latest_time"`
+			AverageTime         float64 `json:"average_time"`
+		} `json:"blocks"`
+		Proposals struct {
+			Total      int    `json:"total"`
+			Active     int    `json:"active"`
+			Enacting   int    `json:"enacting"`
+			Finished   int    `json:"finished"`
+			Successful int    `json:"successful"`
+			Proposers  string `json:"proposers"`
+			Voters     string `json:"voters"`
+		} `json:"proposals"`
+	}{}
+
+	result, failure, status := queryConsensusHandle(r.Clone(r.Context()), gwCosmosmux, rpcAddr)
+	if failure != nil {
+		return nil, failure, status
+	}
+	consensus := result.(kira.ConsensusResponse)
+
+	// consensus health
+	res.ConsensusHealth = consensus.ConsensusHealth
+
+	// current block validator
+	for _, validator := range tasks.AllValidators.Validators {
+		if validator.Address == consensus.Proposer {
+			res.CurrentBlockValidator.Moniker = validator.Moniker
+			res.CurrentBlockValidator.Address = validator.Address
+		}
+	}
+
+	// validators
+	res.Validators = tasks.AllValidators.Status
+
+	// current height
+	sentryStatus := common.GetKiraStatus((rpcAddr))
+	res.Blocks.CurrentHeight, _ = strconv.Atoi(sentryStatus.SyncInfo.LatestBlockHeight)
+
+	// since genesis
+	earliestBlockHeight, _ := strconv.Atoi(sentryStatus.SyncInfo.EarliestBlockHeight)
+	res.Blocks.SinceGenesis = res.Blocks.CurrentHeight - earliestBlockHeight
+
+	// pending transactions
+	result, failure, status = queryUnconfirmedTransactionsHandler(rpcAddr, r.Clone(r.Context()))
+	if failure != nil {
+		return nil, failure, status
+	}
+	unconfirmedTxs := result.(struct {
+		Count      int                                  `json:"n_txs"`
+		Total      int                                  `json:"total"`
+		TotalBytes int64                                `json:"total_bytes"`
+		Txs        []types.TransactionUnconfirmedResult `json:"txs"`
+	})
+	res.Blocks.PendingTransactions = unconfirmedTxs.Total
+
+	// current transactions
+	blockchain, err := common.GetBlockchain(rpcAddr)
+	if err != nil {
+		return nil, nil, http.StatusInternalServerError
+	}
+	res.Blocks.CurrentTransactions = blockchain.BlockMetas[0].NumTxs
+
+	// latest time
+	res.Blocks.LatestTime = blockchain.BlockMetas[0].Header.Time.Sub(
+		blockchain.BlockMetas[1].Header.Time,
+	).Seconds()
+
+	// average time
+	res.Blocks.AverageTime = consensus.AverageBlockTime
+
+	res.Proposals.Total = tasks.AllProposals.Status.TotalProposals
+	res.Proposals.Active = tasks.AllProposals.Status.ActiveProposals
+	res.Proposals.Enacting = tasks.AllProposals.Status.EnactingProposals
+	res.Proposals.Finished = tasks.AllProposals.Status.FinishedProposals
+	res.Proposals.Successful = tasks.AllProposals.Status.SuccessfulProposals
+	res.Proposals.Proposers = tasks.AllProposals.Users.Proposers
+	res.Proposals.Voters = tasks.AllProposals.Users.Voters
+
+	return res, nil, http.StatusOK
+}
+
+// QueryDashboard is a function to query dashboard info.
+func QueryDashboard(rpcAddr string, gwCosmosmux *runtime.ServeMux) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+		statusCode := http.StatusOK
+
+		response.Response, response.Error, statusCode = queryDashboardHandler(rpcAddr, r, gwCosmosmux)
 
 		common.WrapResponse(w, request, *response, statusCode, false)
 	}
