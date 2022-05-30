@@ -116,9 +116,12 @@ for dir in $proto_dirs; do
     for fil in $proto_fils; do
         sed -i="" 's/, (gogoproto.castrepeated) = \"github.com\/cosmos\/cosmos-sdk\/types.Coins\"//g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
         sed -i="" 's/github.com\/cosmos\/cosmos-sdk\/x/github.com\/KiraCore\/interx\/proto-gen\/cosmos/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+        sed -i="" 's/\[(gogoproto.stdtime) = true, (gogoproto.nullable) = false\]/\[(gogoproto.stdtime) = true, (gogoproto.nullable) = false, (gogoproto.moretags) = \"yaml:\\\"date\\\"\"\]/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
         sed -i="" 's/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/types/github.com\/KiraCore\/interx\/proto-gen\/cosmos\/auth\/v1beta1/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
     done
 done
+
+sed -i="" 's/message IdentityRecord {/message IdentityRecord \{\n  option (gogoproto.goproto_getters) = false;/g' ./proto/kira/gov/identity_registrar.proto || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
 
 echoInfo "Generating protobuf files..."
 for dir in $proto_dirs; do
