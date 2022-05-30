@@ -210,11 +210,13 @@ func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime
 			AverageTime         float64 `json:"average_time"`
 		} `json:"blocks"`
 		Proposals struct {
-			Total      int `json:"total"`
-			Active     int `json:"active"`
-			Enacting   int `json:"enacting"`
-			Finished   int `json:"finished"`
-			Successful int `json:"successful"`
+			Total      int    `json:"total"`
+			Active     int    `json:"active"`
+			Enacting   int    `json:"enacting"`
+			Finished   int    `json:"finished"`
+			Successful int    `json:"successful"`
+			Proposers  string `json:"proposers"`
+			Voters     string `json:"voters"`
 		} `json:"proposals"`
 	}{}
 
@@ -279,6 +281,8 @@ func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime
 	res.Proposals.Enacting = tasks.AllProposals.Status.EnactingProposals
 	res.Proposals.Finished = tasks.AllProposals.Status.FinishedProposals
 	res.Proposals.Successful = tasks.AllProposals.Status.SuccessfulProposals
+	res.Proposals.Proposers = tasks.AllProposals.Users.Proposers
+	res.Proposals.Voters = tasks.AllProposals.Users.Voters
 
 	return res, nil, http.StatusOK
 }

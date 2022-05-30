@@ -1,5 +1,5 @@
 
 Features:
-* Included source-code in the release files
-* Added explicit info to README regarding signature verification with cosign
-* Updated proto-gen script to support latest bash-utils
+* Added dashboard endpoint.
+* Added proposals sync module.
+* Included validators, proposals, consensus, block consensus informations into dashboard endpoint.

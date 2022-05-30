@@ -45,6 +45,11 @@ type Proposal struct {
 	Result     string `json:"result"`
 }
 
+type ProposalUserCount struct {
+	Proposers string `json:"proposers"`
+	Voters    string `json:"voters"`
+}
+
 type AllProposals struct {
 	Status struct {
 		TotalProposals      int `json:"total_proposals"`
@@ -53,5 +58,6 @@ type AllProposals struct {
 		FinishedProposals   int `json:"finished_proposals"`
 		SuccessfulProposals int `json:"successful_proposals"`
 	} `json:"status"`
-	Proposals []Proposal `json:"proposals"`
+	Proposals []Proposal        `json:"proposals"`
+	Users     ProposalUserCount `json:"users"`
 }

@@ -89,6 +89,28 @@ func QueryProposals(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 
 	allProposals.Status.FinishedProposals = allProposals.Status.TotalProposals - allProposals.Status.ActiveProposals - allProposals.Status.EnactingProposals
 
+	{
+		request, _ := http.NewRequest("GET", "http://"+gatewayAddr+"/kira/gov/proposers_voters_count", nil)
+
+		response, failure, _ := common.ServeGRPC(request, gwCosmosmux)
+
+		if response == nil {
+			return errors.New(ToString(failure))
+		}
+
+		byteData, err := json.Marshal(response)
+		if err != nil {
+			return err
+		}
+		result := gov.ProposalUserCount{}
+		err = json.Unmarshal(byteData, &result)
+		if err != nil {
+			return err
+		}
+
+		allProposals.Users = result
+	}
+
 	AllProposals = allProposals
 
 	return nil

@@ -3,7 +3,7 @@ module github.com/KiraCore/interx
 go 1.16
 
 require (
-	github.com/KiraCore/sekai v0.1.26-rc.11
+	github.com/KiraCore/sekai v0.1.29-rc.14
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
