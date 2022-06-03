@@ -1,10 +1,10 @@
-# Local Development on Windows
-
 # Workflows
 
 In order to have ability to modify & push workflows to github from the local machines
 *  Generate a "Personal Access Token" with workflow rights
 *  Change Remote url to https://YOUR_USERNAME:YOUR_TOKEN@github.com/KiraCore/interx.git
+
+# Local Development on Windows
 
 ## Re/Install WSL on Windows 10 (PowerShell)
 
@@ -57,26 +57,20 @@ wget https://raw.githubusercontent.com/KiraCore/tools/$BRANCH/bash-utils/install
 setGlobLine "mount -t drvfs C:" "mount -t drvfs C: /mnt/c || echo 'Failed to mount C drive'"
 
 # set env variable to your local repos (will vary depending on the user)
-setGlobEnv SEKAI_REPO "/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/sekai" && \
  setGlobEnv INTERX_REPO "/mnt/c/Users/asmodat/Desktop/KIRA/KIRA-CORE/GITHUB/interx" && \
- loadGlobEnvs
-
-# set home directory of your repos
-setGlobEnv SEKAID_HOME "/root/.sekaid" && \
- setGlobEnv INTERXD_HOME "/root/.interxd" && \
  loadGlobEnvs
 
 # Ensure you have Docker Desktop installed: https://code.visualstudio.com/blogs/2020/03/02/docker-in-wsl2 & reboot your entire host machine
 ```
 
-# Clean Clone
+## Clean Clone & Setup
 ```
 cd $HOME && rm -fvr ./interx && INTERX_BRANCH="master" && \
  git clone https://github.com/KiraCore/interx.git -b $INTERX_BRANCH && \
  cd ./interx
 ```
 
-## Installation
+### Installation
 
 ```
 cd $INTERX_REPO
@@ -87,40 +81,15 @@ chmod -Rv 777 ./scripts && \
 make install
 ```
 
-## Startup
+### Startup
 
 ```
+make network-start
 
-    CFG_grpc="dns:///127.0.0.1:9090" && \
-     CFG_rpc="http://127.0.0.1:26657" && \
-     rm -rfv $INTERXD_HOME && mkdir -p $INTERXD_HOME/cache && \
-     rm -rfv /interx/cache &&
-     interxd init --cache_dir="$INTERXD_HOME/cache" --config="$INTERXD_HOME/config.json" --grpc="$CFG_grpc" --rpc="$CFG_rpc" --port="$INTERNAL_API_PORT" \
-      --signing_mnemonic="$COMMON_DIR/signing.mnemonic" \
-      --seed_node_id="$seed_node_id" \
-      --sentry_node_id="$sentry_node_id" \
-      --validator_node_id="$validator_node_id" \
-      --addrbook="$KIRA_ADDRBOOK_FILE" \
-      --faucet_time_limit=30 \
-      --faucet_amounts="100000ukex,20000000test,300000000000000000samolean,1lol" \
-      --faucet_minimum_amounts="1000ukex,50000test,250000000000000samolean,1lol" \
-      --fee_amounts="ukex 1000ukex,test 500ukex,samolean 250ukex, lol 100ukex" \
-      --version="$KIRA_SETUP_VER"
+curl 0.0.0.0:11000/api/status
+```
 
-    seed_node_id=$(globGet seed_node_id)
-    sentry_node_id=$(globGet sentry_node_id)
-    validator_node_id=$(globGet validator_node_id)
-
-    interxd init --cache_dir="$CACHE_DIR" --config="$CONFIG_PATH" --grpc="$CFG_grpc" --rpc="$CFG_rpc" --port="$INTERNAL_API_PORT" \
-      --signing_mnemonic="$COMMON_DIR/signing.mnemonic" \
-      --seed_node_id="$seed_node_id" \
-      --sentry_node_id="$sentry_node_id" \
-      --validator_node_id="$validator_node_id" \
-      --addrbook="$KIRA_ADDRBOOK_FILE" \
-      --faucet_time_limit=30 \
-      --faucet_amounts="100000ukex,20000000test,300000000000000000samolean,1lol" \
-      --faucet_minimum_amounts="1000ukex,50000test,250000000000000samolean,1lol" \
-      --fee_amounts="ukex 1000ukex,test 500ukex,samolean 250ukex, lol 100ukex" \
-      --version="$KIRA_SETUP_VER"
-
+### Cleanup
+```
+make network-stop
 ```

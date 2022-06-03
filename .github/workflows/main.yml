@@ -16,7 +16,7 @@ jobs:
       id-token: write
       pull-requests: write
     container: 
-      image: ghcr.io/kiracore/docker/base-image:v0.9.1.1
+      image: ghcr.io/kiracore/docker/base-image:v0.10.5
     steps:
           # Work around https://github.com/actions/checkout/issues/760
           - name: Add safe.directory
@@ -68,12 +68,17 @@ jobs:
               echo "   Repository name: ${{ env.REPOSITORY_NAME }}"
               echo "   Release version: ${{ env.RELEASE_VER }}"
               echo "    Release exists: ${{ env.RELEASE_EXISTS }}"
-          - name: Testing INTERX
+          - name: Installing INTERX
             run: |
               echo "(current dir): $PWD" && ls -l ./
               chmod -Rv 555 ./scripts
               make install
               interxd version
+          - name: Launching integration tests...
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              chmod -Rv 555 ./scripts
+              make test-local
           - name: Publishing INTERX binaries
             shell: bash
             run: |
