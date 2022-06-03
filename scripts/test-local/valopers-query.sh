@@ -7,6 +7,6 @@ set -x
 TEST_NAME="VALOPERS-QUERY" && timerStart $TEST_NAME
 echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
-# TODO: Write integration test for valopers querry
+# TODO: Write integration test for valopers query
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"
