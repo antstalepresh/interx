@@ -14,7 +14,7 @@ import (
 	"github.com/KiraCore/interx/database"
 	"github.com/KiraCore/interx/types"
 	"github.com/KiraCore/interx/types/rosetta"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // GetInterxRequest is a function to get Interx Request

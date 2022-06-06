@@ -15,7 +15,7 @@ import (
 	"github.com/KiraCore/interx/types/kira"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	tmRPCTypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 

@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.2"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.3"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -49,9 +49,9 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
     go install github.com/bufbuild/buf/cmd/buf@v1.0.0-rc10
     echoInfo "INFO: Sucessfully intalled buf $(buf --version)"
 
-    setGlobEnv GOLANG_PROTOBUF_VERSION "1.27.1" && \
+    setGlobEnv GOLANG_PROTOBUF_VERSION "1.28.0" && \
      setGlobEnv GOGO_PROTOBUF_VERSION "1.3.2" && \
-     setGlobEnv GRPC_GATEWAY_VERSION "1.14.7" && \
+     setGlobEnv GRPC_GATEWAY_VERSION "2.10.3" && \
      loadGlobEnvs
 
     go install github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar@latest && \
@@ -59,8 +59,8 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
      go install github.com/gogo/protobuf/protoc-gen-gogo@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogofast@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogofaster@v${GOGO_PROTOBUF_VERSION} && \
-     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v${GRPC_GATEWAY_VERSION} && \
-     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION} && \
+     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v${GRPC_GATEWAY_VERSION} && \
+     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogotypes
 
     # Following command executes with error requiring us to silence it, however the executable is placed in $GOBIN

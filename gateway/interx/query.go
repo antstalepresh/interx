@@ -13,7 +13,7 @@ import (
 	"github.com/KiraCore/interx/types"
 	"github.com/KiraCore/interx/types/kira"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterInterxQueryRoutes registers query routers.

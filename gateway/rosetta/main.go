@@ -2,7 +2,7 @@ package rosetta
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"github.com/KiraCore/interx/gateway/rosetta/data"
 )
