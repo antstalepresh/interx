@@ -9,3 +9,5 @@ proto/kira
 codec/
 bin
 nfpm_*
+*.deb
+*_key.json
