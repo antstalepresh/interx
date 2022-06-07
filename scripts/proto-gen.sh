@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.3"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.4"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
