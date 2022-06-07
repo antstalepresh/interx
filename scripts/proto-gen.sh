@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.4"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.3"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -60,8 +60,8 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
      go install github.com/gogo/protobuf/protoc-gen-gogofast@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogofaster@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v${GRPC_GATEWAY_VERSION} && \
-     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION} && \
-     go install github.com/gogo/protobuf/protoc-gen-gogotypes@v1.3.2
+     go install github.com/gogo/protobuf/protoc-gen-gogotypes@v1.3.2  && \
+     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION}
 
     # Following command executes with error requiring us to silence it, however the executable is placed in $GOBIN
     # https://github.com/regen-network/cosmos-proto
