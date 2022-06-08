@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.4"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.5"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -56,6 +56,7 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
 
     rm -f /usr/local/go/bin/protoc-gen-grpc-gateway
     rm -f /usr/local/bin/protoc-gen-grpc-gateway
+    rm -f /usr/bin/protoc-gen-grpc-gateway
     rm -f $HOME/go/bin/protoc-gen-grpc-gateway
     rm -f $GOBIN/protoc-gen-grpc-gateway
     which protoc-gen-grpc-gateway
