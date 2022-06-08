@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.6"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.4"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -143,6 +143,17 @@ for dir in $proto_dirs; do
           --go-grpc_out=paths=source_relative:./proto-gen \
           --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto-gen \
           $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
+    done
+done
+
+protogen_dirs=$(find ./proto-gen -path -prune -o -name '*.gw.go' -print0 | xargs -0 -n1 dirname | sort | uniq)
+
+echoInfo "Updating proto generated files to include relative paths..."
+for dir in $protogen_dirs; do
+    protogen_fils=$(find "${dir}" -maxdepth 1 -name '*.gw.go') 
+    for fil in $protogen_fils; do
+        sed -i="" 's/github.com\/grpc-ecosystem\/grpc-gateway\/runtime/github.com\/grpc-ecosystem\/grpc-gateway\/v2\/runtime/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+        sed -i="" 's/github.com\/grpc-ecosystem\/grpc-gateway\/utilities/github.com\/grpc-ecosystem\/grpc-gateway\/v2\/utilities/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
     done
 done
 
