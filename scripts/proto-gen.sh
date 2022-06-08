@@ -12,7 +12,7 @@ UTILS_OLD_VER="false" && [[ $(versionToNumber "$UTILS_VER" || echo "0") -ge $(ve
 # Installing utils is essential to simplify the setup steps
 if [ "$UTILS_OLD_VER" == "true" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..." && sleep 2
-    KIRA_TOOLS_BRANCH="v0.1.0.7" && cd /tmp && rm -fv ./i.sh && \
+    KIRA_TOOLS_BRANCH="v0.1.5" && cd /tmp && rm -fv ./i.sh && \
     wget https://github.com/KiraCore/tools/releases/download/$KIRA_TOOLS_BRANCH/bash-utils.sh -O ./i.sh && \
     chmod 777 ./i.sh && ./i.sh bashUtilsSetup "/var/kiraglob" && . /etc/profile
 else
@@ -41,7 +41,7 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.4"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.6"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
@@ -55,7 +55,10 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
      loadGlobEnvs
 
     rm -f /usr/local/go/bin/protoc-gen-grpc-gateway
+    rm -f /usr/local/bin/protoc-gen-grpc-gateway
     rm -f $HOME/go/bin/protoc-gen-grpc-gateway
+    rm -f $GOBIN/protoc-gen-grpc-gateway
+    which protoc-gen-grpc-gateway
 
     go install github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar@latest && \
      go install google.golang.org/protobuf/cmd/protoc-gen-go@v${GOLANG_PROTOBUF_VERSION} && \
