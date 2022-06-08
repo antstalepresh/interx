@@ -59,7 +59,7 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
     rm -f /usr/bin/protoc-gen-grpc-gateway
     rm -f $HOME/go/bin/protoc-gen-grpc-gateway
     rm -f $GOBIN/protoc-gen-grpc-gateway
-    which protoc-gen-grpc-gateway
+    # which protoc-gen-grpc-gateway
 
     go install github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar@latest && \
      go install google.golang.org/protobuf/cmd/protoc-gen-go@v${GOLANG_PROTOBUF_VERSION} && \
