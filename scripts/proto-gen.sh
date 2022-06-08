@@ -45,14 +45,6 @@ EXPECTED_INTERX_PROTO_DEP_VER="v0.0.6"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
-    GO111MODULE=on 
-    go install github.com/bufbuild/buf/cmd/buf@v1.0.0-rc10
-    echoInfo "INFO: Sucessfully intalled buf $(buf --version)"
-
-    setGlobEnv GOLANG_PROTOBUF_VERSION "1.28.0" && \
-     setGlobEnv GOGO_PROTOBUF_VERSION "1.3.2" && \
-     setGlobEnv GRPC_GATEWAY_VERSION "2.10.3" && \
-     loadGlobEnvs
 
     rm -f /usr/local/go/bin/buf
     rm -f /usr/local/bin/buf
@@ -123,6 +115,15 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
     rm -f $HOME/go/bin/protoc-gen-go-pulsar
     rm -f $GOBIN/protoc-gen-go-pulsar
     # which protoc-gen-go-pulsar
+
+    GO111MODULE=on 
+    go install github.com/bufbuild/buf/cmd/buf@v1.0.0-rc10
+    echoInfo "INFO: Sucessfully intalled buf $(buf --version)"
+
+    setGlobEnv GOLANG_PROTOBUF_VERSION "1.28.0" && \
+     setGlobEnv GOGO_PROTOBUF_VERSION "1.3.2" && \
+     setGlobEnv GRPC_GATEWAY_VERSION "2.10.3" && \
+     loadGlobEnvs
 
     go install github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar@latest && \
      go install google.golang.org/protobuf/cmd/protoc-gen-go@v${GOLANG_PROTOBUF_VERSION} && \
