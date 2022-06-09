@@ -20,7 +20,7 @@ import (
 	distribution "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmTypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmJsonRPCTypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"

@@ -168,11 +168,11 @@ type InterxRequest struct {
 }
 
 type IdentityRecord struct {
-	ID        uint64   `json:"id,string"`
-	Key       string   `json:"key"`
-	Value     string   `json:"value"`
-	Date      string   `json:"date"`
-	Verifiers []string `json:"verifiers"`
+	ID        uint64      `json:"id,string"`
+	Key       string      `json:"key"`
+	Value     string      `json:"value"`
+	Date      interface{} `json:"date"`
+	Verifiers []string    `json:"verifiers"`
 }
 
 type QueryValidator struct {

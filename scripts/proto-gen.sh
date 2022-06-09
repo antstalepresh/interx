@@ -12,7 +12,7 @@ UTILS_OLD_VER="false" && [[ $(versionToNumber "$UTILS_VER" || echo "0") -ge $(ve
 # Installing utils is essential to simplify the setup steps
 if [ "$UTILS_OLD_VER" == "true" ] ; then
     echo "INFO: KIRA utils were NOT installed on the system, setting up..." && sleep 2
-    KIRA_TOOLS_BRANCH="v0.1.0.7" && cd /tmp && rm -fv ./i.sh && \
+    KIRA_TOOLS_BRANCH="v0.1.5" && cd /tmp && rm -fv ./i.sh && \
     wget https://github.com/KiraCore/tools/releases/download/$KIRA_TOOLS_BRANCH/bash-utils.sh -O ./i.sh && \
     chmod 777 ./i.sh && ./i.sh bashUtilsSetup "/var/kiraglob" && . /etc/profile
 else
@@ -21,7 +21,7 @@ fi
 
 # install golang if needed
 if  ($(isNullOrEmpty "$GO_VER")) || ($(isNullOrEmpty "$GOBIN")) ; then
-    GO_VERSION="1.17.7" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
+    GO_VERSION="1.18.3" && ARCH=$(([[ "$(uname -m)" == *"arm"* ]] || [[ "$(uname -m)" == *"aarch"* ]]) && echo "arm64" || echo "amd64") && \
      OS_VERSION=$(uname) && GO_TAR=go${GO_VERSION}.${OS_VERSION,,}-${ARCH}.tar.gz && rm -rfv /usr/local/go && cd /tmp && rm -fv ./$GO_TAR && \
      wget https://dl.google.com/go/${GO_TAR} && \
      tar -C /usr/local -xvf $GO_TAR && rm -fv ./$GO_TAR && \
@@ -41,17 +41,88 @@ cd $CURRENT_DIR
 loadGlobEnvs
 
 go clean -modcache
-EXPECTED_INTERX_PROTO_DEP_VER="v0.0.2"
+EXPECTED_INTERX_PROTO_DEP_VER="v0.0.6"
 BUF_VER=$(buf --version 2> /dev/null || echo "")
 
 if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTERX_PROTO_DEP_VER" ] ; then
+
+    rm -f /usr/local/go/bin/buf
+    rm -f /usr/local/bin/buf
+    rm -f /usr/bin/buf
+    rm -f $HOME/go/bin/buf
+    rm -f $GOBIN/buf
+    # which buf
+
+    rm -f /usr/local/go/bin/protoc-gen-go-grpc
+    rm -f /usr/local/bin/protoc-gen-go-grpc
+    rm -f /usr/bin/protoc-gen-go-grpc
+    rm -f $HOME/go/bin/protoc-gen-go-grpc
+    rm -f $GOBIN/protoc-gen-go-grpc
+    # which protoc-gen-go-grpc
+
+    rm -f /usr/local/go/bin/protoc-gen-doc
+    rm -f /usr/local/bin/protoc-gen-doc
+    rm -f /usr/bin/protoc-gen-doc
+    rm -f $HOME/go/bin/protoc-gen-doc
+    rm -f $GOBIN/protoc-gen-doc
+    # which protoc-gen-doc
+
+    rm -f /usr/local/go/bin/protoc-gen-gogotypes
+    rm -f /usr/local/bin/protoc-gen-gogotypes
+    rm -f /usr/bin/protoc-gen-gogotypes
+    rm -f $HOME/go/bin/protoc-gen-gogotypes
+    rm -f $GOBIN/protoc-gen-gogotypes
+    # which protoc-gen-gogotypes
+
+    rm -f /usr/local/go/bin/protoc-gen-grpc-gateway
+    rm -f /usr/local/bin/protoc-gen-grpc-gateway
+    rm -f /usr/bin/protoc-gen-grpc-gateway
+    rm -f $HOME/go/bin/protoc-gen-grpc-gateway
+    rm -f $GOBIN/protoc-gen-grpc-gateway
+    # which protoc-gen-grpc-gateway
+
+    rm -f /usr/local/go/bin/protoc-gen-gogofaster
+    rm -f /usr/local/bin/protoc-gen-gogofaster
+    rm -f /usr/bin/protoc-gen-gogofaster
+    rm -f $HOME/go/bin/protoc-gen-gogofaster
+    rm -f $GOBIN/protoc-gen-gogofaster
+    # which protoc-gen-gogofaster
+
+    rm -f /usr/local/go/bin/protoc-gen-gogofast
+    rm -f /usr/local/bin/protoc-gen-gogofast
+    rm -f /usr/bin/protoc-gen-gogofast
+    rm -f $HOME/go/bin/protoc-gen-gogofast
+    rm -f $GOBIN/protoc-gen-gogofast
+    # which protoc-gen-gogofast
+
+    rm -f /usr/local/go/bin/protoc-gen-gogo
+    rm -f /usr/local/bin/protoc-gen-gogo
+    rm -f /usr/bin/protoc-gen-gogo
+    rm -f $HOME/go/bin/protoc-gen-gogo
+    rm -f $GOBIN/protoc-gen-gogo
+    # which protoc-gen-gogo
+
+    rm -f /usr/local/go/bin/protoc-gen-go
+    rm -f /usr/local/bin/protoc-gen-go
+    rm -f /usr/bin/protoc-gen-go
+    rm -f $HOME/go/bin/protoc-gen-go
+    rm -f $GOBIN/protoc-gen-go
+    # which protoc-gen-go
+
+    rm -f /usr/local/go/bin/protoc-gen-go-pulsar
+    rm -f /usr/local/bin/protoc-gen-go-pulsar
+    rm -f /usr/bin/protoc-gen-go-pulsar
+    rm -f $HOME/go/bin/protoc-gen-go-pulsar
+    rm -f $GOBIN/protoc-gen-go-pulsar
+    # which protoc-gen-go-pulsar
+
     GO111MODULE=on 
     go install github.com/bufbuild/buf/cmd/buf@v1.0.0-rc10
     echoInfo "INFO: Sucessfully intalled buf $(buf --version)"
 
-    setGlobEnv GOLANG_PROTOBUF_VERSION "1.27.1" && \
+    setGlobEnv GOLANG_PROTOBUF_VERSION "1.28.0" && \
      setGlobEnv GOGO_PROTOBUF_VERSION "1.3.2" && \
-     setGlobEnv GRPC_GATEWAY_VERSION "1.14.7" && \
+     setGlobEnv GRPC_GATEWAY_VERSION "2.10.3" && \
      loadGlobEnvs
 
     go install github.com/cosmos/cosmos-proto/cmd/protoc-gen-go-pulsar@latest && \
@@ -59,9 +130,9 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
      go install github.com/gogo/protobuf/protoc-gen-gogo@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogofast@v${GOGO_PROTOBUF_VERSION} && \
      go install github.com/gogo/protobuf/protoc-gen-gogofaster@v${GOGO_PROTOBUF_VERSION} && \
-     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v${GRPC_GATEWAY_VERSION} && \
-     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION} && \
-     go install github.com/gogo/protobuf/protoc-gen-gogotypes
+     go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v${GRPC_GATEWAY_VERSION} && \
+    #  go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-swagger@v${GRPC_GATEWAY_VERSION} && \
+     go install github.com/gogo/protobuf/protoc-gen-gogotypes@v1.3.2
 
     # Following command executes with error requiring us to silence it, however the executable is placed in $GOBIN
     # https://github.com/regen-network/cosmos-proto
@@ -122,6 +193,7 @@ for dir in $proto_dirs; do
 done
 
 sed -i="" 's/message IdentityRecord {/message IdentityRecord \{\n  option (gogoproto.goproto_getters) = false;/g' ./proto/kira/gov/identity_registrar.proto || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+sed -i="" 's/ \[(cosmos_proto.accepts_interface) = \"AccountI\"\]//g' ./proto/cosmos/auth/v1beta1/query.proto || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
 
 echoInfo "Generating protobuf files..."
 for dir in $proto_dirs; do
@@ -138,6 +210,17 @@ for dir in $proto_dirs; do
           $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
     done
 done
+
+# protogen_dirs=$(find ./proto-gen -path -prune -o -name '*.gw.go' -print0 | xargs -0 -n1 dirname | sort | uniq)
+
+# echoInfo "Updating proto generated files to include relative paths..."
+# for dir in $protogen_dirs; do
+#     protogen_fils=$(find "${dir}" -maxdepth 1 -name '*.gw.go') 
+#     for fil in $protogen_fils; do
+#         sed -i="" 's/github.com\/grpc-ecosystem\/grpc-gateway\/runtime/github.com\/grpc-ecosystem\/grpc-gateway\/v2\/runtime/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+#         sed -i="" 's/github.com\/grpc-ecosystem\/grpc-gateway\/utilities/github.com\/grpc-ecosystem\/grpc-gateway\/v2\/utilities/g' "$fil" || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
+#     done
+# done
 
 #TODO: Currently it is not possible for go to dicover the gocosmos_out plugin (might require to resolve some issues with path)
 #--gocosmos_out=plugins=interfacetype+grpc,\

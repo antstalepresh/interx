@@ -17,7 +17,7 @@ import (
 	"github.com/KiraCore/interx/global"
 	"github.com/KiraCore/interx/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmTypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmJsonRPCTypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
