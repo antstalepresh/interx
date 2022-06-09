@@ -7,7 +7,7 @@ import (
 	"github.com/KiraCore/interx/config"
 	functions "github.com/KiraCore/interx/functions"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterKiraQueryRoutes registers tx query routers.

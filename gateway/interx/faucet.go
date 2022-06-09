@@ -14,7 +14,7 @@ import (
 	legacytx "github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterInterxFaucetRoutes registers faucet services.

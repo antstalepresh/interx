@@ -9,7 +9,7 @@ import (
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/types"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterCosmosBankRoutes registers query routers.

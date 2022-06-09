@@ -7,7 +7,7 @@ import (
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterKiraUbiRoutes registers kira ubi query routers.

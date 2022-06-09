@@ -9,7 +9,7 @@ import (
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/types/kira/gov"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	sekaitypes "github.com/KiraCore/sekai/types"
 )

@@ -12,7 +12,7 @@ import (
 	"github.com/KiraCore/interx/types"
 	legacytx "github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RegisterCosmosTxRoutes registers query routers.

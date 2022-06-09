@@ -10,11 +10,10 @@ import (
 	"time"
 
 	"github.com/KiraCore/interx/common"
-	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	sekaitypes "github.com/KiraCore/sekai/types"
 )
@@ -57,7 +56,7 @@ func QueryValidators(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 	limit := sekaitypes.PageIterationLimit - 1
 	offset := 0
 	for {
-		validatorsQueryRequest, _ := http.NewRequest("GET", "http://"+gatewayAddr+config.QueryValidators+"?pagination.offset="+strconv.Itoa(offset)+"&pagination.limit="+strconv.Itoa(limit), nil)
+		validatorsQueryRequest, _ := http.NewRequest("GET", "http://"+gatewayAddr+"/kira/staking/validators?pagination.offset="+strconv.Itoa(offset)+"&pagination.limit="+strconv.Itoa(limit), nil)
 
 		validatorsQueryResponse, failure, _ := common.ServeGRPC(validatorsQueryRequest, gwCosmosmux)
 
@@ -93,7 +92,7 @@ func QueryValidators(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 
 	offset = 0
 	for {
-		validatorInfosQueryRequest, _ := http.NewRequest("GET", "http://"+gatewayAddr+config.QueryValidatorInfos+"?pagination.offset="+strconv.Itoa(offset)+"&pagination.limit="+strconv.Itoa(limit), nil)
+		validatorInfosQueryRequest, _ := http.NewRequest("GET", "http://"+gatewayAddr+"/kira/slashing/v1beta1/signing_infos?pagination.offset="+strconv.Itoa(offset)+"&pagination.limit="+strconv.Itoa(limit), nil)
 
 		validatorInfosQueryResponse, failure, _ := common.ServeGRPC(validatorInfosQueryRequest, gwCosmosmux)
 

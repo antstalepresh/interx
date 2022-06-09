@@ -23,7 +23,7 @@ import (
 	"github.com/KiraCore/interx/tasks"
 	functionmeta "github.com/KiraCore/sekai/function_meta"
 	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rakyll/statik/fs"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"

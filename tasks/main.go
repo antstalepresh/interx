@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
 // RunTasks is a function to run threads.
