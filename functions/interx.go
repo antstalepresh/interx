@@ -1705,4 +1705,125 @@ func RegisterInterxFunctions() {
 			}
 		}`,
 	)
+
+	AddInterxFunction(
+		"QueryDashboard",
+		config.QueryDashboard,
+		`{
+			"description": "QueryDashboard is a function to query data for the dashboard.",
+			"response": {
+				"consensus_health": {
+					"description": "Float value between 0 and 1, represents the health status of the consensus."
+				},
+				"current_block_validator": {
+					"type": "struct",
+					"description": "The current block validator info",
+					"fields": {
+						"moniker": {
+							"type":        "string",
+							"description": "The validator's moniker"
+						},
+						"address": {
+							"type":        "string",
+							"description": "The validator's address"
+						}
+					}
+				},
+				"validators": {
+					"type": "struct",
+					"description": "The validators count info",
+					"fields": {
+						"total": {
+							"type":        "number",
+							"description": "The count of total validators"
+						},
+						"active": {
+							"type":        "number",
+							"description": "The count of active validators"
+						},
+						"inactive": {
+							"type":        "number",
+							"description": "The count of in-active validators"
+						},
+						"jailed": {
+							"type":        "number",
+							"description": "The count of jailed validators"
+						},
+						"paused": {
+							"type":        "number",
+							"description": "The count of paused validators"
+						},
+						"waiting": {
+							"type":        "number",
+							"description": "The count of waiting validators"
+						}
+					}
+				},
+				"blocks": {
+					"type": "struct",
+					"description": "The blocks consensus status",
+					"fields": {
+						"current_height": {
+							"type":        "number",
+							"description": "The current block height"
+						},
+						"since_genesis": {
+							"type":        "number",
+							"description": "The block count after genesis block"
+						},
+						"pending_transactions": {
+							"type":        "number",
+							"description": "The count of pending transactions"
+						},
+						"current_transactions": {
+							"type":        "number",
+							"description": "The count of current transactions"
+						},
+						"latest_time": {
+							"type":        "number",
+							"description": "The latest block confirm time"
+						},
+						"average_time": {
+							"type":        "number",
+							"description": "The average block confirm time"
+						}
+					}
+				},
+				"proposals": {
+					"type": "struct",
+					"description": "The proposals count info",
+					"fields": {
+						"total": {
+							"type":        "number",
+							"description": "The count of total proposals"
+						},
+						"active": {
+							"type":        "number",
+							"description": "The count of active proposals"
+						},
+						"enacting": {
+							"type":        "number",
+							"description": "The count of enacting proposals"
+						},
+						"finished": {
+							"type":        "number",
+							"description": "The count of finished proposals"
+						},
+						"successful": {
+							"type":        "number",
+							"description": "The count of successful proposals"
+						},
+						"proposers": {
+							"type":        "number",
+							"description": "The count of proposers"
+						},
+						"voters": {
+							"type":        "number",
+							"description": "The count of voters"
+						}
+					}
+				}
+			}
+		}`,
+	)
 }
