@@ -8,7 +8,6 @@ import (
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
-	"github.com/KiraCore/interx/types"
 	govTypes "github.com/KiraCore/interx/types/kira/gov"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
@@ -103,11 +102,7 @@ func QueryProposalRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Ha
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryProposal,
-			Params:   []byte(proposalID),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
@@ -197,11 +192,7 @@ func QueryVotersRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Hand
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryVoters,
-			Params:   []byte(proposalID),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
@@ -276,11 +267,7 @@ func QueryVotesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Handl
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryVotes,
-			Params:   []byte(proposalID),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 

@@ -101,11 +101,7 @@ func QueryBlockByHeightOrHashRequest(gwCosmosmux *runtime.ServeMux, rpcAddr stri
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		height := queries["height"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryBlockByHeightOrHash,
-			Params:   []byte(height),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
@@ -461,11 +457,7 @@ func QueryBlockTransactionsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		height := queries["height"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryBlockTransactions,
-			Params:   []byte(height),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
@@ -520,11 +512,7 @@ func QueryTransactionResultRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		txHash := queries["txHash"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryTransactionResult,
-			Params:   []byte(txHash),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 

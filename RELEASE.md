@@ -1,4 +1,4 @@
 
 Features:
-* Add metadata for dashboard endpoint
-* Update interx to sync with latest sekaid version (fix broken endpoints)
+* Fix pagination in QueryBalances endpoint
+* Fix request hash generation for caching
