@@ -126,11 +126,7 @@ func QueryDataReferenceRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) ht
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		key := queries["key"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryDataReference,
-			Params:   []byte(key),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
