@@ -117,11 +117,7 @@ func QueryTxHashRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		queries := mux.Vars(r)
 		hash := queries["hash"]
-		request := types.InterxRequest{
-			Method:   r.Method,
-			Endpoint: config.QueryTransactionHash,
-			Params:   []byte(hash),
-		}
+		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
