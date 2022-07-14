@@ -82,4 +82,8 @@ const (
 	QueryRosettaNetworkOptions = "/rosetta/network/options"
 	QueryRosettaNetworkStatus  = "/rosetta/network/status"
 	QueryRosettaAccountBalance = "/rosetta/account/balance"
+
+	QueryEVMStatus = "/api/{chain}/status"
 )
+
+var SupportedEVMChains = [1]string{"ropsten"}
