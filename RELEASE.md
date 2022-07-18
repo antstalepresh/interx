@@ -1,4 +1,3 @@
 
 Features:
-* Fix pagination in QueryBalances endpoint
-* Fix request hash generation for caching
+* Add integration test for account balances query

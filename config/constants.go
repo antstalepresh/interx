@@ -1,8 +1,8 @@
 package config
 
 const (
-	InterxVersion = "v0.4.11"
-	SekaiVersion  = "v0.2.0"
+	InterxVersion = "v0.4.12"
+	SekaiVersion  = "v0.2.2-rc.16"
 	CosmosVersion = "v0.45.1"
 
 	QueryDashboard = "/api/dashboard"
