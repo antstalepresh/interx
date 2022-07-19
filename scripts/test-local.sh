@@ -12,6 +12,9 @@ echoInfo "INFO: Stopping local network..."
 echoInfo "INFO: Launching local network..."
 ./scripts/test-local/network-start.sh || ( systemctl2 stop sekai && exit 1 )
 
+echoInfo "INFO: Testing account balances query..."
+./scripts/test-local/account-balances-query.sh || ( systemctl2 stop sekai && exit 1 )
+
 echoInfo "INFO: Testing valopers query..."
 ./scripts/test-local/valopers-query.sh || ( systemctl2 stop sekai && exit 1 )
 
