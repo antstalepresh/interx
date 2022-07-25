@@ -159,7 +159,7 @@ func QueryPeers(ipAddr string) ([]tmTypes.Peer, error) {
 		return netInfo.Peers, err
 	}
 
-	return netInfo.Peers, err
+	return []tmTypes.Peer{}, err
 }
 
 func QueryKiraStatus(rpcAddr string) (tmTypes.ResultStatus, error) {
@@ -455,7 +455,7 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
 				nodeBlockInfo, _ := QueryBlock(ipAddr, strconv.Itoa(int(commonBlock)))
 
-				nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+				nodeInfo.Safe = localBlockInfo != nil && nodeBlockInfo != nil && localBlockInfo.Hash == nodeBlockInfo.Hash
 			}
 
 			// verify p2p node_id via p2p connect
@@ -560,7 +560,7 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
 					nodeBlockInfo, _ := getBlockFromInterx(getInterxAddress(ipAddr), strconv.Itoa(int(commonBlock)))
 
-					nodeInfo.Safe = localBlockInfo.Hash == nodeBlockInfo.Hash
+					nodeInfo.Safe = localBlockInfo != nil && nodeBlockInfo != nil && localBlockInfo.Hash == nodeBlockInfo.Hash
 				}
 
 				global.Mutex.Lock()

@@ -1,4 +1,4 @@
-.PHONY: proto-gen build publish install start
+.PHONY: proto-gen build publish install start test test-local network-start network-stop
 
 proto-gen:
 	./scripts/proto-gen.sh
@@ -16,6 +16,9 @@ start:
 publish:
 	./scripts/proto-gen.sh
 	./scripts/publish.sh
+
+test:
+	./scripts/test.sh
 
 test-local:
 	./scripts/test-local.sh

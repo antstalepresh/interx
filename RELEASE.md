@@ -1,3 +1,4 @@
 
 Features:
-* Add integration test for account balances query
+* Add unit test architecture setup
+* Fix node discovery task memory pointer issue
