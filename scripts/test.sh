@@ -4,4 +4,4 @@ set -x
 . /etc/profile
 
 echo "INFO: Cleaning up system resources"
-go test -mod=readonly $(go list ./...) 
+go test -mod=readonly $(go list ./gateway/...) 
