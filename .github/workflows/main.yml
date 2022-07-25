@@ -76,6 +76,11 @@ jobs:
               chmod -Rv 555 ./scripts
               make install
               interxd version
+          - name: Launching tests...
+            run: |
+              echo "(current dir): $PWD" && ls -l ./
+              chmod -Rv 555 ./scripts
+              make test
           - name: Launching integration tests...
             run: |
               echo "(current dir): $PWD" && ls -l ./

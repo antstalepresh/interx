@@ -35,7 +35,7 @@ func RegisterBlockRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr s
 	common.AddRPCMethod("GET", config.QueryTransactionResult, "This is an API to query transaction result by hash", true)
 }
 
-func queryBlocksHandle(rpcAddr string, r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+func queryBlocksHandle(rpcAddr string, r *http.Request) (interface{}, interface{}, int) {
 	_ = r.ParseForm()
 
 	minHeight := r.FormValue("minHeight")
@@ -79,7 +79,7 @@ func QueryBlocksRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Hand
 				}
 			}
 
-			response.Response, response.Error, statusCode = queryBlocksHandle(rpcAddr, r, gwCosmosmux)
+			response.Response, response.Error, statusCode = queryBlocksHandle(rpcAddr, r)
 		}
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryBlocks].CachingEnabled)
