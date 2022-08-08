@@ -439,23 +439,27 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 			nodeInfo.Alive = true
 			nodeInfo.Synced = false
 			nodeInfo.BlockHeightAtSync = kiraStatus.SyncInfo.LatestBlockHeight
-			nodeInfo.BlockDiff = common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
-			if nodeInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && nodeInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+			blockDiff := common.NodeStatus.Block - kiraStatus.SyncInfo.LatestBlockHeight
+			if blockDiff >= -BLOCK_DIFF_LIMIT && blockDiff <= BLOCK_DIFF_LIMIT {
 				nodeInfo.Synced = true
 			}
 
-			nodeInfo.Safe = kiraStatus.NodeInfo.Network == common.NodeStatus.Chainid
+			if kiraStatus.NodeInfo.Network != common.NodeStatus.Chainid {
+				// differet chain id
+				continue
+			}
 
-			if nodeInfo.Safe {
-				commonBlock := common.NodeStatus.Block
-				if commonBlock > kiraStatus.SyncInfo.LatestBlockHeight {
-					commonBlock = kiraStatus.SyncInfo.LatestBlockHeight
-				}
+			commonBlock := common.NodeStatus.Block
+			if commonBlock > kiraStatus.SyncInfo.LatestBlockHeight {
+				commonBlock = kiraStatus.SyncInfo.LatestBlockHeight
+			}
 
-				localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
-				nodeBlockInfo, _ := QueryBlock(ipAddr, strconv.Itoa(int(commonBlock)))
+			localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+			nodeBlockInfo, _ := QueryBlock(ipAddr, strconv.Itoa(int(commonBlock)))
 
-				nodeInfo.Safe = localBlockInfo != nil && nodeBlockInfo != nil && localBlockInfo.Hash == nodeBlockInfo.Hash
+			if localBlockInfo == nil || nodeBlockInfo == nil || localBlockInfo.Hash != nodeBlockInfo.Hash {
+				// different block hash
+				continue
 			}
 
 			// verify p2p node_id via p2p connect
@@ -489,8 +493,6 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 					privNodeInfo.Alive = true
 					privNodeInfo.Synced = nodeInfo.Synced
 					privNodeInfo.BlockHeightAtSync = nodeInfo.BlockHeightAtSync
-					privNodeInfo.BlockDiff = nodeInfo.BlockDiff
-					privNodeInfo.Safe = nodeInfo.Safe
 
 					if _, ok := isLocalPeer[privNodeInfo.ID]; ok {
 						privNodeInfo.Connected = true
@@ -544,23 +546,27 @@ func NodeDiscover(rpcAddr string, isLog bool) {
 				interxInfo.Alive = true
 				interxInfo.Synced = false
 				interxInfo.BlockHeightAtSync, _ = strconv.ParseInt(interxStatus.SyncInfo.LatestBlockHeight, 10, 64)
-				interxInfo.BlockDiff = common.NodeStatus.Block - interxInfo.BlockHeightAtSync
-				if interxInfo.BlockDiff >= -BLOCK_DIFF_LIMIT && interxInfo.BlockDiff <= BLOCK_DIFF_LIMIT {
+				blockDiff = common.NodeStatus.Block - interxInfo.BlockHeightAtSync
+				if blockDiff >= -BLOCK_DIFF_LIMIT && blockDiff <= BLOCK_DIFF_LIMIT {
 					interxInfo.Synced = true
 				}
 
-				interxInfo.Safe = interxStatus.InterxInfo.ChainID == common.NodeStatus.Chainid
+				if interxStatus.InterxInfo.ChainID == common.NodeStatus.Chainid {
+					// different chain id
+					continue
+				}
 
-				if nodeInfo.Safe {
-					commonBlock := common.NodeStatus.Block
-					if commonBlock > interxInfo.BlockHeightAtSync {
-						commonBlock = interxInfo.BlockHeightAtSync
-					}
+				commonBlock := common.NodeStatus.Block
+				if commonBlock > interxInfo.BlockHeightAtSync {
+					commonBlock = interxInfo.BlockHeightAtSync
+				}
 
-					localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
-					nodeBlockInfo, _ := getBlockFromInterx(getInterxAddress(ipAddr), strconv.Itoa(int(commonBlock)))
+				localBlockInfo, _ := QueryBlock(host, strconv.Itoa(int(commonBlock)))
+				nodeBlockInfo, _ := getBlockFromInterx(getInterxAddress(ipAddr), strconv.Itoa(int(commonBlock)))
 
-					nodeInfo.Safe = localBlockInfo != nil && nodeBlockInfo != nil && localBlockInfo.Hash == nodeBlockInfo.Hash
+				if localBlockInfo == nil || nodeBlockInfo == nil || localBlockInfo.Hash != nodeBlockInfo.Hash {
+					// different block hash
+					continue
 				}
 
 				global.Mutex.Lock()

@@ -71,12 +71,14 @@ func queryPubP2PNodeList(r *http.Request, rpcAddr string) (interface{}, interfac
 			(r.FormValue("synced") == "false" && !node.Synced) ||
 			(r.FormValue("synced") != "true" && r.FormValue("synced") != "false") {
 
-			behind, _ := strconv.Atoi(r.FormValue("behind"))
-			if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
-				if r.FormValue("unsafe") == "true" || node.Safe {
-					dest = append(dest, node)
-				}
-			}
+			dest = append(dest, node)
+
+			// behind, _ := strconv.Atoi(r.FormValue("behind"))
+			// if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
+			// 	if r.FormValue("unsafe") == "true" || node.Safe {
+			// 		dest = append(dest, node)
+			// 	}
+			// }
 		}
 	}
 	response.NodeList = dest
@@ -197,12 +199,14 @@ func queryPrivP2PNodeList(r *http.Request, rpcAddr string) (interface{}, interfa
 			(r.FormValue("synced") == "false" && !node.Synced) ||
 			(r.FormValue("synced") != "true" && r.FormValue("synced") != "false") {
 
-			behind, _ := strconv.Atoi(r.FormValue("behind"))
-			if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
-				if r.FormValue("unsafe") == "true" || node.Safe {
-					dest = append(dest, node)
-				}
-			}
+			dest = append(dest, node)
+
+			// behind, _ := strconv.Atoi(r.FormValue("behind"))
+			// if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
+			// 	if r.FormValue("unsafe") == "true" || node.Safe {
+			// 		dest = append(dest, node)
+			// 	}
+			// }
 		}
 	}
 	response.NodeList = dest
@@ -306,12 +310,14 @@ func queryInterxList(r *http.Request, rpcAddr string) (interface{}, interface{},
 			(r.FormValue("synced") == "false" && !node.Synced) ||
 			(r.FormValue("synced") != "true" && r.FormValue("synced") != "false") {
 
-			behind, _ := strconv.Atoi(r.FormValue("behind"))
-			if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
-				if r.FormValue("unsafe") == "true" || node.Safe {
-					dest = append(dest, node)
-				}
-			}
+			dest = append(dest, node)
+
+			// behind, _ := strconv.Atoi(r.FormValue("behind"))
+			// if behind == 0 || (node.BlockDiff <= int64(behind) && node.BlockDiff >= -int64(behind)) {
+			// 	if r.FormValue("unsafe") == "true" || node.Safe {
+			// 		dest = append(dest, node)
+			// 	}
+			// }
 		}
 	}
 	response.NodeList = dest

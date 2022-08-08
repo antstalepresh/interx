@@ -40,9 +40,7 @@ type P2PNode struct {
 	Peers             []string `json:"peers"`
 	Alive             bool     `json:"alive"`
 	Synced            bool     `json:"synced"`
-	Safe              bool     `json:"safe"`
-	BlockHeightAtSync int64    `json:"block_height_at_sync"`
-	BlockDiff         int64    `json:"block_diff"`
+	BlockHeightAtSync int64    `json:"block_height"`
 }
 
 type InterxNode struct {
@@ -56,9 +54,7 @@ type InterxNode struct {
 	SekaiVersion      string `json:"sekai_version"`
 	Alive             bool   `json:"alive"`
 	Synced            bool   `json:"synced"`
-	Safe              bool   `json:"safe"`
-	BlockHeightAtSync int64  `json:"block_height_at_sync"`
-	BlockDiff         int64  `json:"block_diff"`
+	BlockHeightAtSync int64  `json:"block_height"`
 }
 
 type SnapNode struct {
