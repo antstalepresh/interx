@@ -8,6 +8,7 @@ import (
 // RegisterRequest is a function to register requests.
 func RegisterRequest(router *mux.Router, rpcAddr string) {
 	RegisterEVMStatusRoutes(router, rpcAddr)
+	RegisterEVMBlockRoutes(router, rpcAddr)
 }
 
 func GetChainConfig(chain string) (bool, *config.EVMConfig) {

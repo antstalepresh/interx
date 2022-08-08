@@ -84,6 +84,7 @@ const (
 	QueryRosettaAccountBalance = "/rosetta/account/balance"
 
 	QueryEVMStatus = "/api/{chain}/status"
+	QueryEVMBlock  = "/api/{chain}/blocks/{identifier}"
 )
 
 var SupportedEVMChains = [1]string{"ropsten"}

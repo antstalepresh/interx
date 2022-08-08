@@ -53,22 +53,17 @@ type NodeDiscoveryConfig struct {
 	ConnectionTimeout     string `json:"connection_timeout"`
 }
 
+type EVMNodeConfig struct {
+	RPC       string `json:"rpc"`
+	RPCToken  string `json:"rpc_token"`
+	RPCSecret string `json:"rpc_secret"`
+}
+
 type EVMConfig struct {
-	Name   string
-	Infura struct {
-		RPC       string `json:"rpc"`
-		RPCToken  string `json:"rpc_token"`
-		RPCSecret string `json:"rpc_secret"`
-	} `json:"infura"`
-	QuickNode struct {
-		RPC      string `json:"rpc"`
-		RPCToken string `json:"rpc_token"`
-	} `json:"quick_node"`
-	Pokt struct {
-		RPC       string `json:"rpc"`
-		RPCToken  string `json:"rpc_token"`
-		RPCSecret string `json:"rpc_secret"`
-	} `json:"pokt"`
+	Name      string
+	Infura    EVMNodeConfig `json:"infura"`
+	QuickNode EVMNodeConfig `json:"quick_node"`
+	Pokt      EVMNodeConfig `json:"pokt"`
 	Etherscan struct {
 		API      string `json:"api"`
 		APIToken string `json:"api_token"`
