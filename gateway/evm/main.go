@@ -9,6 +9,8 @@ import (
 func RegisterRequest(router *mux.Router, rpcAddr string) {
 	RegisterEVMStatusRoutes(router, rpcAddr)
 	RegisterEVMBlockRoutes(router, rpcAddr)
+	RegisterEVMTransactionRoutes(router, rpcAddr)
+	RegisterEVMTransferRoutes(router, rpcAddr)
 }
 
 func GetChainConfig(chain string) (bool, *config.EVMConfig) {

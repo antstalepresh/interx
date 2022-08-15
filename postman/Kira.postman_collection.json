@@ -2841,6 +2841,140 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Transaction",
+					"item": [
+						{
+							"name": "Ropsten Transaction by hash",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/transactions/0xd50cf135d6ca8312b6661c145e79ee84fb03fdbf9638ebf26c5be7460aae4123",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"transactions",
+										"0xd50cf135d6ca8312b6661c145e79ee84fb03fdbf9638ebf26c5be7460aae4123"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ropsten Transaction Receipt",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/transactions/0xd50cf135d6ca8312b6661c145e79ee84fb03fdbf9638ebf26c5be7460aae4123?receipt=true",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"transactions",
+										"0xd50cf135d6ca8312b6661c145e79ee84fb03fdbf9638ebf26c5be7460aae4123"
+									],
+									"query": [
+										{
+											"key": "receipt",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Transfer",
+					"item": [
+						{
+							"name": "Ropsten Estimate",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/txs?rawTx=0xf8680685051f4d5c00833d090094ac2d0226ade52e6b4ccc97359359f01e34d50352834c4b40802aa004f4410acfc636f5d65e75ca37448fd0b1e90632661ad3ea071594b646e7621fa0186d78ddbeef43bc372fcc650ad4e77e0629206426cd183d751e9ddcc8d5e777&estimate=false",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"txs"
+									],
+									"query": [
+										{
+											"key": "rawTx",
+											"value": "0xf8680685051f4d5c00833d090094ac2d0226ade52e6b4ccc97359359f01e34d50352834c4b40802aa004f4410acfc636f5d65e75ca37448fd0b1e90632661ad3ea071594b646e7621fa0186d78ddbeef43bc372fcc650ad4e77e0629206426cd183d751e9ddcc8d5e777"
+										},
+										{
+											"key": "estimate",
+											"value": "false"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ropsten Transaction Receipt",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/txs?rawTx=0xf8680685051f4d5c00833d090094ac2d0226ade52e6b4ccc97359359f01e34d50352834c4b40802aa004f4410acfc636f5d65e75ca37448fd0b1e90632661ad3ea071594b646e7621fa0186d78ddbeef43bc372fcc650ad4e77e0629206426cd183d751e9ddcc8d5e777&estimate=true",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"txs"
+									],
+									"query": [
+										{
+											"key": "rawTx",
+											"value": "0xf8680685051f4d5c00833d090094ac2d0226ade52e6b4ccc97359359f01e34d50352834c4b40802aa004f4410acfc636f5d65e75ca37448fd0b1e90632661ad3ea071594b646e7621fa0186d78ddbeef43bc372fcc650ad4e77e0629206426cd183d751e9ddcc8d5e777"
+										},
+										{
+											"key": "estimate",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},

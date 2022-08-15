@@ -16,7 +16,7 @@ import (
 func RegisterEVMStatusRoutes(r *mux.Router, rpcAddr string) {
 	r.HandleFunc(config.QueryEVMStatus, QueryEVMStatusRequest(rpcAddr)).Methods("GET")
 
-	common.AddRPCMethod("GET", config.QueryEVMStatus, "This is an API to query account address.", true)
+	common.AddRPCMethod("GET", config.QueryEVMStatus, "This is an API to query status.", true)
 }
 
 type EVMStatus struct {
@@ -177,7 +177,7 @@ func QueryEVMStatusRequest(rpcAddr string) http.HandlerFunc {
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
-		common.GetLogger().Info("[query-evm-status] Entering account query: ", chain)
+		common.GetLogger().Info("[query-evm-status] Entering status query: ", chain)
 
 		if !common.RPCMethods["GET"][config.QueryEVMStatus].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)

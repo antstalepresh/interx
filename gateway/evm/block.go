@@ -18,7 +18,7 @@ import (
 func RegisterEVMBlockRoutes(r *mux.Router, rpcAddr string) {
 	r.HandleFunc(config.QueryEVMBlock, QueryEVMBlockRequest(rpcAddr)).Methods("GET")
 
-	common.AddRPCMethod("GET", config.QueryEVMBlock, "This is an API to query account address.", true)
+	common.AddRPCMethod("GET", config.QueryEVMBlock, "This is an API to query blocks.", true)
 }
 
 func queryEVMBlockFromNode(nodeInfo config.EVMNodeConfig, blockHeightOrHash string) (interface{}, interface{}, int) {
@@ -84,7 +84,7 @@ func QueryEVMBlockRequest(rpcAddr string) http.HandlerFunc {
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
-		common.GetLogger().Info("[query-evm-block] Entering account query: ", chain)
+		common.GetLogger().Info("[query-evm-block] Entering block query: ", chain)
 
 		if !common.RPCMethods["GET"][config.QueryEVMBlock].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
