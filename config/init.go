@@ -97,6 +97,8 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryInterxList] = defaultRPCSetting
 	config.API["GET"][QuerySnapList] = defaultRPCSetting
 
+	config.API["GET"][QueryEVMStatus] = defaultRPCSetting
+
 	for _, item := range getPostMethods() {
 		config.API["POST"][item] = defaultRPCSetting
 	}
@@ -153,6 +155,25 @@ func defaultConfig() InterxConfigFromFile {
 	configFromFile.Faucet.FeeAmounts["validatortoken"] = "1000ukex"
 	configFromFile.Faucet.FeeAmounts["ukex"] = "1000ukex"
 	configFromFile.Faucet.TimeLimit = 20
+
+	configFromFile.Evm = make(map[string]EVMConfig)
+
+	for _, item := range SupportedEVMChains {
+		evmConfig := EVMConfig{}
+		evmConfig.Name = ""
+		evmConfig.Infura.RPC = ""
+		evmConfig.Infura.RPCToken = ""
+		evmConfig.Infura.RPCSecret = ""
+		evmConfig.QuickNode.RPC = ""
+		evmConfig.QuickNode.RPCToken = ""
+		evmConfig.Pokt.RPC = ""
+		evmConfig.Pokt.RPCToken = ""
+		evmConfig.Pokt.RPCSecret = ""
+		evmConfig.Etherscan.API = ""
+		evmConfig.Etherscan.APIToken = ""
+
+		configFromFile.Evm[item] = evmConfig
+	}
 
 	return configFromFile
 }
