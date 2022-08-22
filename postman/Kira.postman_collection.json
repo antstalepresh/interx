@@ -2975,6 +2975,72 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Accounts",
+					"item": [
+						{
+							"name": "Ropsten Accounts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/accounts/0xe38e9b26cf5bd6a2a5bc72415af487430294115a",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"accounts",
+										"0xe38e9b26cf5bd6a2a5bc72415af487430294115a"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Balances",
+					"item": [
+						{
+							"name": "Ropsten Balances",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/balances/0xEc44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2?tokens=0xFab46E002BbF0b4509813474841E0716E6730136",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"balances",
+										"0xEc44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2"
+									],
+									"query": [
+										{
+											"key": "tokens",
+											"value": "0xFab46E002BbF0b4509813474841E0716E6730136"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},

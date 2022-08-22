@@ -11,6 +11,8 @@ func RegisterRequest(router *mux.Router, rpcAddr string) {
 	RegisterEVMBlockRoutes(router, rpcAddr)
 	RegisterEVMTransactionRoutes(router, rpcAddr)
 	RegisterEVMTransferRoutes(router, rpcAddr)
+	RegisterEVMAccountsRoutes(router, rpcAddr)
+	RegisterEVMBalancesRoutes(router, rpcAddr)
 }
 
 func GetChainConfig(chain string) (bool, *config.EVMConfig) {
