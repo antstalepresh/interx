@@ -1,12 +1,14 @@
 package common
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -16,6 +18,42 @@ import (
 	"github.com/KiraCore/interx/types/rosetta"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
+
+// Regexp definitions
+var keyMatchRegex = regexp.MustCompile(`\"(\w+)\":`)
+var wordBarrierRegex = regexp.MustCompile(`(\w)([A-Z])`)
+var gasWantedRemoveRegex = regexp.MustCompile(`\s*\"gas_wanted\" *: *\".*\"(,|)`)
+var gasUsedRemoveRegex = regexp.MustCompile(`\s*\"gas_used\" *: *\".*\"(,|)`)
+
+type conventionalMarshaller struct {
+	Value interface{}
+}
+
+func (c conventionalMarshaller) MarshalJSON() ([]byte, error) {
+	marshalled, err := json.MarshalIndent(c.Value, "", "  ")
+
+	converted := keyMatchRegex.ReplaceAllFunc(
+		marshalled,
+		func(match []byte) []byte {
+			return bytes.ToLower(wordBarrierRegex.ReplaceAll(
+				match,
+				[]byte(`${1}_${2}`),
+			))
+		},
+	)
+
+	second := bytes.ToLower(gasWantedRemoveRegex.ReplaceAll(
+		converted,
+		[]byte(``),
+	))
+
+	third := bytes.ToLower(gasUsedRemoveRegex.ReplaceAll(
+		second,
+		[]byte(``),
+	))
+
+	return third, err
+}
 
 // GetInterxRequest is a function to get Interx Request
 func GetInterxRequest(r *http.Request) types.InterxRequest {
@@ -138,14 +176,18 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 			w.Write([]byte(v))
 			return
 		}
-		json.NewEncoder(w).Encode(response.Response)
+
+		encoded, _ := conventionalMarshaller{response.Response}.MarshalJSON()
+		w.Write(encoded)
 	} else {
 		w.WriteHeader(statusCode)
 
 		if response.Error == nil {
 			response.Error = "service not available"
 		}
-		json.NewEncoder(w).Encode(response.Error)
+
+		encoded, _ := conventionalMarshaller{response.Error}.MarshalJSON()
+		w.Write(encoded)
 	}
 }
 
