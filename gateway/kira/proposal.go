@@ -226,7 +226,7 @@ func queryVotesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfac
 	if success != nil {
 		result := struct {
 			Votes []struct {
-				ProposalID uint64 `json:"proposal_id,string,omitempty"`
+				ProposalID uint64 `json:"proposalID,string,omitempty"`
 				Voter      []byte `json:"voter,omitempty"`
 				Option     string `json:"option,omitempty"`
 			} `json:"votes,omitempty"`

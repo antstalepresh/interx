@@ -1,7 +1,6 @@
 package common
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/database"
@@ -119,7 +119,7 @@ func GetAccountBalances(gwCosmosmux *runtime.ServeMux, r *http.Request, bech32ad
 		return nil
 	}
 
-	r.URL.Path = fmt.Sprintf("/api/cosmos/bank/balances/%s", base64.URLEncoding.EncodeToString([]byte(bech32addr)))
+	r.URL.Path = fmt.Sprintf("/cosmos/bank/v1beta1/balances/%s", bech32addr)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 
@@ -150,7 +150,7 @@ func GetAccountNumberSequence(gwCosmosmux *runtime.ServeMux, r *http.Request, be
 		return 0, 0
 	}
 
-	r.URL.Path = fmt.Sprintf("/api/cosmos/auth/accounts/%s", base64.URLEncoding.EncodeToString([]byte(bech32addr)))
+	r.URL.Path = fmt.Sprintf("/cosmos/auth/v1beta1/accounts/%s", bech32addr)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 
@@ -164,7 +164,7 @@ func GetAccountNumberSequence(gwCosmosmux *runtime.ServeMux, r *http.Request, be
 		Account struct {
 			Address       string `json:"addresss"`
 			PubKey        string `json:"pubKey"`
-			AccountNumber string `json:"account_number"`
+			AccountNumber string `json:"accountNumber"`
 			Sequence      string `json:"sequence"`
 		} `json:"account"`
 	}
@@ -183,7 +183,7 @@ func GetAccountNumberSequence(gwCosmosmux *runtime.ServeMux, r *http.Request, be
 // BroadcastTransaction is a function to post transaction, returns txHash
 func BroadcastTransaction(rpcAddr string, txBytes []byte) (string, error) {
 	endpoint := fmt.Sprintf("%s/broadcast_tx_async?tx=0x%X", rpcAddr, txBytes)
-	// GetLogger().Info("[rpc-call] Entering rpc call: ", endpoint)
+	GetLogger().Info("[rpc-call] Entering rpc call: ", endpoint)
 
 	resp, err := http.Get(endpoint)
 	if err != nil {
@@ -329,7 +329,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 		return tokens
 	}
 
-	r.URL.Path = config.QueryKiraTokensAliases
+	r.URL.Path = strings.Replace(config.QueryKiraTokensAliases, "/api", "", 1)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 
@@ -357,7 +357,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 
 // GetTokenSupply is a function to get token supply
 func GetTokenSupply(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.TokenSupply {
-	r.URL.Path = config.QueryTotalSupply
+	r.URL.Path = strings.Replace(config.QueryTotalSupply, "/api/cosmos/bank", "/cosmos/bank/v1beta1", -1)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 

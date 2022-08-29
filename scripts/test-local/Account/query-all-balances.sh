@@ -1,4 +1,4 @@
-a#!/usr/bin/env bash
+#!/usr/bin/env bash
 # To run test locally: make network-start && ./scripts/test-local/account-balances.sh
 set -e
 set -x

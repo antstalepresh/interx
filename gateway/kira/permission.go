@@ -1,7 +1,6 @@
 package kira
 
 import (
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
@@ -24,13 +23,13 @@ func queryPermissionsByAddressHandler(r *http.Request, gwCosmosmux *runtime.Serv
 	queries := mux.Vars(r)
 	bech32addr := queries["val_addr"]
 
-	accAddr, err := sdk.AccAddressFromBech32(bech32addr)
+	_, err := sdk.AccAddressFromBech32(bech32addr)
 	if err != nil {
 		common.GetLogger().Error("[query-account] Invalid bech32addr: ", bech32addr)
 		return common.ServeError(0, "", err.Error(), http.StatusBadRequest)
 	}
 
-	r.URL.Path = fmt.Sprintf("/api/kira/gov/permissions_by_address/%s", base64.URLEncoding.EncodeToString(accAddr.Bytes()))
+	r.URL.Path = fmt.Sprintf("/api/kira/gov/permissions_by_address/%s", bech32addr)
 
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
