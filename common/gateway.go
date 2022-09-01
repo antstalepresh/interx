@@ -1,7 +1,6 @@
 package common
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KiraCore/interx/config"
@@ -29,28 +29,28 @@ type conventionalMarshaller struct {
 	Value interface{}
 }
 
-func (c conventionalMarshaller) MarshalJSON() ([]byte, error) {
+func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, error) {
 	marshalled, err := json.MarshalIndent(c.Value, "", "  ")
 
-	converted := keyMatchRegex.ReplaceAllFunc(
+	if strings.HasPrefix(endpoint, "/api/cosmos/auth/accounts/") { // accounts query
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "accountNumber", "account_number"))
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "pubKey", "pub_key"))
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "typeUrl", "@type"))
+	}
+
+	if strings.HasPrefix(endpoint, "/api/cosmos/bank/balances/") { // accounts query
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "nextKey", "next_key"))
+	}
+
+	second := gasWantedRemoveRegex.ReplaceAll(
 		marshalled,
-		func(match []byte) []byte {
-			return bytes.ToLower(wordBarrierRegex.ReplaceAll(
-				match,
-				[]byte(`${1}_${2}`),
-			))
-		},
+		[]byte(``),
 	)
 
-	second := bytes.ToLower(gasWantedRemoveRegex.ReplaceAll(
-		converted,
-		[]byte(``),
-	))
-
-	third := bytes.ToLower(gasUsedRemoveRegex.ReplaceAll(
+	third := gasUsedRemoveRegex.ReplaceAll(
 		second,
 		[]byte(``),
-	))
+	)
 
 	return third, err
 }
@@ -177,7 +177,7 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 			return
 		}
 
-		encoded, _ := conventionalMarshaller{response.Response}.MarshalJSON()
+		encoded, _ := conventionalMarshaller{response.Response}.MarshalAndConvert(request.Endpoint)
 		w.Write(encoded)
 	} else {
 		w.WriteHeader(statusCode)
@@ -186,7 +186,7 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 			response.Error = "service not available"
 		}
 
-		encoded, _ := conventionalMarshaller{response.Error}.MarshalJSON()
+		encoded, _ := conventionalMarshaller{response.Error}.MarshalAndConvert(request.Endpoint)
 		w.Write(encoded)
 	}
 }
