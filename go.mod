@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/KeisukeYamashita/go-jsonrpc v1.0.1
-	github.com/KiraCore/sekai v0.2.1-rc.15.0.20220616131341-fcbbc2aebe3c
+	github.com/KiraCore/sekai v0.3.1-0.20220817173349-1edb3ebd0173
 	github.com/cosmos/cosmos-sdk v0.45.1
 	github.com/ethereum/go-ethereum v1.10.21
 	github.com/gogo/protobuf v1.3.3
