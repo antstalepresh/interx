@@ -195,6 +195,10 @@ done
 sed -i="" 's/message IdentityRecord {/message IdentityRecord \{\n  option (gogoproto.goproto_getters) = false;/g' ./proto/kira/gov/identity_registrar.proto || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
 sed -i="" 's/ \[(cosmos_proto.accepts_interface) = \"AccountI\"\]//g' ./proto/cosmos/auth/v1beta1/query.proto || ( echoErr "ERROR: Failed to sed file: '$fil'" && exit 1 )
 
+### This part is required to override some cosmos protos
+cp -rfv ./proto-override/cosmos/auth/v1beta1/auth.proto ./proto/cosmos/auth/v1beta1
+###
+
 echoInfo "Generating protobuf files..."
 for dir in $proto_dirs; do
     proto_fils=$(find "${dir}" -maxdepth 1 -name '*.proto') 
