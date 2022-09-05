@@ -89,6 +89,10 @@ const (
 	QueryEVMTransfer    = "/api/{chain}/txs"
 	QueryEVMAccounts    = "/api/{chain}/accounts/{address}"
 	QueryEVMBalances    = "/api/{chain}/balances/{address}"
+	QueryABI            = "/api/{chain}/abi/{contract}"
+	QueryReadContract   = "/api/{chain}/read/{contract}"
+	QueryWriteContract  = "/api/{chain}/write/{contract}"
+	QueryFaucet         = "/api/{chain}/faucet"
 )
 
 var SupportedEVMChains = [1]string{"ropsten"}
