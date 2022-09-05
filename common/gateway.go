@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KiraCore/interx/config"
@@ -16,6 +18,42 @@ import (
 	"github.com/KiraCore/interx/types/rosetta"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
+
+// Regexp definitions
+var keyMatchRegex = regexp.MustCompile(`\"(\w+)\":`)
+var wordBarrierRegex = regexp.MustCompile(`(\w)([A-Z])`)
+var gasWantedRemoveRegex = regexp.MustCompile(`\s*\"gas_wanted\" *: *\".*\"(,|)`)
+var gasUsedRemoveRegex = regexp.MustCompile(`\s*\"gas_used\" *: *\".*\"(,|)`)
+
+type conventionalMarshaller struct {
+	Value interface{}
+}
+
+func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, error) {
+	marshalled, err := json.MarshalIndent(c.Value, "", "  ")
+
+	if strings.HasPrefix(endpoint, "/api/cosmos/auth/accounts/") { // accounts query
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "accountNumber", "account_number"))
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "pubKey", "pub_key"))
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "typeUrl", "@type"))
+	}
+
+	if strings.HasPrefix(endpoint, "/api/cosmos/bank/balances/") { // accounts query
+		marshalled = []byte(strings.ReplaceAll(string(marshalled), "nextKey", "next_key"))
+	}
+
+	second := gasWantedRemoveRegex.ReplaceAll(
+		marshalled,
+		[]byte(``),
+	)
+
+	third := gasUsedRemoveRegex.ReplaceAll(
+		second,
+		[]byte(``),
+	)
+
+	return third, err
+}
 
 // GetInterxRequest is a function to get Interx Request
 func GetInterxRequest(r *http.Request) types.InterxRequest {
@@ -138,14 +176,18 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 			w.Write([]byte(v))
 			return
 		}
-		json.NewEncoder(w).Encode(response.Response)
+
+		encoded, _ := conventionalMarshaller{response.Response}.MarshalAndConvert(request.Endpoint)
+		w.Write(encoded)
 	} else {
 		w.WriteHeader(statusCode)
 
 		if response.Error == nil {
 			response.Error = "service not available"
 		}
-		json.NewEncoder(w).Encode(response.Error)
+
+		encoded, _ := conventionalMarshaller{response.Error}.MarshalAndConvert(request.Endpoint)
+		w.Write(encoded)
 	}
 }
 
