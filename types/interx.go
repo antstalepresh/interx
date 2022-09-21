@@ -18,7 +18,7 @@ type InterxStatus struct {
 		Moniker           string     `json:"moniker"`
 		KiraAddr          string     `json:"kira_addr"`
 		KiraPubKey        string     `json:"kira_pub_key"`
-		FaucetAddr        string     `jsong:"faucet_addr"`
+		FaucetAddr        string     `json:"faucet_addr"`
 		GenesisChecksum   string     `json:"genesis_checksum"`
 		ChainID           string     `json:"chain_id"`
 		InterxVersion     string     `json:"version,omitempty"`
