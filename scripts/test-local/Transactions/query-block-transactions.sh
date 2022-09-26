@@ -8,9 +8,8 @@ TEST_NAME="TX-BLOCK-TX-QUERY" && timerStart $TEST_NAME
 echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
 VALIDATOR_ADDRESS=$(showAddress validator)
-deleteAccount testuser1
-addAccount testuser1
-TESTUSER_ADDRESS=$(showAddress testuser1)
+addAccount testuser3
+TESTUSER_ADDRESS=$(showAddress testuser3)
 
 RESULT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 2> /dev/null || exit 1)
 

@@ -8,9 +8,8 @@ TEST_NAME="TX-BLOCK-HEIGHTORHASH-QUERY" && timerStart $TEST_NAME
 echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
 VALIDATOR_ADDRESS=$(showAddress validator)
-deleteAccount testuser1
-addAccount testuser1
-TESTUSER_ADDRESS=$(showAddress testuser1)
+addAccount testuser2
+TESTUSER_ADDRESS=$(showAddress testuser2)
 
 BLOCK_HEIGHT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 | jsonQuickParse "height" 2> /dev/null || exit 1)
 BLOCK_HASH=$(sekaid query block $BLOCK_HEIGHT | jq '.block_id.hash' | tr -d '"')

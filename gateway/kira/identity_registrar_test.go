@@ -37,7 +37,6 @@ func (s *server) AllIdentityRecords(ctx context.Context, in *pb.QueryAllIdentity
 }
 
 func (s *server) IdentityRecordVerifyRequestsByRequester(ctx context.Context, in *pb.QueryIdentityRecordVerifyRequestsByRequester) (*pb.QueryIdentityRecordVerifyRequestsByRequesterResponse, error) {
-	fmt.Println("========")
 	return &pb.QueryIdentityRecordVerifyRequestsByRequesterResponse{VerifyRecords: []pb.IdentityRecordsVerify{
 		{
 			Address: "test_address",

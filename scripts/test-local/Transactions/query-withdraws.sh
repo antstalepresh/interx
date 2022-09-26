@@ -8,9 +8,8 @@ TEST_NAME="TX-WITHDRAW-QUERY" && timerStart $TEST_NAME
 echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
 ACCOUNT_ADDRESS=$(showAddress validator)
-deleteAccount testuser1
-addAccount testuser1
-TESTUSER_ADDRESS=$(showAddress testuser1)
+addAccount testuser7
+TESTUSER_ADDRESS=$(showAddress testuser7)
 
 TXRESULT="0x"$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 | jsonQuickParse "txhash" 2> /dev/null || echo "error")
 

@@ -8,9 +8,8 @@ TEST_NAME="TX-HASH-QUERY" && timerStart $TEST_NAME
 echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
 VALIDATOR_ADDRESS=$(showAddress validator)
-deleteAccount testuser1
-addAccount testuser1
-TESTUSER_ADDRESS=$(showAddress testuser1)
+addAccount testuser8
+TESTUSER_ADDRESS=$(showAddress testuser8)
 
 TXRESULT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 2> /dev/null || exit 1)
 TX_ID=$(echo $TXRESULT | jsonQuickParse "txhash")
