@@ -1,4 +1,4 @@
 
 Features:
-* Add unit test architecture setup
-* Fix node discovery task memory pointer issue
+* update response data json to use snake_case
+* remove gas_wanted and gas_used from transaction endpoint

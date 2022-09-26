@@ -207,6 +207,8 @@ func LoadConfig(configFilePath string) {
 	if _, err := os.Stat(GetDbCacheDir() + "/token-aliases.json"); !os.IsNotExist(err) {
 		os.Remove(GetDbCacheDir() + "/token-aliases.json")
 	}
+
+	Config.Evm = configFromFile.Evm
 }
 
 // GenPrivKey is a function to generate a privKey

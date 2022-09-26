@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.17"
+	InterxVersion = "v0.4.19"
 	SekaiVersion  = "v0.3.0.21"
 	CosmosVersion = "v0.45.1"
 
@@ -82,4 +82,11 @@ const (
 	QueryRosettaNetworkOptions = "/rosetta/network/options"
 	QueryRosettaNetworkStatus  = "/rosetta/network/status"
 	QueryRosettaAccountBalance = "/rosetta/account/balance"
+
+	QueryEVMStatus      = "/api/{chain}/status"
+	QueryEVMBlock       = "/api/{chain}/blocks/{identifier}"
+	QueryEVMTransaction = "/api/{chain}/transactions/{hash}"
+	QueryEVMTransfer    = "/api/{chain}/txs"
 )
+
+var SupportedEVMChains = [1]string{"ropsten"}

@@ -3,8 +3,10 @@ module github.com/KiraCore/interx
 go 1.18
 
 require (
-	github.com/KiraCore/sekai v0.2.5-rc.19
+	github.com/KeisukeYamashita/go-jsonrpc v1.0.1
+	github.com/KiraCore/sekai v0.3.1-0.20220817173349-1edb3ebd0173
 	github.com/cosmos/cosmos-sdk v0.45.1
+	github.com/ethereum/go-ethereum v1.10.21
 	github.com/gogo/protobuf v1.3.3
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.3
@@ -14,7 +16,7 @@ require (
 	github.com/regen-network/cosmos-proto v0.3.1
 	github.com/rs/cors v1.7.0
 	github.com/sonyarouje/simdb v0.0.0-20181202125413-c2488dfc374a
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.2
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tyler-smith/go-bip39 v1.0.2
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
@@ -32,6 +34,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.0 // indirect
@@ -43,6 +46,7 @@ require (
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgraph-io/badger/v2 v2.2007.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.3 // indirect
@@ -56,7 +60,7 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/gateway v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/golang/snappy v0.0.3-0.20201103224600-674baa8c7fc3 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/orderedcode v0.0.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
@@ -67,7 +71,7 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.0.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20210204194344-59a8610d2b87 // indirect
 	github.com/improbable-eng/grpc-web v0.14.1 // indirect
@@ -103,7 +107,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca // indirect
+	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/tendermint/btcd v0.1.1 // indirect
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15 // indirect
@@ -111,11 +115,12 @@ require (
 	github.com/tendermint/tm-db v0.6.4 // indirect
 	github.com/zondax/hid v0.9.0 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
