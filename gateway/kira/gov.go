@@ -216,7 +216,7 @@ func QueryExecutionFeeRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) htt
 				}
 			}
 
-			response.Response, response.Error, statusCode = QueryNetworkPropertiesHandle(r, gwCosmosmux)
+			response.Response, response.Error, statusCode = QueryExecutionFeeHandle(r, gwCosmosmux)
 		}
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryExecutionFee].CachingEnabled)
