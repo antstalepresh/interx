@@ -22,11 +22,11 @@ WAITING_VAL=0
 for i in "${RESULT_[@]}"
 do
   VAL_STATUS=$(echo $i | jq '.status' | tr -d '"')
-  [ $VAL_STATUS == "ACTIVE" ] && ((ACTIVE_VAL++))
-  [ $VAL_STATUS == "PAUSED" ] && ((PAUSED_VAL++))
-  [ $VAL_STATUS == "INACTIVE" ] && ((INACTIVE_VAL++))
-  [ $VAL_STATUS == "JAILED" ] && ((JAILED_VAL++))
-  [ $VAL_STATUS == "WAITING" ] && ((WAITING_VAL++))
+  [ $VAL_STATUS == "ACTIVE" ] && ((++ACTIVE_VAL))
+  [ $VAL_STATUS == "PAUSED" ] && ((++PAUSED_VAL))
+  [ $VAL_STATUS == "INACTIVE" ] && ((++INACTIVE_VAL))
+  [ $VAL_STATUS == "JAILED" ] && ((++JAILED_VAL))
+  [ $VAL_STATUS == "WAITING" ] && ((++WAITING_VAL))
 done
 
 INTERX_GATEWAY="127.0.0.1:11000"
