@@ -2,6 +2,7 @@ package interx
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -93,6 +94,7 @@ func GetGenesisResults(rpcAddr string) (*tmtypes.GenesisDoc, string, error) {
 // QueryGenesis is a function to query genesis.
 func QueryGenesis(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(genesisPath())
 		if saveGenesis(rpcAddr) != nil {
 			common.ServeError(0, "", "interx error", http.StatusInternalServerError)
 		} else {
