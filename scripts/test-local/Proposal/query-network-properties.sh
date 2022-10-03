@@ -10,7 +10,7 @@ echoInfo "INFO: $TEST_NAME - Integration Test - START"
 NETWORK_RESULT=$(showNetworkProperties | jq '.properties.inflation_rate' | tr -d '"' || exit 1)
 
 INTERX_GATEWAY="127.0.0.1:11000"
-NETWORK_RESULT_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/network_properties" | jq '.properties.inflationRate' | tr -d '"' || exit 1)
+NETWORK_RESULT_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/network_properties" | jq '.properties.inflation_rate' | tr -d '"' || exit 1)
 
 [ $NETWORK_RESULT != $NETWORK_RESULT_INTERX ] && echoErr "ERROR: Expected network inflation rate to be '$NETWORK_RESULT', but got '$NETWORK_RESULT_INTERX'" && exit 1
 
