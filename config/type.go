@@ -68,6 +68,12 @@ type EVMConfig struct {
 		API      string `json:"api"`
 		APIToken string `json:"api_token"`
 	} `json:"etherscan"`
+	Faucet struct {
+		PrivateKey           string            `json:"private_key"`
+		FaucetAmounts        map[string]uint64 `json:"faucet_amounts"`
+		FaucetMinimumAmounts map[string]uint64 `json:"faucet_minimum_amounts"`
+		TimeLimit            int64             `json:"time_limit"`
+	}
 }
 
 // InterxConfig is a struct to be used for interx configuration

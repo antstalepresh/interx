@@ -92,7 +92,7 @@ const (
 	QueryABI            = "/api/{chain}/abi/{contract}"
 	QueryReadContract   = "/api/{chain}/read/{contract}"
 	QueryWriteContract  = "/api/{chain}/write/{contract}"
-	QueryFaucet         = "/api/{chain}/faucet"
+	QueryEVMFaucet      = "/api/{chain}/faucet"
 )
 
 var SupportedEVMChains = [1]string{"ropsten"}
