@@ -32,15 +32,75 @@ type conventionalMarshaller struct {
 func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, error) {
 	marshalled, err := json.MarshalIndent(c.Value, "", "  ")
 
-	if strings.HasPrefix(endpoint, "/api/cosmos/auth/accounts/") { // accounts query
-		marshalled = []byte(strings.ReplaceAll(string(marshalled), "accountNumber", "account_number"))
-		marshalled = []byte(strings.ReplaceAll(string(marshalled), "pubKey", "pub_key"))
-		marshalled = []byte(strings.ReplaceAll(string(marshalled), "typeUrl", "@type"))
-	}
+	// if strings.HasPrefix(endpoint, "/api/status") { // status query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"FaucetAddr\"", "\"faucet_addr\""))
+	// }
 
-	if strings.HasPrefix(endpoint, "/api/cosmos/bank/balances/") { // accounts query
-		marshalled = []byte(strings.ReplaceAll(string(marshalled), "nextKey", "next_key"))
-	}
+	// if strings.HasPrefix(endpoint, "/api/cosmos/auth/accounts/") { // accounts query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"accountNumber\"", "\"account_number\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"pubKey\"", "\"pub_key\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"typeUrl\"", "\"@type\""))
+	// }
+
+	// if strings.HasPrefix(endpoint, "/api/cosmos/bank/balances/") { // accounts query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"nextKey\"", "\"next_key\""))
+	// }
+
+	// if strings.HasPrefix(endpoint, "/api/kira/gov/network_properties") { // network properties query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"enableForeignFeePayments\"", "\"enable_foreign_fee_payments\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"enableTokenBlacklist\"", "\"enable_token_blacklist\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"enableTokenWhitelist\"", "\"enable_token_whitelist\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"inactiveRankDecreasePercent\"", "\"inactive_rank_decrease_percent\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"inflationPeriod\"", "\"inflation_period\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"inflationRate\"", "\"inflation_rate\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxDelegators\"", "\"max_delegators\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxJailedPercentage\"", "\"max_jailed_percentage\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxMischance\"", "\"max_mischance\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxSlashingPercentage\"", "\"max_slashing_percentage\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxTxFee\"", "\"max_tx_fee\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minDelegationPushout\"", "\"min_delegation_pushout\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minIdentityApprovalTip\"", "\"min_identity_approval_tip\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minProposalEnactmentBlocks\"", "\"min_proposal_enactment_blocks\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minProposalEndBlocks\"", "\"min_proposal_end_blocks\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minTxFee\"", "\"min_tx_fee\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minValidators\"", "\"min_validators\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minimumProposalEndTime\"", "\"minimum_proposal_end_time\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"mischanceConfidence\"", "\"mischance_confidence\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"mischanceRankDecreaseAmount\"", "\"mischance_rank_decrease_amount\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"poorNetworkMaxBankSend\"", "\"poor_network_max_bank_send\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"proposalEnactmentTime\"", "\"proposal_enactment_time\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"slashingPeriod\"", "\"slashing_period\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"ubiHardcap\"", "\"ubi_hardcap\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"uniqueIdentityKeys\"", "\"unique_identity_keys\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"unjailMaxTime\"", "\"unjail_max_time\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"unstakingPeriod\"", "\"unstaking_period\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"validatorsFeeShare\"", "\"validators_fee_share\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"voteQuorum\"", "\"vote_quorum\""))
+	// }
+
+	// if strings.HasPrefix(endpoint, "/api/kira/tokens/rates") { // network properties query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"feePayments\"", "\"fee_payments\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"feeRate\"", "\"fee_rate\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"stakeCap\"", "\"stake_cap\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"stakeMin\"", "\"stake_min\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"stakeToken\"", "\"stake_token\""))
+	// }
+
+	// if strings.HasPrefix(endpoint, "/api/kira/ubi-records") { // network properties query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"distributionEnd\"", "\"distribution_end\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"distributionLast\"", "\"distribution_last\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"distributionStart\"", "\"distribution_start\""))
+	// }
+
+	// if strings.HasPrefix(endpoint, "/api/kira/spending-pools") { // network properties query
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"ownerAccounts\"", "\"owner_accounts\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"ownerRoles\"", "\"owner_roles\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"claimEnd\"", "\"claim_end\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"claimStart\"", "\"claim_start\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"voteEnactment\"", "\"vote_enactment\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"votePeriod\"", "\"vote_period\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"voteQuorum\"", "\"vote_quorum\""))
+	// }
 
 	second := gasWantedRemoveRegex.ReplaceAll(
 		marshalled,
