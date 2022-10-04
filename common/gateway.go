@@ -39,7 +39,7 @@ func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, erro
 	// if strings.HasPrefix(endpoint, "/api/cosmos/auth/accounts/") { // accounts query
 	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"accountNumber\"", "\"account_number\""))
 	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"pubKey\"", "\"pub_key\""))
-	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"typeUrl\"", "\"@\"type"))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"typeUrl\"", "\"@type\""))
 	// }
 
 	// if strings.HasPrefix(endpoint, "/api/cosmos/bank/balances/") { // accounts query
