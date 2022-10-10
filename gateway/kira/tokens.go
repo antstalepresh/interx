@@ -142,7 +142,7 @@ func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux)
 			result.Data[index].StakeMin = convertRate(tokenRate.StakeMin)
 		}
 
-		success = result.Data
+		success = result
 	}
 
 	return success, failure, status
