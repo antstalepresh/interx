@@ -6,6 +6,7 @@ require (
 	github.com/KeisukeYamashita/go-jsonrpc v1.0.1
 	github.com/KiraCore/sekai v0.3.1-0.20220817173349-1edb3ebd0173
 	github.com/cosmos/cosmos-sdk v0.45.1
+	github.com/cosmos/go-bip39 v1.0.0
 	github.com/ethereum/go-ethereum v1.10.21
 	github.com/gogo/protobuf v1.3.3
 	github.com/gorilla/mux v1.8.0
@@ -40,7 +41,6 @@ require (
 	github.com/coinbase/rosetta-sdk-go v0.7.0 // indirect
 	github.com/confio/ics23/go v0.6.6 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
-	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/iavl v0.17.3 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
