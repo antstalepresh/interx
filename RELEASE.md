@@ -1,3 +1,3 @@
 
 Features:
-* update response data json to use snake_case
+* fix auth endpoint response
