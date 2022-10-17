@@ -45,7 +45,7 @@ func queryEVMFaucetFromNode(chainConfig *config.EVMConfig, nodeInfo config.EVMNo
 		return common.ServeError(0, "", "unsupported token", http.StatusBadRequest)
 	}
 
-	if token == "0x00000000000000000000000000000000000000000000000000" {
+	if token == "0x0000000000000000000000000000000000000000" {
 		// faucet account eth balance
 		data, err := client.Call("eth_getBalance", faucetAddress.String(), "latest")
 		if err != nil {
@@ -115,7 +115,63 @@ func queryEVMFaucetFromNode(chainConfig *config.EVMConfig, nodeInfo config.EVMNo
 		return common.ServeError(0, "", "transfer amount exceed the minimum amount", http.StatusInternalServerError)
 	}
 
-	return nil, nil, http.StatusOK
+	return faucetAccountBalance, nil, http.StatusOK
+}
+
+func queryEVMFaucetInfoFromNode(chainConfig *config.EVMConfig, nodeInfo config.EVMNodeConfig) (interface{}, interface{}, int) {
+	client := jsonrpc2.NewRPCClient(nodeInfo.RPC + "/" + nodeInfo.RPCToken)
+	if nodeInfo.RPCSecret != "" {
+		client.SetBasicAuth(nodeInfo.RPCToken, nodeInfo.RPCSecret)
+	}
+
+	privateKey, _ := crypto.HexToECDSA(chainConfig.Faucet.PrivateKey)
+	publicKey := privateKey.Public()
+	publicKeyECDSA, _ := publicKey.(*ecdsa.PublicKey)
+	faucetAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+
+	// FaucetAccountInfo is a struct to be used for Faucet Account Info
+	type FaucetAccountInfo struct {
+		Address  string            `json:"address"`
+		Balances map[string]uint64 `json:"balances"`
+	}
+	faucetInfo := FaucetAccountInfo{}
+	faucetInfo.Address = faucetAddress.String()
+	faucetInfo.Balances = make(map[string]uint64)
+
+	for k := range chainConfig.Faucet.FaucetAmounts {
+		if k == "0x0000000000000000000000000000000000000000" {
+			// faucet account eth balance
+			data, err := client.Call("eth_getBalance", faucetAddress.String(), "latest")
+			if err != nil {
+				return common.ServeError(0, "failed to get eth balance of faucet account", err.Error(), http.StatusInternalServerError)
+			}
+			ethBalanceString, err := data.GetString()
+			if err != nil {
+				return common.ServeError(0, "failed to get eth balance of faucet account", err.Error(), http.StatusInternalServerError)
+			}
+			faucetInfo.Balances[k], _ = strconv.ParseUint((ethBalanceString)[2:], 16, 64)
+		} else {
+			// faucet account token balance
+			call := new(EVMCall)
+			call.To = k
+			call.Data = "0x70a08231000000000000000000000000" + faucetAddress.String()[2:] // balanceOf
+			data, err := client.Call("eth_call", *call, "latest")
+			if err != nil {
+				return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
+			}
+			tokenBalancesString, err := data.GetString()
+			if err != nil {
+				return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
+			}
+			if tokenBalancesString != "0x" {
+				faucetInfo.Balances[k], _ = strconv.ParseUint((tokenBalancesString)[2:], 16, 64)
+			} else {
+				faucetInfo.Balances[k] = 0
+			}
+		}
+	}
+
+	return faucetInfo, nil, http.StatusOK
 }
 
 func queryEVMFaucetRequestHandle(r *http.Request, chain string) (interface{}, interface{}, int) {
@@ -127,11 +183,21 @@ func queryEVMFaucetRequestHandle(r *http.Request, chain string) (interface{}, in
 	_ = r.ParseForm()
 
 	address := r.FormValue("claim")
-	if len(address) == 0 {
-		return common.ServeError(0, "", "invalid address", http.StatusBadRequest)
-	}
-
 	token := r.FormValue("token")
+
+	if len(address) == 0 {
+		res, err, statusCode := queryEVMFaucetInfoFromNode(chainConfig, chainConfig.QuickNode)
+		if err == nil {
+			return res, err, statusCode
+		}
+
+		res, err, statusCode = queryEVMFaucetInfoFromNode(chainConfig, chainConfig.Pokt)
+		if err == nil {
+			return res, err, statusCode
+		}
+
+		return queryEVMFaucetInfoFromNode(chainConfig, chainConfig.Infura)
+	}
 	if len(token) == 0 {
 		token = "0x0000000000000000000000000000000000000000"
 	}
@@ -141,12 +207,12 @@ func queryEVMFaucetRequestHandle(r *http.Request, chain string) (interface{}, in
 		return res, err, statusCode
 	}
 
-	res, err, statusCode = queryEVMFaucetFromNode(chainConfig, chainConfig.Infura, address, token)
+	res, err, statusCode = queryEVMFaucetFromNode(chainConfig, chainConfig.Pokt, address, token)
 	if err == nil {
 		return res, err, statusCode
 	}
 
-	return queryEVMFaucetFromNode(chainConfig, chainConfig.Pokt, address, token)
+	return queryEVMFaucetFromNode(chainConfig, chainConfig.Infura, address, token)
 }
 
 // RegisterEVMFaucetRequest is a function to faucet evm tokens
