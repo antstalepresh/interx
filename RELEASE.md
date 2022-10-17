@@ -1,3 +1,4 @@
 
 Features:
-* fix auth endpoint response
+* fix execution fee query by transaction type
+* fix token rates query

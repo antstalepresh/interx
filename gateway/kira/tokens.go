@@ -1,8 +1,10 @@
 package kira
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/KiraCore/interx/common"
@@ -94,9 +96,56 @@ func QueryKiraTokensAliasesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 	}
 }
 
+func convertRate(rateString string) string {
+	rate, _ := strconv.ParseFloat(rateString, 64)
+	rate = rate / 1000000000000000000.0
+	rateString = fmt.Sprintf("%g", rate)
+	if !strings.Contains(rateString, ".") {
+		rateString = rateString + ".0"
+	}
+	return rateString
+}
+
 func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/tokens", "/kira/tokens", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
+
+	if success != nil {
+		type TokenRate struct {
+			Denom       string `json:"denom"`
+			FeePayments bool   `json:"feePayments"`
+			FeeRate     string `json:"feeRate"`
+			StakeCap    string `json:"stakeCap"`
+			StakeMin    string `json:"stakeMin"`
+			StakeToken  bool   `json:"stakeToken"`
+		}
+
+		type TokenRatesResponse struct {
+			Data []TokenRate `json:"data"`
+		}
+		result := TokenRatesResponse{}
+
+		byteData, err := json.Marshal(success)
+		if err != nil {
+			common.GetLogger().Error("[query-token-rates] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+		err = json.Unmarshal(byteData, &result)
+		if err != nil {
+			common.GetLogger().Error("[query-token-rates] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		for index, tokenRate := range result.Data {
+			result.Data[index].FeeRate = convertRate(tokenRate.FeeRate)
+			result.Data[index].StakeCap = convertRate(tokenRate.StakeCap)
+			result.Data[index].StakeMin = convertRate(tokenRate.StakeMin)
+		}
+
+		success = result
+	}
+
+	return success, failure, status
 }
 
 // QueryKiraTokensRatesRequest is a function to query all tokens rates.

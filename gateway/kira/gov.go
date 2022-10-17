@@ -189,7 +189,9 @@ func QueryNetworkPropertiesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func QueryExecutionFeeHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
+	r.ParseForm()
+	message := r.FormValue("message")
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov/execution_fee", "/kira/gov/execution_fee/"+message, -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 
