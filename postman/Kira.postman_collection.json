@@ -2308,10 +2308,6 @@
 			"name": "Role",
 			"item": [
 				{
-					"name": "New Folder",
-					"item": []
-				},
-				{
 					"name": "Query All Roles",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -3076,12 +3072,12 @@
 					"name": "Read Contract",
 					"item": [
 						{
-							"name": "Ropsten Abi",
+							"name": "Ropsten",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://0.0.0.0:11000/api/ropsten/read/0xFab46E002BbF0b4509813474841E0716E6730136?function=balanceOf&key_1=Ec44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2",
+									"raw": "http://0.0.0.0:11000/api/ropsten/read/0xFab46E002BbF0b4509813474841E0716E6730136?function=balanceOf&key_1=0xEc44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2",
 									"protocol": "http",
 									"host": [
 										"0",
@@ -3103,8 +3099,157 @@
 										},
 										{
 											"key": "key_1",
-											"value": "Ec44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2"
+											"value": "0xEc44c03Ff46cfDB7754bc1c0D39a7C5e0D8fd9B2"
 										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Write Contract",
+					"item": [
+						{
+							"name": "Ropsten",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/ropsten/write/0xFab46E002BbF0b4509813474841E0716E6730136?from=0xd8f223c7ab9342ac555440fd1011014d2dcb9062&function=transfer&key_1=0x60CB212F15dcEf185240d43C4e162C730fA8a9C2&key_2=100000000000000000000000",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"ropsten",
+										"write",
+										"0xFab46E002BbF0b4509813474841E0716E6730136"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "0xd8f223c7ab9342ac555440fd1011014d2dcb9062"
+										},
+										{
+											"key": "function",
+											"value": "transfer"
+										},
+										{
+											"key": "key_1",
+											"value": "0x60CB212F15dcEf185240d43C4e162C730fA8a9C2"
+										},
+										{
+											"key": "key_2",
+											"value": "100000000000000000000000"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Faucet",
+					"item": [
+						{
+							"name": "Faucet",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/goerli/faucet?claim=0xA67b17bE6a048131A996661800a8840d233BDE7F&token=0x0000000000000000000000000000000000000000",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"goerli",
+										"faucet"
+									],
+									"query": [
+										{
+											"key": "claim",
+											"value": "0xA67b17bE6a048131A996661800a8840d233BDE7F"
+										},
+										{
+											"key": "token",
+											"value": "0x0000000000000000000000000000000000000000"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Faucet Info",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://0.0.0.0:11000/api/goerli/faucet",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "11000",
+									"path": [
+										"api",
+										"goerli",
+										"faucet"
 									]
 								}
 							},
