@@ -164,7 +164,14 @@ rm -rfv ./proto/cosmos ./proto/kira ./third_party/proto
 mkdir -p ./third_party/proto
 cp -rfv $cosmos_sdk_dir/proto/cosmos ./proto
 cp -rfv $cosmos_sdk_dir/third_party/proto/* ./third_party/proto
-cp -rfv $kira_dir/proto/kira ./proto
+# cp -rfv $kira_dir/proto/kira ./proto
+
+wget https://github.com/KiraCore/sekai/releases/download/$SEKAI_BRANCH/source-code.tar.gz
+mkdir -p sekai
+tar -C ./sekai/ -xvf ./source-code.tar.gz
+rm -rfv ./source-code.tar.gz
+cp -rfv ./sekai/proto/kira ./proto
+rm -rfv ./sekai
 
 ### This part is required by gocosmos_out
 rm -rfv ./codec && mkdir -p codec/types

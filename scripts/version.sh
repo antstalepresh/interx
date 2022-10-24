@@ -14,8 +14,8 @@ VERSION=$(grep -Fn -m 1 "$VARIABLE_NAME " $CONSTANS_FILE | rev | cut -d "=" -f1 
 # we have to remove the hash from the version, anything occuring after the 4'th comma should be trimmed for release candidate versions
 if [[ "$VERSION" == *"-rc"* ]] ; then
     # we have to remove the hash from the version, anything occuring after the 3'th comma for non release candidate versions be trimmed
-    echo $VERSION | cut -f1-4 -d.
+    echo $VERSION | cut -f1-5 -d.
 else
     # we have to remove the hash from the version, anything occuring after the 3'th comma for non release candidate versions be trimmed
-    echo $VERSION | cut -f1-3 -d.
+    echo $VERSION | cut -f1-4 -d.
 fi

@@ -102,6 +102,12 @@ func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, erro
 	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"voteQuorum\"", "\"vote_quorum\""))
 	// }
 
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"defaultParameters\"", "\"default_parameters\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"executionFee\"", "\"execution_fee\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"failureFee\"", "\"failure_fee\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"timeout\"", "\"timeout\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"transactionType\"", "\"transaction_type\""))
+
 	second := gasWantedRemoveRegex.ReplaceAll(
 		marshalled,
 		[]byte(``),
