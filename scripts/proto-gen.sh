@@ -166,7 +166,7 @@ cp -rfv $cosmos_sdk_dir/proto/cosmos ./proto
 cp -rfv $cosmos_sdk_dir/third_party/proto/* ./third_party/proto
 # cp -rfv $kira_dir/proto/kira ./proto
 
-wget https://github.com/KiraCore/sekai/releases/download/v0.3.1.25/source-code.tar.gz
+wget https://github.com/KiraCore/sekai/releases/download/$SEKAI_BRANCH/source-code.tar.gz
 mkdir -p sekai
 tar -C ./sekai/ -xvf ./source-code.tar.gz
 rm -rfv ./source-code.tar.gz
