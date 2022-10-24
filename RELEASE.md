@@ -1,4 +1,3 @@
 
 Features:
-* fix execution fee query by transaction type
-* fix token rates query
+* fix all execution fees query by transaction type
