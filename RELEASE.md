@@ -1,3 +1,3 @@
 
 Features:
-* fix all execution fees query by transaction type
+* fix all reported camelCase
