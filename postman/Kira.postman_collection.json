@@ -3184,7 +3184,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://0.0.0.0:11000/api/goerli/faucet?claim=0xA67b17bE6a048131A996661800a8840d233BDE7F&token=0x0000000000000000000000000000000000000000",
+									"raw": "http://0.0.0.0:11000/api/goerli/faucet?claim=0x626917CF83eB583A67bcfCD65F2076c613c8c59A&token=0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
 									"protocol": "http",
 									"host": [
 										"0",
@@ -3201,11 +3201,11 @@
 									"query": [
 										{
 											"key": "claim",
-											"value": "0xA67b17bE6a048131A996661800a8840d233BDE7F"
+											"value": "0x626917CF83eB583A67bcfCD65F2076c613c8c59A"
 										},
 										{
 											"key": "token",
-											"value": "0x0000000000000000000000000000000000000000"
+											"value": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
 										}
 									]
 								}
