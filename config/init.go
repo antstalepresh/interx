@@ -157,7 +157,6 @@ func defaultConfig() InterxConfigFromFile {
 	configFromFile.Faucet.TimeLimit = 20
 
 	configFromFile.Evm = make(map[string]EVMConfig)
-
 	for _, item := range SupportedEVMChains {
 		evmConfig := EVMConfig{}
 		evmConfig.Name = ""
@@ -172,7 +171,9 @@ func defaultConfig() InterxConfigFromFile {
 		evmConfig.Etherscan.API = ""
 		evmConfig.Etherscan.APIToken = ""
 		evmConfig.Faucet.PrivateKey = "0000000000000000000000000000000000000000000000000000000000000000"
+		evmConfig.Faucet.FaucetAmounts = make(map[string]uint64)
 		evmConfig.Faucet.FaucetAmounts["0x0000000000000000000000000000000000000000"] = 10000000000000000
+		evmConfig.Faucet.FaucetMinimumAmounts = make(map[string]uint64)
 		evmConfig.Faucet.FaucetMinimumAmounts["0x0000000000000000000000000000000000000000"] = 1000000000000000
 		evmConfig.Faucet.TimeLimit = 20
 
