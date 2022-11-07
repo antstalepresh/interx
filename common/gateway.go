@@ -108,6 +108,28 @@ func (c conventionalMarshaller) MarshalAndConvert(endpoint string) ([]byte, erro
 	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"timeout\"", "\"timeout\""))
 	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"transactionType\"", "\"transaction_type\""))
 
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"inactiveUntil\"", "\"inactive_until\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"lastPresentBlock\"", "\"last_present_block\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"missedBlocksCounter\"", "\"missed_blocks_counter\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"producedBlocksCounter\"", "\"produced_blocks_counter\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"startHeight\"", "\"start_height\""))
+
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"enactmentEndTime\"", "\"enactment_end_time\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"execResult\"", "\"exec_result\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minEnactmentEndBlockHeight\"", "\"min_enactment_end_block_height\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minVotingEndBlockHeight\"", "\"min_voting_end_block_height\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"proposalId\"", "\"proposal_id\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"submitTime\"", "\"submit_time\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"votingEndTime\"", "\"voting_end_time\""))
+
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxCustodyBufferSize\"", "\"max_custody_buffer_size\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"maxCustodyTxSize\"", "\"max_custody_tx_size\""))
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"minCustodyReward\"", "\"min_custody_reward\""))
+
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"verifyRecords\"", "\"verify_records\""))
+
+	marshalled = []byte(strings.ReplaceAll(string(marshalled), "\"txTypes\"", "\"tx_types\""))
+
 	second := gasWantedRemoveRegex.ReplaceAll(
 		marshalled,
 		[]byte(``),

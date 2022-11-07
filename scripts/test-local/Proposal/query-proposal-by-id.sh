@@ -12,7 +12,7 @@ VALIDATOR_ADDRESS=$(showAddress validator)
 PROPOSAL_RESULT=$(setPoorNetworkMessages validator asdf)
 
 INTERX_GATEWAY="127.0.0.1:11000"
-PROPOSAL_ID_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/proposals?all=true&reverse=true" | jq '.proposals[0].proposalId' | tr -d '"' || exit 1)
+PROPOSAL_ID_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/proposals?all=true&reverse=true" | jq '.proposals[0].proposal_id' | tr -d '"' || exit 1)
 RESULT_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/gov/proposals/$PROPOSAL_ID_INTERX | jq '.proposal.content.messages[0]' || exit 1)
 RESULT_CLI=$(showProposal $PROPOSAL_ID_INTERX | jq '.content.messages[0]')
 
