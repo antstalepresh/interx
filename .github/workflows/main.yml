@@ -101,8 +101,6 @@ jobs:
               echo " interx-darwin-arm64.deb: sha256:$(sha256sum ./bin/interx-darwin-arm64.deb  | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-amd64.deb: sha256:$(sha256sum ./bin/interx-linux-amd64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "  interx-linux-arm64.deb: sha256:$(sha256sum ./bin/interx-linux-arm64.deb   | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "interx-windows-amd64.exe: sha256:$(sha256sum ./bin/interx-windows-amd64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
-              echo "interx-windows-arm64.exe: sha256:$(sha256sum ./bin/interx-windows-arm64.exe | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo "      source-code.tar.gz: sha256:$(sha256sum ./bin/source-code.tar.gz | awk '{ print $1 }')" >> ./bin/RELEASE.md
               echo -e "\`\`\`"   >> ./bin/RELEASE.md
               tar -czvf deb.tar.gz -C ./bin .
@@ -215,10 +213,6 @@ jobs:
                 ./interx-darwin-amd64.deb.sig
                 ./interx-darwin-arm64.deb
                 ./interx-darwin-arm64.deb.sig
-                ./interx-windows-amd64.exe
-                ./interx-windows-amd64.exe.sig
-                ./interx-windows-arm64.exe
-                ./interx-windows-arm64.exe.sig
                 ./source-code.tar.gz
           - name: Cleanup all resources
             if: always()
