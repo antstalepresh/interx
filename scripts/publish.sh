@@ -52,10 +52,8 @@ rm -rfv ./bin
 # NOTE: To see available build architectures, run: go tool dist list
 pcgRelease "amd64" "$VERSION" "linux"
 pcgRelease "amd64" "$VERSION" "darwin"
-pcgRelease "amd64" "$VERSION" "windows"
 pcgRelease "arm64" "$VERSION" "linux"
 pcgRelease "arm64" "$VERSION" "darwin"
-pcgRelease "arm64" "$VERSION" "windows"
 
 rm -rfv ./bin/amd64 ./bin/arm64 ./bin/deb
 echoInfo "INFO: Sucessfully published INTERX deb packages into ./bin"
