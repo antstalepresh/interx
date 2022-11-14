@@ -12,3 +12,4 @@ nfpm_*
 *.deb
 *_key.json
 .vscode/
+.DS_Store
