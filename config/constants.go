@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.21-rc1"
+	InterxVersion = "v0.4.21-rc2"
 	SekaiVersion  = "v0.3.1.25"
 	CosmosVersion = "v0.45.1"
 
@@ -95,4 +95,4 @@ const (
 	QueryEVMFaucet      = "/api/{chain}/faucet"
 )
 
-var SupportedEVMChains = [1]string{"ropsten"}
+var SupportedEVMChains = [1]string{"goerli"}

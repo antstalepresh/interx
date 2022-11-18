@@ -1,3 +1,3 @@
 
 Features:
-* add unit tests for evm endpoints
+* add integration tests for evm endpoints
