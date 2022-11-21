@@ -28,14 +28,12 @@ import (
 
 // RegisterInterxTxRoutes registers tx query routers.
 func RegisterInterxTxRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr string) {
-	r.HandleFunc(config.QueryWithdraws, QueryWithdraws(rpcAddr)).Methods("GET")
-	r.HandleFunc(config.QueryDeposits, QueryDeposits(rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryUnconfirmedTxs, QueryUnconfirmedTxs(rpcAddr)).Methods("GET")
+	r.HandleFunc(config.QueryTransactions, QueryTransactions(rpcAddr)).Methods("GET")
 
 	common.AddRPCMethod("GET", config.QueryKiraFunctions, "This is an API to query kira functions and metadata.", true)
-	common.AddRPCMethod("GET", config.QueryWithdraws, "This is an API to query withdraw transactions.", true)
-	common.AddRPCMethod("GET", config.QueryDeposits, "This is an API to query deposit transactions.", true)
 	common.AddRPCMethod("GET", config.QueryUnconfirmedTxs, "This is an API to query unconfirmed transactions.", true)
+	common.AddRPCMethod("GET", config.QueryTransactions, "This is an API to query transactions.", true)
 }
 
 func toSnakeCase(str string) string {
@@ -144,7 +142,11 @@ func getBlockHeight(rpcAddr string, hash string) (int64, error) {
 	return result.Height, nil
 }
 
-func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw bool) (interface{}, interface{}, int) {
+func convertTxTypeToQueryString(txType string, address string) string {
+	return fmt.Sprintf("message.action='%s'%20AND%20message.sender='%s'", config.MsgTypes[txType], address)
+}
+
+func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}, interface{}, int) {
 	err := r.ParseForm()
 	if err != nil {
 		common.GetLogger().Error("[query-transactions] Failed to parse query parameters:", err)
@@ -152,27 +154,54 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 	}
 
 	var (
+		query     string = ""
 		account   string = ""
 		txType    string = ""
-		last      string = ""
 		sender    string = ""
 		recipient string = ""
+		direction string = ""
 		pageSize  int    = 10
 		page      int    = 1
+		limit     int    = 10
+		offset    int    = 0
 	)
 
-	account = r.FormValue("account")
+	//------------ Type ------------
+	txTypes := r.FormValue("type")
+	txTypesArray := strings.Split(txType, ",")
+	for _, txType := range txTypesArray {
+		if config.MsgTypes[txType] == "" {
+
+		}
+	}
+	if txType == "" {
+		txType = "all"
+	}
+
+	//------------ Address ------------
+	account = r.FormValue("address")
 	if account == "" {
-		common.GetLogger().Error("[query-transactions] 'account' is not set")
-		return common.ServeError(0, "'account' is not set", "", http.StatusBadRequest)
+		common.GetLogger().Error("[query-transactions] 'address' is not set")
+		return common.ServeError(0, "'address' is not set", "", http.StatusBadRequest)
 	}
 
-	if isWithdraw {
-		sender = account
-	} else {
+	//------------ Direction ------------
+	direction = r.FormValue("direction")
+	directions := strings.Split(direction, ",")
+	for _, drt := range directions {
+		if drt == "inbound" {
+			recipient = account
+		} else if drt == "outbound" {
+			sender = account
+		}
+	}
+
+	if recipient == "" && sender == "" {
 		recipient = account
+		sender = account
 	}
 
+	//------------ Pagination ------------
 	if pageSizeStr := r.FormValue("page_size"); pageSizeStr != "" {
 		if pageSize, err = strconv.Atoi(pageSizeStr); err != nil {
 			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
@@ -191,63 +220,55 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 		}
 	}
 
-	txType = r.FormValue("type")
-	if txType == "" {
-		txType = "all"
+	if limitStr := r.FormValue("limit"); limitStr != "" {
+		if limit, err = strconv.Atoi(limitStr); err != nil {
+			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'limit': ", err)
+			return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
+		}
+
+		if limit < 1 || limit > 1000 {
+			common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
+			return common.ServeError(0, "'limit' should be 1 ~ 1000", "", http.StatusBadRequest)
+		}
+		pageSize = limit
 	}
 
-	last = r.FormValue("last")
+	if offsetStr := r.FormValue("offset"); offsetStr != "" {
+		if offset, err = strconv.Atoi(offsetStr); err != nil {
+			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'offset': ", err)
+			return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
+		}
+
+		page = offset / pageSize
+		offset = offset % pageSize
+	}
 
 	var transactions []*tmTypes.ResultTx
 
-	if last == "" {
+	if limit > 0 || offset > 0 {
 		searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, page, pageSize, -1, -1, "")
 		if err != nil {
 			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
 			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 		}
+		transactions = searchResult.Txs[offset:]
 
-		transactions = searchResult.Txs
-	} else {
-		blockHeight, err := getBlockHeight(rpcAddr, last)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to query block height: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		// get current block
-		searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, 0, pageSize, blockHeight, blockHeight, "")
+		searchResult, err = SearchTxHashHandle(rpcAddr, sender, recipient, txType, page+1, pageSize, -1, -1, "")
 		if err != nil {
 			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
 			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 		}
-
-		beforeLast := true
-		for _, tx := range searchResult.Txs {
-			if !beforeLast {
-				transactions = append(transactions, tx)
-			}
-			if fmt.Sprintf("0x%X", tx.Hash) == last {
-				beforeLast = false
-			}
-
-			if len(transactions) == pageSize {
-				break
-			}
+		transactions = append(transactions, searchResult.Txs[:offset]...)
+	} else {
+		searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, page, pageSize, -1, -1, "")
+		if err != nil {
+			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 		}
-
-		if len(transactions) < pageSize && blockHeight > 0 {
-			searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, 0, pageSize-len(transactions), -1, blockHeight-1, "")
-			if err != nil {
-				common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
-				return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-			}
-
-			transactions = append(transactions, searchResult.Txs...)
-		}
+		transactions = searchResult.Txs
 	}
 
-	var txResults = make(map[string]types.DepositWithdrawResult)
+	var txResults = []types.TransactionResponse{}
 
 	for _, transaction := range transactions {
 		tx, err := config.EncodingCg.TxConfig.TxDecoder()(transaction.Tx)
@@ -268,7 +289,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 		}
 
-		var txResponses []types.DepositWithdrawTransaction
+		var txResponses []types.TransactionTxResult
 
 		for index, msg := range tx.GetMsgs() {
 			txType := kiratypes.MsgType(msg)
@@ -463,11 +484,13 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 		if len(txResponses) == 0 {
 			for _, event := range transaction.TxResult.GetEvents() {
 				if event.GetType() == "transfer" {
-					tx := types.DepositWithdrawTransaction{
+					tx := types.TransactionTxResult{
 						Address: "",
 						Type:    txType,
-						Denom:   "",
-						Amount:  0,
+						Tip: types.TransactionCoinSpentResult{
+							Denom:  "",
+							Amount: 0,
+						},
 					}
 
 					attributes := event.GetAttributes()
@@ -486,8 +509,8 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 
 							coin, err := sdk.ParseCoinNormalized(value)
 							if err == nil {
-								tx.Denom = coin.Denom
-								tx.Amount = coin.Amount.Int64()
+								tx.Tip.Denom = coin.Denom
+								tx.Tip.Amount = coin.Amount.Int64()
 							}
 
 						}
@@ -498,15 +521,16 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 			}
 		}
 
-		txResults[fmt.Sprintf("0x%X", transaction.Hash)] = types.DepositWithdrawResult{
+		txResults = append(txResults, types.TransactionResponse{
 			Time: blockTime,
+			Hash: fmt.Sprintf("0x%X", transaction.Hash),
 			Txs:  txResponses,
-		}
+		})
 	}
 
 	res := struct {
-		Transactions map[string]types.DepositWithdrawResult `json:"transactions"`
-		TotalCount   int                                    `json:"total_count"`
+		Transactions []types.TransactionResponse `json:"transactions"`
+		TotalCount   int                         `json:"total_count"`
 	}{}
 
 	searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, 0, pageSize, -1, -1, "")
@@ -516,60 +540,31 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request, isWithdraw b
 	return res, nil, http.StatusOK
 }
 
-// QueryWithdraws is a function to query withdraw transactions.
-func QueryWithdraws(rpcAddr string) http.HandlerFunc {
+// QueryWithdraws is a function to query all transactions.
+func QueryTransactions(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 		statusCode := http.StatusOK
 
-		common.GetLogger().Info("[query-withdraws] Entering withdraws query")
+		common.GetLogger().Info("[query-transactions] Entering transactions query")
 
-		if !common.RPCMethods["GET"][config.QueryWithdraws].Enabled {
+		fmt.Println(common.RPCMethods["GET"])
+		if !common.RPCMethods["GET"][config.QueryTransactions].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
 		} else {
-			if common.RPCMethods["GET"][config.QueryWithdraws].CachingEnabled {
+			if common.RPCMethods["GET"][config.QueryTransactions].CachingEnabled {
 				found, cacheResponse, cacheError, cacheStatus := common.SearchCache(request, response)
 				if found {
 					response.Response, response.Error, statusCode = cacheResponse, cacheError, cacheStatus
 					common.WrapResponse(w, request, *response, statusCode, false)
 
-					common.GetLogger().Info("[query-withdraws] Returning from the cache")
+					common.GetLogger().Info("[query-transactions] Returning from the cache")
 					return
 				}
 			}
 
-			response.Response, response.Error, statusCode = QueryBlockTransactionsHandler(rpcAddr, r, true)
-		}
-
-		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryStatus].CachingEnabled)
-	}
-}
-
-// QueryDeposits is a function to query deposit transactions.
-func QueryDeposits(rpcAddr string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		request := common.GetInterxRequest(r)
-		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
-
-		common.GetLogger().Error("[query-deposits] Entering withdraws query")
-
-		if !common.RPCMethods["GET"][config.QueryDeposits].Enabled {
-			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
-		} else {
-			if common.RPCMethods["GET"][config.QueryDeposits].CachingEnabled {
-				found, cacheResponse, cacheError, cacheStatus := common.SearchCache(request, response)
-				if found {
-					response.Response, response.Error, statusCode = cacheResponse, cacheError, cacheStatus
-					common.WrapResponse(w, request, *response, statusCode, false)
-
-					common.GetLogger().Info("[query-deposits] Returning from the cache")
-					return
-				}
-			}
-
-			response.Response, response.Error, statusCode = QueryBlockTransactionsHandler(rpcAddr, r, false)
+			response.Response, response.Error, statusCode = QueryBlockTransactionsHandler(rpcAddr, r)
 		}
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryStatus].CachingEnabled)
