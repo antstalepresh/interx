@@ -11,7 +11,6 @@ INTERX_GATEWAY="127.0.0.1:11000"
 
 RESULT_FROM_INTERX=$(curl --fail 127.0.0.1:11000/api/goerli/accounts/0x326C977E6efc84E512bB9C30f76E30c160eD06FB | jq '.account' || echo "error")
 RESULT_SUM_FROM_INTERX="$(echo $RESULT_FROM_INTERX | jq '."@type"')$(echo $RESULT_FROM_INTERX | jq '.address')$(echo $RESULT_FROM_INTERX | jq '.pending')$(echo $RESULT_FROM_INTERX | jq '.sequence')"
-echo $RESULT_SUM_FROM_INTERX
 
 [ '"contract""0x326C977E6efc84E512bB9C30f76E30c160eD06FB"11' != "$RESULT_SUM_FROM_INTERX" ] && echoErr "ERROR: Expected contract address" && exit 1
 
