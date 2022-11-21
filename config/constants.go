@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.20-rc4"
+	InterxVersion = "v0.4.21-rc1"
 	SekaiVersion  = "v0.3.1.25"
 	CosmosVersion = "v0.45.1"
 
@@ -87,6 +87,12 @@ const (
 	QueryEVMBlock       = "/api/{chain}/blocks/{identifier}"
 	QueryEVMTransaction = "/api/{chain}/transactions/{hash}"
 	QueryEVMTransfer    = "/api/{chain}/txs"
+	QueryEVMAccounts    = "/api/{chain}/accounts/{address}"
+	QueryEVMBalances    = "/api/{chain}/balances/{address}"
+	QueryABI            = "/api/{chain}/abi/{contract}"
+	QueryReadContract   = "/api/{chain}/read/{contract}"
+	QueryWriteContract  = "/api/{chain}/write/{contract}"
+	QueryEVMFaucet      = "/api/{chain}/faucet"
 )
 
 var SupportedEVMChains = [1]string{"ropsten"}

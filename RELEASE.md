@@ -1,3 +1,3 @@
 
 Features:
-* fix all reported camelCase
+* add unit tests for evm endpoints
