@@ -357,7 +357,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 
 // GetTokenSupply is a function to get token supply
 func GetTokenSupply(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.TokenSupply {
-	r.URL.Path = strings.Replace(config.QueryTotalSupply, "/api/cosmos/bank", "/cosmos/bank/v1beta1", -1)
+	r.URL.Path = strings.Replace(config.QueryTotalSupply, "/api/kira", "/cosmos/bank/v1beta1", -1)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 
