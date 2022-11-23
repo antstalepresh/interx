@@ -70,11 +70,11 @@ func (suite *BalancesQueryTestSuite) TestAccountsQuery() {
 	suite.Require().EqualValues(result.Balances[0].Contract, "")
 	suite.Require().EqualValues(result.Balances[0].Symbol, "ETH")
 	suite.Require().EqualValues(result.Balances[0].Decimals, 18)
-	suite.Require().EqualValues(result.Balances[0].Amount, 1000000000000000000)
+	suite.Require().EqualValues(result.Balances[0].Amount, "1000000000000000000")
 	suite.Require().EqualValues(result.Balances[1].Contract, "token")
 	suite.Require().EqualValues(result.Balances[1].Symbol, "token")
 	suite.Require().EqualValues(result.Balances[1].Decimals, 6)
-	suite.Require().EqualValues(result.Balances[1].Amount, 1000000)
+	suite.Require().EqualValues(result.Balances[1].Amount, "1000000")
 }
 
 func TestBalancesQueryTestSuite(t *testing.T) {
