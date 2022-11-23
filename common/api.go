@@ -324,10 +324,10 @@ func GetBlockNanoTime(rpcAddr string, height int64) (int64, error) {
 
 // GetTokenAliases is a function to get token aliases
 func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.TokenAlias {
-	tokens, err := database.GetTokenAliases()
-	if err == nil {
-		return tokens
-	}
+	// tokens, err := database.GetTokenAliases()
+	// if err == nil {
+	// 	return tokens
+	// }
 
 	r.URL.Path = strings.Replace(config.QueryKiraTokensAliases, "/api", "", 1)
 	r.URL.RawQuery = ""
@@ -344,7 +344,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 	}
 
 	result := TokenAliasesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	err := json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		GetLogger().Error("[grpc-call] Unable to decode response: ", err)
 	}
