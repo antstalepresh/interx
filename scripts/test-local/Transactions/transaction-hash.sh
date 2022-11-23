@@ -18,7 +18,7 @@ echo $TX_ID
 echo $BLOCK_HEIGHT
 
 INTERX_GATEWAY="127.0.0.1:11000"
-RESULT_FROM_INTERX=$(curl --fail $INTERX_GATEWAY/api/cosmos/txs/$TX_ID || exit 1)
+RESULT_FROM_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/txs/$TX_ID || exit 1)
 RESULT_ID=$(echo $RESULT_FROM_INTERX  | jq '.hash')
 RESULT_HEIGHT=$(echo $RESULT_FROM_INTERX | jq '.height')
 
