@@ -1,18 +1,18 @@
 package config
 
 const (
-	InterxVersion = "v0.4.21"
+	InterxVersion = "v0.4.21-rc2"
 	SekaiVersion  = "v0.3.1.25"
 	CosmosVersion = "v0.45.1"
 
 	QueryDashboard = "/api/dashboard"
 
-	QueryAccounts        = "/api/cosmos/auth/accounts/{address}"
-	QueryTotalSupply     = "/api/cosmos/bank/supply"
-	QueryBalances        = "/api/cosmos/bank/balances/{address}"
-	PostTransaction      = "/api/cosmos/txs"
-	QueryTransactionHash = "/api/cosmos/txs/{hash}"
-	EncodeTransaction    = "/api/cosmos/txs/encode"
+	QueryAccounts        = "/api/kira/accounts/{address}"
+	QueryTotalSupply     = "/api/kira/supply"
+	QueryBalances        = "/api/kira/balances/{address}"
+	PostTransaction      = "/api/kira/txs"
+	QueryTransactionHash = "/api/kira/txs/{hash}"
+	EncodeTransaction    = "/api/kira/txs/encode"
 
 	QueryRoles                = "/api/kira/gov/all_roles"
 	QueryRolesByAddress       = "/api/kira/gov/roles_by_address/{val_addr}"
@@ -49,7 +49,7 @@ const (
 
 	QueryInterxFunctions = "/api/metadata"
 
-	FaucetRequestURL         = "/api/faucet"
+	FaucetRequestURL         = "/api/kira/faucet"
 	QueryRPCMethods          = "/api/rpc_methods"
 	QueryWithdraws           = "/api/withdraws"
 	QueryDeposits            = "/api/deposits"
@@ -93,6 +93,8 @@ const (
 	QueryReadContract   = "/api/{chain}/read/{contract}"
 	QueryWriteContract  = "/api/{chain}/write/{contract}"
 	QueryEVMFaucet      = "/api/{chain}/faucet"
+
+	QueryKiraEndpoints = "/api/kira/"
 )
 
-var SupportedEVMChains = [1]string{"ropsten"}
+var SupportedEVMChains = [1]string{"goerli"}

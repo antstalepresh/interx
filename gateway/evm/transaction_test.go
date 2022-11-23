@@ -15,21 +15,24 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type BlockQueryResponse struct {
-	Hash      string `json:"hash"`
-	Number    string `json:"number"`
-	Timestamp string `json:"timestamp"`
+type TransactionQueryResponse struct {
+	Hash string `json:"hash"`
 }
 
-type BlockQueryTestSuite struct {
+type TransactionQueryReceipt struct {
+	Hash    string `json:"hash"`
+	Receipt bool   `json:"receipt"`
+}
+
+type TransactionQueryTestSuite struct {
 	suite.Suite
 
-	chain  string
-	height string
-	hash   string
+	chain    string
+	hash     string
+	Response TransactionQueryResponse
 }
 
-func (suite *BlockQueryTestSuite) SetupTest() {
+func (suite *TransactionQueryTestSuite) SetupTest() {
 	evmConfig := config.EVMConfig{}
 	evmConfig.Name = ""
 	evmConfig.Infura.RPC = test.INFURA_RPC
@@ -53,16 +56,17 @@ func (suite *BlockQueryTestSuite) SetupTest() {
 	config.Config.Evm[suite.chain] = evmConfig
 }
 
-func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHeight() {
+func (suite *TransactionQueryTestSuite) TestQueryTransactionByHash() {
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
-	response, error, statusCode := queryEVMBlockRequestHandle(r, suite.chain, suite.height)
+	r.URL.RawQuery = "receipt=false"
+	response, error, statusCode := queryEVMTransactionRequestHandle(r, suite.chain, suite.hash)
 
 	byteData, err := json.Marshal(response)
 	if err != nil {
 		suite.Assert()
 	}
 
-	result := BlockQueryResponse{}
+	result := TransactionQueryResponse{}
 	err = json.Unmarshal(byteData, &result)
 	if err != nil {
 		suite.Assert()
@@ -71,19 +75,19 @@ func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHeight() {
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
 	suite.Require().EqualValues(result.Hash, suite.hash)
-	suite.Require().EqualValues(result.Number, suite.height)
 }
 
-func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHash() {
+func (suite *TransactionQueryTestSuite) TestQueryTransactionReceipt() {
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
-	response, error, statusCode := queryEVMBlockRequestHandle(r, suite.chain, suite.hash)
+	r.URL.RawQuery = "receipt=true"
+	response, error, statusCode := queryEVMTransactionRequestHandle(r, suite.chain, suite.hash)
 
 	byteData, err := json.Marshal(response)
 	if err != nil {
 		suite.Assert()
 	}
 
-	result := BlockQueryResponse{}
+	result := TransactionQueryReceipt{}
 	err = json.Unmarshal(byteData, &result)
 	if err != nil {
 		suite.Assert()
@@ -91,22 +95,20 @@ func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHash() {
 	suite.Require().NoError(err)
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
-
 	suite.Require().EqualValues(result.Hash, suite.hash)
-	suite.Require().EqualValues(result.Number, suite.height)
+	suite.Require().EqualValues(result.Receipt, true)
 }
 
-func TestBlockQueryTestSuite(t *testing.T) {
-	testSuite := new(BlockQueryTestSuite)
+func TestTransactionQueryTestSuite(t *testing.T) {
+	testSuite := new(TransactionQueryTestSuite)
 	testSuite.chain = "goerli"
-	testSuite.height = "0x0a"
 	testSuite.hash = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 	serv := jrpc.New()
-	if err := serv.RegisterMethod("eth_getBlockByNumber", ethGetBlockByNumber); err != nil {
+	if err := serv.RegisterMethod("eth_getTransactionByHash", ethGetTransactionByHash); err != nil {
 		panic(err)
 	}
-	if err := serv.RegisterMethod("eth_getBlockByHash", ethGetBlockByHash); err != nil {
+	if err := serv.RegisterMethod("eth_getTransactionReceipt", ethGetTransactionReceipt); err != nil {
 		panic(err)
 	}
 
@@ -134,26 +136,23 @@ func TestBlockQueryTestSuite(t *testing.T) {
 	evmServer.Close()
 }
 
-func ethGetBlockByNumber(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
-	blockQueryResponse := BlockQueryResponse{
-		Number:    "0x0a",
-		Hash:      "0x0000000000000000000000000000000000000000000000000000000000000000",
-		Timestamp: "0x00",
+func ethGetTransactionByHash(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
+	transactionQueryResponse := TransactionQueryResponse{
+		Hash: "0x0000000000000000000000000000000000000000000000000000000000000000",
 	}
-	mdata, err := json.Marshal(blockQueryResponse)
+	mdata, err := json.Marshal(transactionQueryResponse)
 	if err != nil {
 		return nil, jrpc.InternalErrorCode, err
 	}
 	return mdata, jrpc.OK, nil
 }
 
-func ethGetBlockByHash(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
-	blockQueryResponse := BlockQueryResponse{
-		Number:    "0x0a",
-		Hash:      "0x0000000000000000000000000000000000000000000000000000000000000000",
-		Timestamp: "0x0",
+func ethGetTransactionReceipt(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
+	transactionQueryResponse := TransactionQueryReceipt{
+		Hash:    "0x0000000000000000000000000000000000000000000000000000000000000000",
+		Receipt: true,
 	}
-	mdata, err := json.Marshal(blockQueryResponse)
+	mdata, err := json.Marshal(transactionQueryResponse)
 	if err != nil {
 		return nil, jrpc.InternalErrorCode, err
 	}

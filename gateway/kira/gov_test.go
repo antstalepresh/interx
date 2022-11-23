@@ -33,7 +33,7 @@ import (
 
 var (
 	port = flag.Int("port", 50051, "The server port")
-	addr = flag.String("addr", "localhost:50051", "the address to connect to")
+	addr = flag.String("0xaddr", "localhost:50051", "the address to connect to")
 )
 
 // GetGrpcServeMux is a function to get ServerMux for GRPC server.

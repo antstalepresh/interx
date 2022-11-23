@@ -1,7 +1,4 @@
 
 Features:
-* add evm account/balance endpoints
-* add evm ABI endpoints
-* add evm read/write contract endpoints
-* add evm faucet endpoints
-* update postman API collection for EVM endpoints
+* add integration tests for evm endpoints
+* update kira endpoints to be under `kira` network in url

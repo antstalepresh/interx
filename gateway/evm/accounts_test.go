@@ -3,6 +3,7 @@ package evm
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -15,21 +16,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type BlockQueryResponse struct {
-	Hash      string `json:"hash"`
-	Number    string `json:"number"`
-	Timestamp string `json:"timestamp"`
-}
-
-type BlockQueryTestSuite struct {
+type AccountsQueryTestSuite struct {
 	suite.Suite
 
-	chain  string
-	height string
-	hash   string
+	Address  string
+	Chain    string
+	Response EVMAccountResponse
 }
 
-func (suite *BlockQueryTestSuite) SetupTest() {
+func (suite *AccountsQueryTestSuite) SetupTest() {
 	evmConfig := config.EVMConfig{}
 	evmConfig.Name = ""
 	evmConfig.Infura.RPC = test.INFURA_RPC
@@ -50,40 +45,19 @@ func (suite *BlockQueryTestSuite) SetupTest() {
 	evmConfig.Faucet.TimeLimit = 20
 
 	config.Config.Evm = make(map[string]config.EVMConfig)
-	config.Config.Evm[suite.chain] = evmConfig
+	config.Config.Evm[suite.Chain] = evmConfig
 }
 
-func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHeight() {
+func (suite *AccountsQueryTestSuite) TestAccountsQuery() {
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
-	response, error, statusCode := queryEVMBlockRequestHandle(r, suite.chain, suite.height)
+	response, error, statusCode := queryEVMAccountsRequestHandle(r, suite.Chain, suite.Address)
 
 	byteData, err := json.Marshal(response)
 	if err != nil {
 		suite.Assert()
 	}
 
-	result := BlockQueryResponse{}
-	err = json.Unmarshal(byteData, &result)
-	if err != nil {
-		suite.Assert()
-	}
-	suite.Require().NoError(err)
-	suite.Require().Nil(error)
-	suite.Require().EqualValues(statusCode, http.StatusOK)
-	suite.Require().EqualValues(result.Hash, suite.hash)
-	suite.Require().EqualValues(result.Number, suite.height)
-}
-
-func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHash() {
-	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
-	response, error, statusCode := queryEVMBlockRequestHandle(r, suite.chain, suite.hash)
-
-	byteData, err := json.Marshal(response)
-	if err != nil {
-		suite.Assert()
-	}
-
-	result := BlockQueryResponse{}
+	result := EVMAccountResponse{}
 	err = json.Unmarshal(byteData, &result)
 	if err != nil {
 		suite.Assert()
@@ -92,21 +66,29 @@ func (suite *BlockQueryTestSuite) TestQueryEVMBlockByHash() {
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
 
-	suite.Require().EqualValues(result.Hash, suite.hash)
-	suite.Require().EqualValues(result.Number, suite.height)
+	suite.Require().EqualValues(result.Account.Type, suite.Response.Account.Type)
+	suite.Require().EqualValues(result.Account.Address, suite.Response.Account.Address)
+	suite.Require().EqualValues(result.Account.Pending, suite.Response.Account.Pending)
+	suite.Require().EqualValues(result.Account.Sequence, suite.Response.Account.Sequence)
+	suite.Require().EqualValues(result.ContractCode, suite.Response.ContractCode)
 }
 
-func TestBlockQueryTestSuite(t *testing.T) {
-	testSuite := new(BlockQueryTestSuite)
-	testSuite.chain = "goerli"
-	testSuite.height = "0x0a"
-	testSuite.hash = "0x0000000000000000000000000000000000000000000000000000000000000000"
+func TestAccountsQueryTestSuite(t *testing.T) {
+	testSuite := *new(AccountsQueryTestSuite)
+	testSuite.Address = "0xaddr"
+	testSuite.Chain = "goerli"
+	testSuite.Response = *new(EVMAccountResponse)
+	testSuite.Response.Account.Type = "contract"
+	testSuite.Response.Account.Address = "0xaddr"
+	testSuite.Response.Account.Pending = 10
+	testSuite.Response.Account.Sequence = 9
+	testSuite.Response.ContractCode = "code"
 
 	serv := jrpc.New()
-	if err := serv.RegisterMethod("eth_getBlockByNumber", ethGetBlockByNumber); err != nil {
+	if err := serv.RegisterMethod("eth_getCode", ethGetCode); err != nil {
 		panic(err)
 	}
-	if err := serv.RegisterMethod("eth_getBlockByHash", ethGetBlockByHash); err != nil {
+	if err := serv.RegisterMethod("eth_getTransactionCount", ethGetTransactionCount); err != nil {
 		panic(err)
 	}
 
@@ -130,30 +112,27 @@ func TestBlockQueryTestSuite(t *testing.T) {
 	go evmServer.ListenAndServe()
 
 	time.Sleep(1 * time.Second)
-	suite.Run(t, testSuite)
+	suite.Run(t, &testSuite)
 	evmServer.Close()
 }
 
-func ethGetBlockByNumber(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
-	blockQueryResponse := BlockQueryResponse{
-		Number:    "0x0a",
-		Hash:      "0x0000000000000000000000000000000000000000000000000000000000000000",
-		Timestamp: "0x00",
-	}
-	mdata, err := json.Marshal(blockQueryResponse)
+func ethGetCode(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
+	result := "code"
+	mdata, err := json.Marshal(result)
 	if err != nil {
 		return nil, jrpc.InternalErrorCode, err
 	}
 	return mdata, jrpc.OK, nil
 }
 
-func ethGetBlockByHash(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
-	blockQueryResponse := BlockQueryResponse{
-		Number:    "0x0a",
-		Hash:      "0x0000000000000000000000000000000000000000000000000000000000000000",
-		Timestamp: "0x0",
+func ethGetTransactionCount(ctx context.Context, data json.RawMessage) (json.RawMessage, int, error) {
+	result := "0x" + fmt.Sprintf("%x", 10)
+
+	if string(data) == `["0xaddr","latest"]` {
+		result = "0x" + fmt.Sprintf("%x", 9)
 	}
-	mdata, err := json.Marshal(blockQueryResponse)
+
+	mdata, err := json.Marshal(result)
 	if err != nil {
 		return nil, jrpc.InternalErrorCode, err
 	}

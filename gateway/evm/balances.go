@@ -2,6 +2,8 @@ package evm
 
 import (
 	"encoding/hex"
+	"fmt"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +11,7 @@ import (
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	"github.com/gorilla/mux"
+	"github.com/holiman/uint256"
 
 	// "github.com/powerman/rpc-codec/jsonrpc2"
 	jsonrpc2 "github.com/KeisukeYamashita/go-jsonrpc"
@@ -16,7 +19,7 @@ import (
 
 type EVMBalance struct {
 	Contract string `json:"contract"`
-	Amount   uint64 `json:"amount"`
+	Amount   string `json:"amount"`
 	Symbol   string `json:"symbol"`
 	Decimals uint64 `json:"decimals"`
 }
@@ -59,7 +62,10 @@ func queryEVMBalancesFromNode(nodeInfo config.EVMNodeConfig, address string, tok
 	if err != nil {
 		return common.ServeError(0, "failed to get eth balance ", err.Error(), http.StatusInternalServerError)
 	}
-	balance.Amount, _ = strconv.ParseUint((ethBalance)[2:], 16, 64)
+	amount := *new(big.Int)
+	amount.SetString((ethBalance)[2:], 16)
+	balanceAmount, _ := uint256.FromBig(&amount)
+	balance.Amount = fmt.Sprintf("%d", balanceAmount)
 	response.Balances = append(response.Balances, *balance)
 
 	// token balances
@@ -103,9 +109,12 @@ func queryEVMBalancesFromNode(nodeInfo config.EVMNodeConfig, address string, tok
 			return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
 		}
 		if tokenBalances == "0x" {
-			balance.Amount = 0
+			balance.Amount = "0"
 		} else {
-			balance.Amount, _ = strconv.ParseUint((tokenBalances)[2:], 16, 64)
+			amount := *new(big.Int)
+			amount.SetString((tokenBalances)[2:], 16)
+			balanceAmount, _ := uint256.FromBig(&amount)
+			balance.Amount = fmt.Sprintf("%d", balanceAmount)
 		}
 		response.Balances = append(response.Balances, *balance)
 	}
