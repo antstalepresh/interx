@@ -18,7 +18,7 @@ func RegisterCosmosAuthRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcA
 }
 
 func queryAccountsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	r.URL.Path = strings.Replace(r.URL.Path, "/api/cosmos/auth", "/cosmos/auth/v1beta1", -1)
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira", "/cosmos/auth/v1beta1", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

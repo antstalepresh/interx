@@ -324,10 +324,10 @@ func GetBlockNanoTime(rpcAddr string, height int64) (int64, error) {
 
 // GetTokenAliases is a function to get token aliases
 func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.TokenAlias {
-	tokens, err := database.GetTokenAliases()
-	if err == nil {
-		return tokens
-	}
+	// tokens, err := database.GetTokenAliases()
+	// if err == nil {
+	// 	return tokens
+	// }
 
 	r.URL.Path = strings.Replace(config.QueryKiraTokensAliases, "/api", "", 1)
 	r.URL.RawQuery = ""
@@ -344,7 +344,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 	}
 
 	result := TokenAliasesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	err := json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		GetLogger().Error("[grpc-call] Unable to decode response: ", err)
 	}
@@ -357,7 +357,7 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 
 // GetTokenSupply is a function to get token supply
 func GetTokenSupply(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.TokenSupply {
-	r.URL.Path = strings.Replace(config.QueryTotalSupply, "/api/cosmos/bank", "/cosmos/bank/v1beta1", -1)
+	r.URL.Path = strings.Replace(config.QueryTotalSupply, "/api/kira", "/cosmos/bank/v1beta1", -1)
 	r.URL.RawQuery = ""
 	r.Method = "GET"
 

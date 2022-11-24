@@ -12,6 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.3
 	github.com/gumeniukcom/golang-jsonrpc2 v0.0.0-20191115112220-39c5ba2dd66f
+	github.com/holiman/uint256 v1.2.0
 	github.com/iancoleman/strcase v0.1.2
 	github.com/inhies/go-bytesize v0.0.0-20200716184324-4fe85e9b81b2
 	github.com/rakyll/statik v0.1.7

@@ -160,7 +160,7 @@ func defaultConfig() InterxConfigFromFile {
 	for _, item := range SupportedEVMChains {
 		evmConfig := EVMConfig{}
 		evmConfig.Name = ""
-		evmConfig.Infura.RPC = ""
+		evmConfig.Infura.RPC = "https://eth-goerli.public.blastapi.io"
 		evmConfig.Infura.RPCToken = ""
 		evmConfig.Infura.RPCSecret = ""
 		evmConfig.QuickNode.RPC = ""
