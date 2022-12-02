@@ -45,6 +45,50 @@ func toSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
+// SearchUserTxs is a function to query all transactions for the user
+func SearchUserTxsAndSaveToCache(rpcAddr string, address string) (*tmTypes.ResultTxSearch, error) {
+	var events = make([]string, 0, 5)
+	var page = 1
+	var limit = 100
+
+	if address != "" {
+		events = append(events, fmt.Sprintf("message.sender='%s'", address))
+	}
+
+	// search transactions
+	endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
+	common.GetLogger().Info("[query-transaction] Entering transaction search: ", endpoint)
+
+	resp, err := http.Get(endpoint)
+	if err != nil {
+		common.GetLogger().Error("[query-transaction] Unable to connect to ", endpoint)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(resp.Body)
+
+	response := new(tmJsonRPCTypes.RPCResponse)
+
+	if err := json.Unmarshal(respBody, response); err != nil {
+		common.GetLogger().Error("[query-transaction] Unable to decode response: ", err)
+		return nil, err
+	}
+
+	if response.Error != nil {
+		common.GetLogger().Error("[query-transaction] Error response:", response.Error.Message)
+		return nil, errors.New(response.Error.Message)
+	}
+
+	result := new(tmTypes.ResultTxSearch)
+	if err := tmjson.Unmarshal(response.Result, result); err != nil {
+		common.GetLogger().Error("[query-transaction] Failed to unmarshal result:", err)
+		return nil, fmt.Errorf("error unmarshalling result: %w", err)
+	}
+
+	return result, nil
+}
+
 // SearchTxHashHandle is a function to query transactions
 func SearchTxHashHandle(rpcAddr string, sender string, recipient string, txType string, page int, limit int, txMinHeight int64, txMaxHeight int64, txHash string) (*tmTypes.ResultTxSearch, error) {
 	var events = make([]string, 0, 5)
@@ -154,28 +198,27 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 
 	var (
-		query     string = ""
-		account   string = ""
-		txType    string = ""
-		sender    string = ""
-		recipient string = ""
-		direction string = ""
-		pageSize  int    = 10
-		page      int    = 1
-		limit     int    = 10
-		offset    int    = 0
+		query      string = ""
+		account    string = ""
+		txTypes           = []string{}
+		sender     string = ""
+		recipient  string = ""
+		directions        = []string{}
+		statuses          = []string{}
+		sort       string = ""
+		pageSize   int    = 10
+		page       int    = 1
+		limit      int    = 10
+		offset     int    = 0
 	)
 
 	//------------ Type ------------
-	txTypes := r.FormValue("type")
-	txTypesArray := strings.Split(txType, ",")
+	txTypesParam := r.FormValue("type")
+	txTypesArray := strings.Split(txTypesParam, ",")
 	for _, txType := range txTypesArray {
-		if config.MsgTypes[txType] == "" {
-
+		if config.MsgTypes[txType] != "" {
+			txTypes = append(txTypes, config.MsgTypes[txType])
 		}
-	}
-	if txType == "" {
-		txType = "all"
 	}
 
 	//------------ Address ------------
@@ -186,19 +229,29 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 
 	//------------ Direction ------------
-	direction = r.FormValue("direction")
-	directions := strings.Split(direction, ",")
-	for _, drt := range directions {
-		if drt == "inbound" {
-			recipient = account
-		} else if drt == "outbound" {
-			sender = account
+	directionsParam := r.FormValue("direction")
+	directionsArray := strings.Split(directionsParam, ",")
+	for _, drt := range directionsArray {
+		if drt == "inbound" || drt == "outbound" {
+			directions = append(directions, drt)
 		}
 	}
 
-	if recipient == "" && sender == "" {
-		recipient = account
-		sender = account
+	//------------ Status ------------
+	statusesParam := r.FormValue("status")
+	statusesArray := strings.Split(statusesParam, ",")
+	for _, sts := range statusesArray {
+		if sts == "pending" || sts == "confirmed" || sts == "failed" {
+			statuses = append(statuses, sts)
+		}
+	}
+
+	//------------ Sort ------------
+	sortParam := r.FormValue("sort")
+	if sortParam == "amountASC" || sortParam == "amountDESC" || sortParam == "dateASC" || sortParam == "dateDESC" {
+		sort = sortParam
+	} else {
+		sort = "dateDESC"
 	}
 
 	//------------ Pagination ------------
@@ -207,9 +260,9 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
 			return common.ServeError(0, "failed to parse parameter 'page_size'", err.Error(), http.StatusBadRequest)
 		}
-		if pageSize < 1 || pageSize > 1000 {
+		if pageSize < 1 || pageSize > 100 {
 			common.GetLogger().Error("[query-transactions] Invalid 'page_size' range: ", pageSize)
-			return common.ServeError(0, "'page_size' should be 1 ~ 1000", "", http.StatusBadRequest)
+			return common.ServeError(0, "'page_size' should be 1 ~ 100", "", http.StatusBadRequest)
 		}
 	}
 
@@ -226,9 +279,9 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
 		}
 
-		if limit < 1 || limit > 1000 {
+		if limit < 1 || limit > 100 {
 			common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
-			return common.ServeError(0, "'limit' should be 1 ~ 1000", "", http.StatusBadRequest)
+			return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
 		}
 		pageSize = limit
 	}
