@@ -1,8 +1,13 @@
 package database
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/KiraCore/interx/config"
-	"github.com/sonyarouje/simdb/db"
+	"github.com/KiraCore/interx/global"
 	tmTypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
@@ -12,72 +17,69 @@ type TransactionData struct {
 	Data    tmTypes.ResultTxSearch `json:"data"`
 }
 
-// ID is a field for facuet claim struct.
-func (c TransactionData) ID() (jsonField string, value interface{}) {
-	value = c.Address
-	jsonField = "address"
-	return
-}
-
-func LoadTransactionDbDriver() {
-	DisableStdout()
-	driver, _ := db.New(config.GetDbCacheDir() + "/transaction")
-	EnableStdout()
-
-	transactionDb = driver
-}
-
 // GetTransactions is a function to get user transactions from cache
-func GetTransactions(address string) (tmTypes.ResultTxSearch, error) {
-	if transactionDb == nil {
-		panic("cache dir not set")
+func GetTransactions(address string) (*tmTypes.ResultTxSearch, error) {
+
+	filePath := fmt.Sprintf("%s/transactions/%s", config.GetDbCacheDir(), address)
+	data := tmTypes.ResultTxSearch{}
+
+	txs, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return &tmTypes.ResultTxSearch{}, err
 	}
 
-	data := TransactionData{}
-
-	DisableStdout()
-	err := transactionDb.Open(TransactionData{}).Where("address", "=", address).First().AsEntity(&data)
-	EnableStdout()
+	err = json.Unmarshal([]byte(txs), &data)
 
 	if err != nil {
-		return tmTypes.ResultTxSearch{}, err
+		return &tmTypes.ResultTxSearch{}, err
 	}
 
-	return data.Data, nil
+	return &data, nil
+}
+
+func GetLastBlockFetched(address string) int64 {
+	data, err := GetTransactions(address)
+
+	if err != nil {
+		return 0
+	}
+
+	lastTx := data.Txs[len(data.Txs)-1]
+	return lastTx.Height
 }
 
 // SaveTransactions is a function to save user transactions to cache
-func SaveTransactions(address string, txsData tmTypes.ResultTxSearch) {
-	if transactionDb == nil {
-		panic("cache dir not set")
+func SaveTransactions(address string, txsData tmTypes.ResultTxSearch) error {
+	cachedData, err := GetTransactions(address)
+
+	if cachedData.TotalCount > 0 {
+		txsData.Txs = append(cachedData.Txs, txsData.Txs...)
+		txsData.TotalCount = txsData.TotalCount + cachedData.TotalCount
 	}
 
-	data := TransactionData{
-		Address: address,
-		Data:    txsData,
+	data, err := json.Marshal(txsData)
+	if err != nil {
+		return err
 	}
 
-	_, err := GetTransactions(address)
+	folderPath := fmt.Sprintf("%s/transactions", config.GetDbCacheDir())
+	filePath := fmt.Sprintf("%s/%s", folderPath, address)
+
+	global.Mutex.Lock()
+	err = os.MkdirAll(folderPath, os.ModePerm)
+	if err != nil {
+		global.Mutex.Unlock()
+
+		fmt.Println("[cache] Unable to create a folder: ", folderPath)
+		return err
+	}
+
+	err = ioutil.WriteFile(filePath, data, 0644)
+	global.Mutex.Unlock()
 
 	if err != nil {
-		dataToUpdate := TransactionData{}
-		DisableStdout()
-		err := transactionDb.Open(TransactionData{}).Where("address", "=", address).First().AsEntity(&dataToUpdate)
-		if err != nil {
-			err = transactionDb.Open(TransactionData{}).Insert(data)
-		} else {
-			dataToUpdate.Data = txsData
-			transactionDb.Update(dataToUpdate)
-		}
-		EnableStdout()
-
-		if err != nil {
-			panic(err)
-		}
-
+		fmt.Println("[cache] Unable to save response: ", filePath)
 	}
-}
 
-var (
-	transactionDb *db.Driver
-)
+	return err
+}

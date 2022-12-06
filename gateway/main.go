@@ -122,7 +122,6 @@ func Run(configFilePath string, log grpclog.LoggerV2) error {
 	functionmeta.RegisterStdMsgs()
 
 	database.LoadBlockDbDriver()
-	database.LoadTransactionDbDriver()
 	database.LoadBlockNanoDbDriver()
 	database.LoadFaucetDbDriver()
 	database.LoadReferenceDbDriver()
