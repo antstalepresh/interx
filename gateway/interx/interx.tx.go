@@ -294,10 +294,6 @@ func getBlockHeight(rpcAddr string, hash string) (int64, error) {
 	return result.Height, nil
 }
 
-func convertTxTypeToQueryString(txType string, address string) string {
-	return fmt.Sprintf("message.action='%s'%20AND%20message.sender='%s'", config.MsgTypes[txType], address)
-}
-
 func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}, interface{}, int) {
 	err := r.ParseForm()
 	if err != nil {
