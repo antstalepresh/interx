@@ -108,6 +108,9 @@ echoInfo "INFO: Testing validator status query..."
 echoInfo "INFO: Testing validators query..."
 ./scripts/test-local/Validators/query-validators.sh || ( systemctl2 stop sekai && exit 1 )
 
+echoInfo "INFO: Testing evm account query..."
+./scripts/test-local/Evm/query-accounts.sh || ( systemctl2 stop sekai && exit 1 )
+
 echoInfo "INFO: Stopping local network..."
 ./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )
 

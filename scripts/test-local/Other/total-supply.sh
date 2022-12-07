@@ -9,7 +9,7 @@ echoInfo "INFO: $TEST_NAME - Integration Test - START"
 
 INTERX_GATEWAY="127.0.0.1:11000"
 AMOUNT_SUPPLY_CLI=$(sekaid query bank total --output=json | jq '.supply[5].amount' || echo "0")
-AMOUNT_SUPPLY_INTERX=$(curl --fail "$INTERX_GATEWAY/api/cosmos/bank/supply" | jq '.supply[5].amount' || echo "0")
+AMOUNT_SUPPLY_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/supply" | jq '.supply[5].amount' || echo "0")
 
 [ $AMOUNT_SUPPLY_CLI != $AMOUNT_SUPPLY_INTERX ] && echoErr "ERROR: Expected amount to be '$AMOUNT_SUPPLY_CLI', but got '$AMOUNT_SUPPLY_INTERX'" && exit 1
 

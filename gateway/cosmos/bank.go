@@ -21,7 +21,7 @@ func RegisterCosmosBankRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcA
 }
 
 func querySupplyHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	r.URL.Path = strings.Replace(r.URL.Path, "/api/cosmos/bank", "/cosmos/bank/v1beta1", -1)
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira", "/cosmos/bank/v1beta1", -1)
 	return common.ServeGRPC(r, gwCosmosmux)
 }
 

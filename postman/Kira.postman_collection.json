@@ -34,7 +34,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/auth/accounts/kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2",
+							"raw": "http://0.0.0.0:11000/api/kira/accounts/kira16mmnsaeymq36rv967zc5wxwe9x2c70qx7nkxgt",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -45,10 +45,9 @@
 							"port": "11000",
 							"path": [
 								"api",
-								"cosmos",
-								"auth",
+								"kira",
 								"accounts",
-								"kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2"
+								"kira16mmnsaeymq36rv967zc5wxwe9x2c70qx7nkxgt"
 							]
 						}
 					},
@@ -79,7 +78,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/bank/balances/kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2?offset=3",
+							"raw": "http://0.0.0.0:11000/api/kira/balances/kira16mmnsaeymq36rv967zc5wxwe9x2c70qx7nkxgt?offset=3",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -90,10 +89,9 @@
 							"port": "11000",
 							"path": [
 								"api",
-								"cosmos",
-								"bank",
+								"kira",
 								"balances",
-								"kira1vjj0myjf30dfug6wmejlsczj7uej7x7sye08n2"
+								"kira16mmnsaeymq36rv967zc5wxwe9x2c70qx7nkxgt"
 							],
 							"query": [
 								{
@@ -187,7 +185,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/txs/0x4A41257AC228F6CE476E9C9AD67BB98057412A22B035E1C0A4CCEB0E4E8E364D",
+							"raw": "http://0.0.0.0:11000/api/kira/txs/0x4A41257AC228F6CE476E9C9AD67BB98057412A22B035E1C0A4CCEB0E4E8E364D",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -198,7 +196,7 @@
 							"port": "11000",
 							"path": [
 								"api",
-								"cosmos",
+								"kira",
 								"txs",
 								"0x4A41257AC228F6CE476E9C9AD67BB98057412A22B035E1C0A4CCEB0E4E8E364D"
 							]
@@ -228,7 +226,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/txs/encode",
+							"raw": "http://0.0.0.0:11000/api/kira/txs/encode",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -239,7 +237,7 @@
 							"port": "11000",
 							"path": [
 								"api",
-								"cosmos",
+								"kira",
 								"txs",
 								"encode"
 							]
@@ -269,7 +267,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/cosmos/txs",
+							"raw": "http://0.0.0.0:11000/api/kira/txs",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -280,7 +278,7 @@
 							"port": "11000",
 							"path": [
 								"api",
-								"cosmos",
+								"kira",
 								"txs"
 							]
 						}
@@ -812,7 +810,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/faucet?claim=kira1kdnep4lm3z6yd3pah0rzfu3dvudgwfjejs9ans&token=stake",
+							"raw": "http://0.0.0.0:11000/api/kira/faucet?claim=kira1kdnep4lm3z6yd3pah0rzfu3dvudgwfjejs9ans&token=stake",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -823,6 +821,7 @@
 							"port": "11000",
 							"path": [
 								"api",
+								"kira",
 								"faucet"
 							],
 							"query": [
@@ -864,7 +863,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://0.0.0.0:11000/api/faucet",
+							"raw": "http://0.0.0.0:11000/api/kira/faucet",
 							"protocol": "http",
 							"host": [
 								"0",
@@ -875,6 +874,7 @@
 							"port": "11000",
 							"path": [
 								"api",
+								"kira",
 								"faucet"
 							]
 						}
@@ -3411,7 +3411,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:11000/api/cosmos/bank/supply",
+					"raw": "http://0.0.0.0:11000/api/kira/supply",
 					"protocol": "http",
 					"host": [
 						"0",
@@ -3422,8 +3422,7 @@
 					"port": "11000",
 					"path": [
 						"api",
-						"cosmos",
-						"bank",
+						"kira",
 						"supply"
 					]
 				}
