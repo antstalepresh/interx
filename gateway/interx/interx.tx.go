@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -16,11 +17,7 @@ import (
 	"github.com/KiraCore/interx/database"
 	"github.com/KiraCore/interx/types"
 	kiratypes "github.com/KiraCore/sekai/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
-	distribution "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	tmjson "github.com/tendermint/tendermint/libs/json"
@@ -49,7 +46,7 @@ func toSnakeCase(str string) string {
 }
 
 // GetTransactionsWithSync is a function to sync user transactions and return result
-func GetTransactionsWithSync(rpcAddr string, address string) (*tmTypes.ResultTxSearch, error) {
+func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*tmTypes.ResultTxSearch, error) {
 	var page = 1
 	var limit = 100
 	var limitPages = 100
@@ -58,12 +55,16 @@ func GetTransactionsWithSync(rpcAddr string, address string) (*tmTypes.ResultTxS
 		return &tmTypes.ResultTxSearch{}, nil
 	}
 
-	lastBlock := database.GetLastBlockFetched(address)
+	lastBlock := database.GetLastBlockFetched(address, isWithdraw)
 
 	for page < limitPages {
 		var events = make([]string, 0, 5)
-		events = append(events, fmt.Sprintf("message.sender='%s'", address))
-		events = append(events, fmt.Sprintf("tx.Height>=%d", lastBlock))
+		if isWithdraw {
+			events = append(events, fmt.Sprintf("message.sender='%s'", address))
+		} else {
+			events = append(events, fmt.Sprintf("transfer.recipient='%s'", address))
+		}
+		events = append(events, fmt.Sprintf("tx.height>%d", lastBlock))
 
 		// search transactions
 		endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
@@ -86,7 +87,6 @@ func GetTransactionsWithSync(rpcAddr string, address string) (*tmTypes.ResultTxS
 		}
 
 		if response.Error != nil {
-			common.GetLogger().Error("[query-transaction] Error response:", response.Error.Message)
 			break
 		}
 
@@ -96,27 +96,55 @@ func GetTransactionsWithSync(rpcAddr string, address string) (*tmTypes.ResultTxS
 			return nil, fmt.Errorf("error unmarshalling result: %w", err)
 		}
 
-		database.SaveTransactions(address, *result)
+		database.SaveTransactions(address, *result, isWithdraw)
 		page++
 	}
 
-	return database.GetTransactions(address)
+	return database.GetTransactions(address, isWithdraw)
 }
 
 // GetFilteredTransactions is a function to filter transactions by various options
-func GetFilteredTransactions(rpcAddr string, address string, types []string, directions []string, dateStart int, dateEnd int, statuses []string, sortBy string) (*tmTypes.ResultTxSearch, error) {
+func GetFilteredTransactions(rpcAddr string, address string, types []string, directions []string, dateStart int, dateEnd int, statuses []string, sortBy string) (*tmTypes.ResultTxSearch, *map[string]string, *map[string]string, error) {
 	result, _ := searchUnconfirmed(rpcAddr, "100")
 	hashToStatusMap := make(map[string]string)
+	hashToDirectionMap := make(map[string]string)
 	for _, unconfirmedTx := range result.Txs {
 		hashToStatusMap[string(unconfirmedTx.Hash())] = "unconfirmed"
 	}
 
-	cachedTxs, err := GetTransactionsWithSync(rpcAddr, address)
-	if err != nil {
-		return nil, err
+	// filter transactions by date start/end timestamp, msg type, and direction
+	// filter by direction
+	cachedTxs := tmTypes.ResultTxSearch{
+		Txs:        []*tmTypes.ResultTx{},
+		TotalCount: 0,
+	}
+	if len(directions) == 0 {
+		directions = []string{"inbound", "outbound"}
+	}
+	if slices.Contains(directions, "inbound") {
+		cachedTxs1, err := GetTransactionsWithSync(rpcAddr, address, false)
+		for _, cachedTx := range cachedTxs1.Txs {
+			hashToDirectionMap[cachedTx.Hash.String()] = "inbound"
+		}
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		cachedTxs.TotalCount += cachedTxs1.TotalCount
+		cachedTxs.Txs = append(cachedTxs.Txs, cachedTxs1.Txs...)
 	}
 
-	// Filter transactions by date start/end timestamp and msg type
+	if slices.Contains(directions, "outbound") {
+		cachedTxs2, err := GetTransactionsWithSync(rpcAddr, address, true)
+		for _, cachedTx := range cachedTxs2.Txs {
+			hashToDirectionMap[cachedTx.Hash.String()] = "outbound"
+		}
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		cachedTxs.TotalCount += cachedTxs2.TotalCount
+		cachedTxs.Txs = append(cachedTxs.Txs, cachedTxs2.Txs...)
+	}
+
 	filteredTxsByTimeMsgStatus := &tmTypes.ResultTxSearch{
 		Txs:        []*tmTypes.ResultTx{},
 		TotalCount: 0,
@@ -149,7 +177,7 @@ func GetFilteredTransactions(rpcAddr string, address string, types []string, dir
 			}
 		}
 
-		if !contain {
+		if !contain && len(types) != 0 {
 			continue
 		}
 
@@ -166,15 +194,7 @@ func GetFilteredTransactions(rpcAddr string, address string, types []string, dir
 		filteredTxsByTimeMsgStatus.TotalCount++
 	}
 
-	return filteredTxsByTimeMsgStatus, nil
-
-	// // Sort transactions
-	// if sortBy == "amountASC" {
-
-	// 	sort.Slice(filteredTxsByTimeMsgStatus.Txs, func(i, j int) bool {
-	// 		return filteredTxsByTimeMsgStatus.Txs[i]. < filteredTxsByTimeMsgStatus.Txs[j].
-	// 	})
-	// }
+	return filteredTxsByTimeMsgStatus, &hashToStatusMap, &hashToDirectionMap, nil
 }
 
 // SearchTxHashHandle is a function to query transactions
@@ -286,20 +306,17 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 
 	var (
-		query      string = ""
 		account    string = ""
 		txTypes           = []string{}
-		sender     string = ""
-		recipient  string = ""
 		directions        = []string{}
 		statuses          = []string{}
 		dateStart  int    = -1
 		dateEnd    int    = -1
 		sortBy     string = ""
-		pageSize   int    = 10
-		page       int    = 1
-		limit      int    = 10
-		offset     int    = 0
+		// pageSize   int    = -1
+		// page       int    = -1
+		// limit      int    = -1
+		// offset     int    = -1
 	)
 
 	//------------ Type ------------
@@ -307,7 +324,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	txTypesArray := strings.Split(txTypesParam, ",")
 	for _, txType := range txTypesArray {
 		if config.MsgTypes[txType] != "" {
-			txTypes = append(txTypes, config.MsgTypes[txType])
+			txTypes = append(txTypes, txType)
 		}
 	}
 
@@ -338,7 +355,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 
 	//------------ Sort ------------
 	sortParam := r.FormValue("sort")
-	if sortParam == "amountASC" || sortParam == "amountDESC" || sortParam == "dateASC" || sortParam == "dateDESC" {
+	if sortParam == "dateASC" || sortParam == "dateDESC" {
 		sortBy = sortParam
 	} else {
 		sortBy = "dateDESC"
@@ -350,7 +367,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			layout := "01/02/2006 3:04:05 PM"
 			t, err1 := time.Parse(layout, dateStStr+" 12:00:00 AM")
 			if err1 != nil {
-				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateStart': ", err)
+				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateStart': ", err1)
 				return common.ServeError(0, "failed to parse parameter 'dateStart'", err.Error(), http.StatusBadRequest)
 			}
 
@@ -363,7 +380,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			layout := "01/02/2006 3:04:05 PM"
 			t, err1 := time.Parse(layout, dateEdStr+" 12:00:00 AM")
 			if err1 != nil {
-				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateEnd': ", err)
+				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateEnd': ", err1)
 				return common.ServeError(0, "failed to parse parameter 'dateEnd'", err.Error(), http.StatusBadRequest)
 			}
 
@@ -371,80 +388,53 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		}
 	}
 
-	//------------ Pagination ------------
-	if pageSizeStr := r.FormValue("page_size"); pageSizeStr != "" {
-		if pageSize, err = strconv.Atoi(pageSizeStr); err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
-			return common.ServeError(0, "failed to parse parameter 'page_size'", err.Error(), http.StatusBadRequest)
-		}
-		if pageSize < 1 || pageSize > 100 {
-			common.GetLogger().Error("[query-transactions] Invalid 'page_size' range: ", pageSize)
-			return common.ServeError(0, "'page_size' should be 1 ~ 100", "", http.StatusBadRequest)
-		}
-	}
+	// //------------ Pagination ------------
+	// if pageSizeStr := r.FormValue("page_size"); pageSizeStr != "" {
+	// 	if pageSize, err = strconv.Atoi(pageSizeStr); err != nil {
+	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
+	// 		return common.ServeError(0, "failed to parse parameter 'page_size'", err.Error(), http.StatusBadRequest)
+	// 	}
+	// 	if pageSize < 1 || pageSize > 100 {
+	// 		common.GetLogger().Error("[query-transactions] Invalid 'page_size' range: ", pageSize)
+	// 		return common.ServeError(0, "'page_size' should be 1 ~ 100", "", http.StatusBadRequest)
+	// 	}
+	// }
 
-	if pageStr := r.FormValue("page"); pageStr != "" {
-		if page, err = strconv.Atoi(pageStr); err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page': ", err)
-			return common.ServeError(0, "failed to parse parameter 'page'", err.Error(), http.StatusBadRequest)
-		}
-	}
+	// if pageStr := r.FormValue("page"); pageStr != "" {
+	// 	if page, err = strconv.Atoi(pageStr); err != nil {
+	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page': ", err)
+	// 		return common.ServeError(0, "failed to parse parameter 'page'", err.Error(), http.StatusBadRequest)
+	// 	}
+	// }
 
-	if limitStr := r.FormValue("limit"); limitStr != "" {
-		if limit, err = strconv.Atoi(limitStr); err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'limit': ", err)
-			return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
-		}
+	// if limitStr := r.FormValue("limit"); limitStr != "" {
+	// 	if limit, err = strconv.Atoi(limitStr); err != nil {
+	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'limit': ", err)
+	// 		return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
+	// 	}
 
-		if limit < 1 || limit > 100 {
-			common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
-			return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
-		}
-		pageSize = limit
-	}
+	// 	if limit < 1 || limit > 100 {
+	// 		common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
+	// 		return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
+	// 	}
+	// }
 
-	if offsetStr := r.FormValue("offset"); offsetStr != "" {
-		if offset, err = strconv.Atoi(offsetStr); err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'offset': ", err)
-			return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
-		}
+	// if offsetStr := r.FormValue("offset"); offsetStr != "" {
+	// 	if offset, err = strconv.Atoi(offsetStr); err != nil {
+	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'offset': ", err)
+	// 		return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
+	// 	}
+	// }
 
-		page = offset / pageSize
-		offset = offset % pageSize
-	}
-
-	filteredTxs, err := GetFilteredTransactions(rpcAddr, account, txTypes, directions, dateStart, dateEnd, statuses, sortBy)
+	filteredTxs, hashToStatusMap, hashToDirectionMap, err := GetFilteredTransactions(rpcAddr, account, txTypes, directions, dateStart, dateEnd, statuses, sortBy)
 	if err != nil {
 		return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 	}
 
 	var transactions []*tmTypes.ResultTx
-
-	if limit > 0 || offset > 0 {
-		searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, page, pageSize, -1, -1, "")
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-		transactions = searchResult.Txs[offset:]
-
-		searchResult, err = SearchTxHashHandle(rpcAddr, sender, recipient, txType, page+1, pageSize, -1, -1, "")
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-		transactions = append(transactions, searchResult.Txs[:offset]...)
-	} else {
-		searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, page, pageSize, -1, -1, "")
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to search transaction hash: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-		transactions = searchResult.Txs
-	}
+	transactions = filteredTxs.Txs
 
 	var txResults = []types.TransactionResponse{}
-
 	for _, transaction := range transactions {
 		tx, err := config.EncodingCg.TxConfig.TxDecoder()(transaction.Tx)
 		if err != nil {
@@ -458,258 +448,54 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			return common.ServeError(0, "", fmt.Sprintf("block not found: %d", transaction.Height), http.StatusInternalServerError)
 		}
 
-		logs, err := sdk.ParseABCILogs(transaction.TxResult.GetLog())
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to parse ABCI logs: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
+		txResponses := []interface{}{}
 
-		var txResponses []types.TransactionTxResult
-
-		for index, msg := range tx.GetMsgs() {
+		for _, msg := range tx.GetMsgs() {
 			txType := kiratypes.MsgType(msg)
-
-			var evMap = make(map[string]([]sdk.Attribute))
-			for _, event := range logs[index].GetEvents() {
-				evMap[event.GetType()] = event.GetAttributes()
+			a := make(map[string]interface{})
+			bz, err := json.Marshal(msg)
+			if err != nil {
+				continue
 			}
-
-			if txType == "send" {
-				msgSend := msg.(*bank.MsgSend)
-
-				if isWithdraw && msgSend.FromAddress == account {
-					for _, coin := range msgSend.Amount {
-						txResponses = append(txResponses, types.DepositWithdrawTransaction{
-							Address: msgSend.ToAddress,
-							Type:    txType,
-							Denom:   coin.GetDenom(),
-							Amount:  coin.Amount.Int64(),
-						})
-					}
-				}
-				if !isWithdraw && msgSend.ToAddress == account {
-					for _, coin := range msgSend.Amount {
-						txResponses = append(txResponses, types.DepositWithdrawTransaction{
-							Address: msgSend.FromAddress,
-							Type:    txType,
-							Denom:   coin.GetDenom(),
-							Amount:  coin.Amount.Int64(),
-						})
-					}
-				}
-			} else if txType == "multisend" {
-				msgMultiSend := msg.(*bank.MsgMultiSend)
-				inputs := msgMultiSend.GetInputs()
-				outputs := msgMultiSend.GetOutputs()
-				if isWithdraw {
-					for _, input := range inputs {
-						if input.Address == account {
-							if len(inputs) == 1 {
-								for _, output := range outputs {
-									for _, coin := range output.Coins {
-										txResponses = append(txResponses, types.DepositWithdrawTransaction{
-											Address: output.Address,
-											Type:    txType,
-											Denom:   coin.GetDenom(),
-											Amount:  coin.Amount.Int64(),
-										})
-									}
-								}
-							} else if len(outputs) == 1 {
-								for _, coin := range input.Coins {
-									txResponses = append(txResponses, types.DepositWithdrawTransaction{
-										Address: outputs[0].Address,
-										Type:    txType,
-										Denom:   coin.GetDenom(),
-										Amount:  coin.Amount.Int64(),
-									})
-								}
-							}
-						}
-					}
-				} else {
-					for _, output := range outputs {
-						if output.Address == account {
-							if len(inputs) == 1 {
-								for _, coin := range output.Coins {
-									txResponses = append(txResponses, types.DepositWithdrawTransaction{
-										Address: inputs[0].Address,
-										Type:    txType,
-										Denom:   coin.GetDenom(),
-										Amount:  coin.Amount.Int64(),
-									})
-								}
-							} else if len(outputs) == 1 {
-								for _, input := range inputs {
-									for _, coin := range input.Coins {
-										txResponses = append(txResponses, types.DepositWithdrawTransaction{
-											Address: input.Address,
-											Type:    txType,
-											Denom:   coin.GetDenom(),
-											Amount:  coin.Amount.Int64(),
-										})
-									}
-								}
-							}
-						}
-					}
-				}
-			} else if txType == "create_validator" {
-				createValidatorMsg := msg.(*staking.MsgCreateValidator)
-
-				if isWithdraw && createValidatorMsg.DelegatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: createValidatorMsg.ValidatorAddress,
-						Type:    txType,
-						Denom:   createValidatorMsg.Value.Denom,
-						Amount:  createValidatorMsg.Value.Amount.Int64(),
-					})
-				} else if !isWithdraw && createValidatorMsg.ValidatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: createValidatorMsg.DelegatorAddress,
-						Type:    txType,
-						Denom:   createValidatorMsg.Value.Denom,
-						Amount:  createValidatorMsg.Value.Amount.Int64(),
-					})
-				}
-			} else if txType == "delegate" {
-				delegateMsg := msg.(*staking.MsgDelegate)
-
-				if isWithdraw && delegateMsg.DelegatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: delegateMsg.ValidatorAddress,
-						Type:    txType,
-						Denom:   delegateMsg.Amount.Denom,
-						Amount:  delegateMsg.Amount.Amount.Int64(),
-					})
-				} else if !isWithdraw && delegateMsg.ValidatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: delegateMsg.DelegatorAddress,
-						Type:    txType,
-						Denom:   delegateMsg.Amount.Denom,
-						Amount:  delegateMsg.Amount.Amount.Int64(),
-					})
-				}
-			} else if txType == "begin_redelegate" {
-				reDelegateMsg := msg.(*staking.MsgBeginRedelegate)
-
-				if isWithdraw && reDelegateMsg.ValidatorSrcAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: reDelegateMsg.ValidatorDstAddress,
-						Type:    txType,
-						Denom:   reDelegateMsg.Amount.Denom,
-						Amount:  reDelegateMsg.Amount.Amount.Int64(),
-					})
-				} else if !isWithdraw && reDelegateMsg.ValidatorDstAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: reDelegateMsg.ValidatorSrcAddress,
-						Type:    txType,
-						Denom:   reDelegateMsg.Amount.Denom,
-						Amount:  reDelegateMsg.Amount.Amount.Int64(),
-					})
-				}
-			} else if txType == "begin_unbonding" {
-				unDelegateMsg := msg.(*staking.MsgUndelegate)
-
-				if isWithdraw && unDelegateMsg.ValidatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: unDelegateMsg.DelegatorAddress,
-						Type:    txType,
-						Denom:   unDelegateMsg.Amount.Denom,
-						Amount:  unDelegateMsg.Amount.Amount.Int64(),
-					})
-				} else if !isWithdraw && unDelegateMsg.DelegatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: unDelegateMsg.ValidatorAddress,
-						Type:    txType,
-						Denom:   unDelegateMsg.Amount.Denom,
-						Amount:  unDelegateMsg.Amount.Amount.Int64(),
-					})
-				}
-			} else if txType == "withdraw_delegator_reward" {
-				var coin sdk.Coin
-				if v, found := evMap["withdraw_rewards"]; found && len(v) >= 2 {
-					if v[0].GetKey() == "amount" {
-						coin, _ = sdk.ParseCoinNormalized(v[0].Value)
-					} else if v[1].GetKey() == "amount" {
-						coin, _ = sdk.ParseCoinNormalized(v[1].Value)
-					}
-				}
-
-				withdrawDelegatorRewardMsg := msg.(*distribution.MsgWithdrawDelegatorReward)
-
-				if isWithdraw && withdrawDelegatorRewardMsg.ValidatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: withdrawDelegatorRewardMsg.DelegatorAddress,
-						Type:    txType,
-						Denom:   coin.Denom,
-						Amount:  coin.Amount.Int64(),
-					})
-				} else if !isWithdraw && withdrawDelegatorRewardMsg.DelegatorAddress == account {
-					txResponses = append(txResponses, types.DepositWithdrawTransaction{
-						Address: withdrawDelegatorRewardMsg.ValidatorAddress,
-						Type:    txType,
-						Denom:   coin.Denom,
-						Amount:  coin.Amount.Int64(),
-					})
-				}
-			}
+			err = json.Unmarshal(bz, &a)
+			a["type"] = txType
+			txResponses = append(txResponses, a)
 		}
 
-		if len(txResponses) == 0 {
-			for _, event := range transaction.TxResult.GetEvents() {
-				if event.GetType() == "transfer" {
-					tx := types.TransactionTxResult{
-						Address: "",
-						Type:    txType,
-						Tip: types.TransactionCoinSpentResult{
-							Denom:  "",
-							Amount: 0,
-						},
-					}
-
-					attributes := event.GetAttributes()
-					for _, attribute := range attributes {
-						key := string(attribute.GetKey())
-						value := string(attribute.GetValue())
-						if key == "sender" {
-							if isWithdraw {
-								tx.Address = value
-							}
-						} else if key == "recipient" {
-							if !isWithdraw {
-								tx.Address = value
-							}
-						} else if key == "amount" {
-
-							coin, err := sdk.ParseCoinNormalized(value)
-							if err == nil {
-								tx.Tip.Denom = coin.Denom
-								tx.Tip.Amount = coin.Amount.Int64()
-							}
-
-						}
-					}
-
-					txResponses = append(txResponses, tx)
-				}
-			}
+		hashStatus := "confirmed"
+		if (*hashToStatusMap)[transaction.Hash.String()] == "unconfirmed" {
+			hashStatus = "unconfirmed"
 		}
-
 		txResults = append(txResults, types.TransactionResponse{
-			Time: blockTime,
-			Hash: fmt.Sprintf("0x%X", transaction.Hash),
-			Txs:  txResponses,
+			Time:      blockTime,
+			Status:    hashStatus,
+			Direction: (*hashToDirectionMap)[transaction.Hash.String()],
+			Hash:      fmt.Sprintf("0x%X", transaction.Hash),
+			Txs:       txResponses,
 		})
 	}
+
+	// sort txResults
+	if sortBy == "dateASC" {
+		sort.Slice(txResults, func(i, j int) bool {
+			return txResults[i].Time < txResults[j].Time
+		})
+	} else {
+		sort.Slice(txResults, func(i, j int) bool {
+			return txResults[i].Time > txResults[j].Time
+		})
+	}
+
+	totalCount := len(txResults)
+
+	// apply direction filtering, sorting, and pagination to filtered results
 
 	res := struct {
 		Transactions []types.TransactionResponse `json:"transactions"`
 		TotalCount   int                         `json:"total_count"`
 	}{}
 
-	searchResult, err := SearchTxHashHandle(rpcAddr, sender, recipient, txType, 0, pageSize, -1, -1, "")
-	res.TotalCount = searchResult.TotalCount
+	res.TotalCount = totalCount
 	res.Transactions = txResults
 
 	return res, nil, http.StatusOK
@@ -724,7 +510,6 @@ func QueryTransactions(rpcAddr string) http.HandlerFunc {
 
 		common.GetLogger().Info("[query-transactions] Entering transactions query")
 
-		fmt.Println(common.RPCMethods["GET"])
 		if !common.RPCMethods["GET"][config.QueryTransactions].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
 		} else {
@@ -748,7 +533,6 @@ func QueryTransactions(rpcAddr string) http.HandlerFunc {
 
 func searchUnconfirmed(rpcAddr string, limit string) (*tmTypes.ResultUnconfirmedTxs, error) {
 	endpoint := fmt.Sprintf("%s/unconfirmed_txs?limit=%s", rpcAddr, limit)
-	fmt.Println(endpoint)
 	common.GetLogger().Info("[query-unconfirmed-txs] Entering transaction search: ", endpoint)
 
 	resp, err := http.Get(endpoint)

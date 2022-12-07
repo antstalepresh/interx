@@ -80,36 +80,21 @@ type DepositWithdrawTransaction struct {
 	Amount  int64  `json:"amount"`
 }
 
-// DepositWithdrawResult is a struct to be used for query deposit/withdraw transaction response
-type DepositWithdrawResult struct {
-	Time int64                        `json:"time"`
-	Txs  []DepositWithdrawTransaction `json:"txs"`
-}
-
 // TransactionResponse is a struct to be used for transactions response
 type TransactionResponse struct {
-	Time      int64  `json:"time"`
-	Hash      string `json:"hash"`
-	Status    string `json:"status"`
-	Direction string `json:"direction"`
-	Memo      string `json:"memo"`
-	Fee       []TransactionCoinSpentResult
-	Txs       []TransactionTxResult
+	Time      int64                        `json:"time"`
+	Hash      string                       `json:"hash"`
+	Status    string                       `json:"status"`
+	Direction string                       `json:"direction"`
+	Memo      string                       `json:"memo"`
+	Fee       []TransactionCoinSpentResult `json:"fee"`
+	Txs       []interface{}                `json:"txs"`
 }
 
 // TransactionFeeResult is a struct to be used for transactions response
 type TransactionCoinSpentResult struct {
 	Amount int64  `json:"amount"`
 	Denom  string `json:"denom,omitempty"`
-}
-
-// TransactionTxResult is a struct to be used for transactions response
-type TransactionTxResult struct {
-	Type      string                     `json:"type"`
-	Address   string                     `json:"address"`
-	RecordIds []int64                    `json:"recordIds"`
-	Tip       TransactionCoinSpentResult `json:"tip"`
-	Verifier  string                     `json:"verifier"`
 }
 
 // Transaction is a struct to be used for query transaction response

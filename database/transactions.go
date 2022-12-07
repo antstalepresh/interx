@@ -11,16 +11,13 @@ import (
 	tmTypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-// TransactionData is a struct for transaction details.
-type TransactionData struct {
-	Address string                 `json:"address"`
-	Data    tmTypes.ResultTxSearch `json:"data"`
-}
-
 // GetTransactions is a function to get user transactions from cache
-func GetTransactions(address string) (*tmTypes.ResultTxSearch, error) {
-
+func GetTransactions(address string, isWithdraw bool) (*tmTypes.ResultTxSearch, error) {
 	filePath := fmt.Sprintf("%s/transactions/%s", config.GetDbCacheDir(), address)
+	if !isWithdraw {
+		filePath = filePath + "-inbound"
+	}
+
 	data := tmTypes.ResultTxSearch{}
 
 	txs, err := ioutil.ReadFile(filePath)
@@ -37,20 +34,24 @@ func GetTransactions(address string) (*tmTypes.ResultTxSearch, error) {
 	return &data, nil
 }
 
-func GetLastBlockFetched(address string) int64 {
-	data, err := GetTransactions(address)
+func GetLastBlockFetched(address string, isWithdraw bool) int64 {
+	data, err := GetTransactions(address, isWithdraw)
 
 	if err != nil {
 		return 0
 	}
 
-	lastTx := data.Txs[len(data.Txs)-1]
+	if len(data.Txs) == 0 {
+		return 0
+	}
+
+	lastTx := data.Txs[0]
 	return lastTx.Height
 }
 
 // SaveTransactions is a function to save user transactions to cache
-func SaveTransactions(address string, txsData tmTypes.ResultTxSearch) error {
-	cachedData, err := GetTransactions(address)
+func SaveTransactions(address string, txsData tmTypes.ResultTxSearch, isWithdraw bool) error {
+	cachedData, err := GetTransactions(address, isWithdraw)
 
 	if cachedData.TotalCount > 0 {
 		txsData.Txs = append(cachedData.Txs, txsData.Txs...)
@@ -64,6 +65,9 @@ func SaveTransactions(address string, txsData tmTypes.ResultTxSearch) error {
 
 	folderPath := fmt.Sprintf("%s/transactions", config.GetDbCacheDir())
 	filePath := fmt.Sprintf("%s/%s", folderPath, address)
+	if !isWithdraw {
+		filePath = filePath + "-inbound"
+	}
 
 	global.Mutex.Lock()
 	err = os.MkdirAll(folderPath, os.ModePerm)
