@@ -96,9 +96,6 @@ const (
 	QueryKiraEndpoints = "/api/kira/"
 )
 
-<<<<<<< HEAD
-var SupportedEVMChains = [1]string{"ropsten"}
-
 // map msg type param from api to backend msg type
 var MsgTypes = map[string]string{
 	// Evidence
@@ -172,6 +169,4 @@ var MsgTypes = map[string]string{
 	"basket-token-swap":        "MsgBasketTokenSwap",
 	"basket-claim-rewards":     "MsgBasketClaimRewards",
 }
-=======
 var SupportedEVMChains = [1]string{"goerli"}
->>>>>>> master

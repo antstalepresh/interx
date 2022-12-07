@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"regexp"
 	"sort"
@@ -309,10 +310,10 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		dateStart  int    = -1
 		dateEnd    int    = -1
 		sortBy     string = ""
-		// pageSize   int    = -1
-		// page       int    = -1
-		// limit      int    = -1
-		// offset     int    = -1
+		pageSize   int    = -1
+		page       int    = -1
+		limit      int    = -1
+		offset     int    = -1
 	)
 
 	//------------ Type ------------
@@ -384,43 +385,61 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		}
 	}
 
-	// //------------ Pagination ------------
-	// if pageSizeStr := r.FormValue("page_size"); pageSizeStr != "" {
-	// 	if pageSize, err = strconv.Atoi(pageSizeStr); err != nil {
-	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
-	// 		return common.ServeError(0, "failed to parse parameter 'page_size'", err.Error(), http.StatusBadRequest)
-	// 	}
-	// 	if pageSize < 1 || pageSize > 100 {
-	// 		common.GetLogger().Error("[query-transactions] Invalid 'page_size' range: ", pageSize)
-	// 		return common.ServeError(0, "'page_size' should be 1 ~ 100", "", http.StatusBadRequest)
-	// 	}
-	// }
+	//------------ Pagination ------------
+	if pageSizeStr := r.FormValue("page_size"); pageSizeStr != "" {
+		if pageSize, err = strconv.Atoi(pageSizeStr); err != nil {
+			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page_size': ", err)
+			return common.ServeError(0, "failed to parse parameter 'page_size'", err.Error(), http.StatusBadRequest)
+		}
+		if pageSize < 1 || pageSize > 100 {
+			common.GetLogger().Error("[query-transactions] Invalid 'page_size' range: ", pageSize)
+			return common.ServeError(0, "'page_size' should be 1 ~ 100", "", http.StatusBadRequest)
+		}
+	}
 
-	// if pageStr := r.FormValue("page"); pageStr != "" {
-	// 	if page, err = strconv.Atoi(pageStr); err != nil {
-	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page': ", err)
-	// 		return common.ServeError(0, "failed to parse parameter 'page'", err.Error(), http.StatusBadRequest)
-	// 	}
-	// }
+	if pageStr := r.FormValue("page"); pageStr != "" {
+		if page, err = strconv.Atoi(pageStr); err != nil {
+			common.GetLogger().Error("[query-transactions] Failed to parse parameter 'page': ", err)
+			return common.ServeError(0, "failed to parse parameter 'page'", err.Error(), http.StatusBadRequest)
+		}
+	}
 
-	// if limitStr := r.FormValue("limit"); limitStr != "" {
-	// 	if limit, err = strconv.Atoi(limitStr); err != nil {
-	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'limit': ", err)
-	// 		return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
-	// 	}
+	if pageSize > 0 && page == -1 {
+		offset = 0
+		limit = pageSize
+	} else if pageSize == -1 && page > 0 {
+		offset = 30 * (page - 1)
+		limit = 30
+	} else if pageSize > 0 && page > 0 {
+		offset = pageSize * (page - 1)
+		limit = pageSize
+	} else {
+		if limitStr := r.FormValue("limit"); limitStr != "" {
+			if limit, err = strconv.Atoi(limitStr); err != nil {
+				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'limit': ", err)
+				return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
+			}
 
-	// 	if limit < 1 || limit > 100 {
-	// 		common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
-	// 		return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
-	// 	}
-	// }
+			if limit < 1 || limit > 100 {
+				common.GetLogger().Error("[query-transactions] Invalid 'limit' range: ", limit)
+				return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
+			}
+		}
 
-	// if offsetStr := r.FormValue("offset"); offsetStr != "" {
-	// 	if offset, err = strconv.Atoi(offsetStr); err != nil {
-	// 		common.GetLogger().Error("[query-transactions] Failed to parse parameter 'offset': ", err)
-	// 		return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
-	// 	}
-	// }
+		if offsetStr := r.FormValue("offset"); offsetStr != "" {
+			if offset, err = strconv.Atoi(offsetStr); err != nil {
+				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'offset': ", err)
+				return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
+			}
+		}
+
+		if limit == -1 {
+			limit = 30
+		}
+		if offset == -1 {
+			offset = 0
+		}
+	}
 
 	filteredTxs, hashToStatusMap, hashToDirectionMap, err := GetFilteredTransactions(rpcAddr, account, txTypes, directions, dateStart, dateEnd, statuses, sortBy)
 	if err != nil {
@@ -484,7 +503,11 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 
 	totalCount := len(txResults)
 
-	// apply direction filtering, sorting, and pagination to filtered results
+	// pagination for txResults
+	if offset > len(txResults) {
+		offset = len(txResults)
+	}
+	txResults = txResults[offset:int(math.Min(float64(offset+limit), float64(len(txResults))))]
 
 	res := struct {
 		Transactions []types.TransactionResponse `json:"transactions"`
