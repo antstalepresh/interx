@@ -84,7 +84,7 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 
 		if err := json.Unmarshal(respBody, response); err != nil {
 			common.GetLogger().Error("[query-transaction] Unable to decode response: ", err)
-			return nil, err
+			break
 		}
 
 		if response.Error != nil {
@@ -94,7 +94,7 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 		result := new(tmTypes.ResultTxSearch)
 		if err := tmjson.Unmarshal(response.Result, result); err != nil {
 			common.GetLogger().Error("[query-transaction] Failed to unmarshal result:", err)
-			return nil, fmt.Errorf("error unmarshalling result: %w", err)
+			break
 		}
 
 		database.SaveTransactions(address, *result, isWithdraw)

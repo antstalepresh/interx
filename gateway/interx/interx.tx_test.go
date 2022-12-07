@@ -28,8 +28,8 @@ type InterxTxTestSuite struct {
 }
 
 type TransactionSearchResult struct {
-	Transactions map[string]types.DepositWithdrawResult `json:"transactions"`
-	TotalCount   int                                    `json:"total_count"`
+	Transactions []types.TransactionResponse `json:"transactions"`
+	TotalCount   int                         `json:"total_count"`
 }
 
 func (suite *InterxTxTestSuite) SetupTest() {
@@ -74,9 +74,11 @@ func (suite *InterxTxTestSuite) TestBlockTransactionsHandler() {
 	database.LoadBlockNanoDbDriver()
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
 	q := r.URL.Query()
-	q.Add("account", "test_account")
+	q.Add("address", "test_account")
+	q.Add("direction", "outbound")
+	q.Add("page_size", "1")
 	r.URL.RawQuery = q.Encode()
-	response, error, statusCode := QueryBlockTransactionsHandler(test.TENDERMINT_RPC, r, true)
+	response, error, statusCode := QueryBlockTransactionsHandler(test.TENDERMINT_RPC, r)
 
 	byteData, err := json.Marshal(response)
 	if err != nil {
@@ -163,6 +165,13 @@ func TestInterxTxTestSuite(t *testing.T) {
 				response := tmJsonRPCTypes.RPCResponse{
 					JSONRPC: "2.0",
 					Result:  []byte(`{"txs":[{"hash":"DE0CAB9BF94391C2562A0AA2784BB8E9A75031B719ED9D144683D008D24BFD40","height":"127","index":0,"tx_result":{"code":0,"data":"Ch4KHC9jb3Ntb3MuYmFuay52MWJldGExLk1zZ1NlbmQ=","log":"[{\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"kira1uttsny8adtugcvpwdewc9ykgsdez7xactughf0\"},{\"key\":\"amount\",\"value\":\"100ukex\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"kira1kvdklhm7kdmyhvga3ty7nwd2llz9q9hyq3lvfh\"},{\"key\":\"amount\",\"value\":\"100ukex\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmos.bank.v1beta1.MsgSend\"},{\"key\":\"sender\",\"value\":\"kira1kvdklhm7kdmyhvga3ty7nwd2llz9q9hyq3lvfh\"},{\"key\":\"module\",\"value\":\"bank\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"kira1uttsny8adtugcvpwdewc9ykgsdez7xactughf0\"},{\"key\":\"sender\",\"value\":\"kira1kvdklhm7kdmyhvga3ty7nwd2llz9q9hyq3lvfh\"},{\"key\":\"amount\",\"value\":\"100ukex\"}]}]}]","info":"","gas_wanted":"0","gas_used":"0","events":[{"type":"tx","attributes":[{"key":"YWNjX3NlcQ==","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaC8w","index":true}]},{"type":"tx","attributes":[{"key":"c2lnbmF0dXJl","value":"VENzcit4NDRQU1FOVFh1U2JIZElMYlZOWUwzV2h2VTdwQVlUTUFDWHpQZ3dxMU9VdFNnTit3RFB1ZjhyQmlZNkRmTDlncVZUVk5ZUitVc1NMRkc0TVE9PQ==","index":true}]},{"type":"coin_spent","attributes":[{"key":"c3BlbmRlcg==","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"coin_received","attributes":[{"key":"cmVjZWl2ZXI=","value":"a2lyYTE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHFrZncycw==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"transfer","attributes":[{"key":"cmVjaXBpZW50","value":"a2lyYTE3eHBmdmFrbTJhbWc5NjJ5bHM2Zjg0ejNrZWxsOGM1bHFrZncycw==","index":true},{"key":"c2VuZGVy","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"message","attributes":[{"key":"c2VuZGVy","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true}]},{"type":"tx","attributes":[{"key":"ZmVl","value":"MTAwdWtleA==","index":true}]},{"type":"message","attributes":[{"key":"YWN0aW9u","value":"L2Nvc21vcy5iYW5rLnYxYmV0YTEuTXNnU2VuZA==","index":true}]},{"type":"coin_spent","attributes":[{"key":"c3BlbmRlcg==","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"coin_received","attributes":[{"key":"cmVjZWl2ZXI=","value":"a2lyYTF1dHRzbnk4YWR0dWdjdnB3ZGV3Yzl5a2dzZGV6N3hhY3R1Z2hmMA==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"transfer","attributes":[{"key":"cmVjaXBpZW50","value":"a2lyYTF1dHRzbnk4YWR0dWdjdnB3ZGV3Yzl5a2dzZGV6N3hhY3R1Z2hmMA==","index":true},{"key":"c2VuZGVy","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true},{"key":"YW1vdW50","value":"MTAwdWtleA==","index":true}]},{"type":"message","attributes":[{"key":"c2VuZGVy","value":"a2lyYTFrdmRrbGhtN2tkbXlodmdhM3R5N253ZDJsbHo5cTloeXEzbHZmaA==","index":true}]},{"type":"message","attributes":[{"key":"bW9kdWxl","value":"YmFuaw==","index":true}]}],"codespace":""},"tx":"CooBCocBChwvY29zbW9zLmJhbmsudjFiZXRhMS5Nc2dTZW5kEmcKK2tpcmExa3Zka2xobTdrZG15aHZnYTN0eTdud2QybGx6OXE5aHlxM2x2ZmgSK2tpcmExdXR0c255OGFkdHVnY3Zwd2Rld2M5eWtnc2Rlejd4YWN0dWdoZjAaCwoEdWtleBIDMTAwEmMKTgpGCh8vY29zbW9zLmNyeXB0by5zZWNwMjU2azEuUHViS2V5EiMKIQMyhuutfXlSrOPslBJJa94LMTSe2koeuVQIh+f5UKsF/xIECgIIARIRCgsKBHVrZXgSAzEwMBDAmgwaQEwrK/seOD0kDU17kmx3SC21TWC91ob1O6QGEzAAl8z4MKtTlLUoDfsAz7n/KwYmOg3y/YKlU1TWEflLEixRuDE="}],"total_count":"1"}`),
+				}
+				if r.FormValue("page") == "2" {
+					response.Error = &tmJsonRPCTypes.RPCError{
+						Code:    -32603,
+						Message: "Internal error",
+					}
+					response.Result = nil
 				}
 				response1, err := tmjson.Marshal(response)
 				if err != nil {
