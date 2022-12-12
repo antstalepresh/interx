@@ -443,6 +443,78 @@ func RegisterInterxFunctions() {
 	)
 
 	AddInterxFunction(
+		"QueryTransactions",
+		config.QueryTransactions,
+		`{
+			"description": "QueryTransactions is a function to query transactions of the account filtered by various options like msg type, date, and so on.",
+			"parameters": {
+				"account": {
+					"type":        "string",
+					"description": "This represents the kira account address."
+				},
+				"type": {
+					"type":        "string",
+					"description": "This represents the transaction type.",
+					"optional": true
+				},
+				"page": {
+					"type":        "int",
+					"description": "This represents the page number of results.",
+					"optional": true
+				},
+				"page_size": {
+					"type":        "int",
+					"description": "This represents the pageSize number of results. (1 ~ 100)",
+					"optional": true
+				},
+				"offset": {
+					"type":        "int",
+					"description": "This represents the offset of the first transaction.",
+					"optional": true
+				},
+				"limit": {
+					"type":        "int",
+					"description": "This represents the limit of total results to be shown. (1 ~ 100)",
+					"optional": true
+				},
+				"dateStart": {
+					"type":        "string",
+					"description": "This represents the starting point in timestamp or date(DD/MM/YY) format.",
+					"optional": true
+				},
+				"dateEnd": {
+					"type":        "string",
+					"description": "This represents the ending point in timestamp or date(DD/MM/YY) format.",
+					"optional": true
+				},
+				"direction": {
+					"type":        "string",
+					"description": "This represents direction of the transaction(outbound, inbound).",
+					"optional": true
+				},
+				"status": {
+					"type":        "string",
+					"description": "This represents the transaction status(pending, confirmed, failed).",
+					"optional": true
+				},
+				"sort": {
+					"type":        "string",
+					"description": "This represents how the transactions should be sorted(dateASC, dateDESC).",
+					"optional": true
+				}
+			},
+			"response": {
+				"transactions": {
+					"description": "The array of transactions"
+				},
+				"total_count": {
+					"description": "The total transaction count"
+				}
+			}
+		}`,
+	)
+
+	AddInterxFunction(
 		"QueryUnconfirmedTxs",
 		config.QueryUnconfirmedTxs,
 		`{
