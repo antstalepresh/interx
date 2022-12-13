@@ -194,6 +194,7 @@ func TestInterxTxTestSuite(t *testing.T) {
 		}),
 	}
 	go tendermintServer.ListenAndServe()
+	time.Sleep(2 * time.Second)
 
 	suite.Run(t, testSuite)
 
