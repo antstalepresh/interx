@@ -90,8 +90,8 @@ echoInfo "INFO: Testing query transaction result..."
 echoInfo "INFO: Testing query transactions result..."
 ./scripts/test-local/Transactions/query-transactions.sh || ( systemctl2 stop sekai && exit 1 )
 
-echoInfo "INFO: Testing unconfirmed transactions query..."
-./scripts/test-local/Transactions/query-unconfirmed-transactions.sh || ( systemctl2 stop sekai && exit 1 )
+# echoInfo "INFO: Testing unconfirmed transactions query..."
+# ./scripts/test-local/Transactions/query-unconfirmed-transactions.sh || ( systemctl2 stop sekai && exit 1 )
 
 echoInfo "INFO: Testing transaction hash query..."
 ./scripts/test-local/Transactions/transaction-hash.sh || ( systemctl2 stop sekai && exit 1 )
