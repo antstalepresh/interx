@@ -31,9 +31,11 @@ func GetTransactions(address string, isWithdraw bool) (*tmTypes.ResultTxSearch, 
 		return &tmTypes.ResultTxSearch{}, err
 	}
 
+	// Return cached inbound or outbound transactions depending on isWithdraw flag
 	return &data, nil
 }
 
+// Return the last block number among the cached transactions
 func GetLastBlockFetched(address string, isWithdraw bool) int64 {
 	data, err := GetTransactions(address, isWithdraw)
 
@@ -53,8 +55,9 @@ func GetLastBlockFetched(address string, isWithdraw bool) int64 {
 func SaveTransactions(address string, txsData tmTypes.ResultTxSearch, isWithdraw bool) error {
 	cachedData, err := GetTransactions(address, isWithdraw)
 
+	// Append new txs to the cached txs array
 	if cachedData.TotalCount > 0 {
-		txsData.Txs = append(cachedData.Txs, txsData.Txs...)
+		txsData.Txs = append(txsData.Txs, cachedData.Txs...)
 		txsData.TotalCount = txsData.TotalCount + cachedData.TotalCount
 	}
 

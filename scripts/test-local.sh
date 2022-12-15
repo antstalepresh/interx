@@ -90,9 +90,6 @@ echoInfo "INFO: Testing query transaction result..."
 echoInfo "INFO: Testing query transactions result..."
 ./scripts/test-local/Transactions/query-transactions.sh || ( systemctl2 stop sekai && exit 1 )
 
-# echoInfo "INFO: Testing unconfirmed transactions query..."
-# ./scripts/test-local/Transactions/query-unconfirmed-transactions.sh || ( systemctl2 stop sekai && exit 1 )
-
 echoInfo "INFO: Testing transaction hash query..."
 ./scripts/test-local/Transactions/transaction-hash.sh || ( systemctl2 stop sekai && exit 1 )
 
@@ -113,9 +110,6 @@ echoInfo "INFO: Testing validator status query..."
 
 echoInfo "INFO: Testing validators query..."
 ./scripts/test-local/Validators/query-validators.sh || ( systemctl2 stop sekai && exit 1 )
-
-# echoInfo "INFO: Testing evm account query..."
-# ./scripts/test-local/Evm/query-accounts.sh || ( systemctl2 stop sekai && exit 1 )
 
 echoInfo "INFO: Stopping local network..."
 ./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )

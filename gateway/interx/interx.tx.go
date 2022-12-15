@@ -34,7 +34,7 @@ func RegisterInterxTxRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAdd
 
 	common.AddRPCMethod("GET", config.QueryKiraFunctions, "This is an API to query kira functions and metadata.", true)
 	common.AddRPCMethod("GET", config.QueryUnconfirmedTxs, "This is an API to query unconfirmed transactions.", true)
-	common.AddRPCMethod("GET", config.QueryTransactions, "This is an API to query transactions.", true)
+	common.AddRPCMethod("GET", config.QueryTransactions, "This is an API to query transactions filtered by various options.", true)
 }
 
 func toSnakeCase(str string) string {
@@ -57,6 +57,10 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 	}
 
 	lastBlock := database.GetLastBlockFetched(address, isWithdraw)
+	totalResult := tmTypes.ResultTxSearch{
+		Txs:        []*tmTypes.ResultTx{},
+		TotalCount: 0,
+	}
 
 	for page < limitPages {
 		var events = make([]string, 0, 5)
@@ -97,9 +101,11 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 			break
 		}
 
-		database.SaveTransactions(address, *result, isWithdraw)
+		totalResult.TotalCount += result.TotalCount
+		totalResult.Txs = append(totalResult.Txs, result.Txs...)
 		page++
 	}
+	database.SaveTransactions(address, totalResult, isWithdraw)
 
 	return database.GetTransactions(address, isWithdraw)
 }
@@ -263,6 +269,7 @@ func SearchTxHashHandle(rpcAddr string, sender string, recipient string, txType 
 	return result, nil
 }
 
+// Get block height for tx hash from cache or tendermint
 func getBlockHeight(rpcAddr string, hash string) (int64, error) {
 	endpoint := fmt.Sprintf("%s/tx?hash=%s", rpcAddr, hash)
 	common.GetLogger().Info("[query-block] Entering block query: ", endpoint)
@@ -481,6 +488,8 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		if (*hashToStatusMap)[transaction.Hash.String()] == "unconfirmed" {
 			hashStatus = "unconfirmed"
 		}
+
+		// Get memo and fee amounts
 		txResults = append(txResults, types.TransactionResponse{
 			Time:      blockTime,
 			Status:    hashStatus,
