@@ -42,8 +42,7 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryDataReferenceKeys] = defaultRPCSetting
 	config.API["GET"][QueryDataReference] = defaultRPCSetting
 	config.API["GET"][QueryKiraStatus] = defaultRPCSetting
-	config.API["GET"][QueryWithdraws] = defaultRPCSetting
-	config.API["GET"][QueryDeposits] = defaultRPCSetting
+	config.API["GET"][QueryTransactions] = defaultRPCSetting
 	config.API["GET"][QueryStatus] = defaultRPCSetting
 	config.API["GET"][QueryValidators] = defaultRPCSetting
 	config.API["GET"][QueryValidatorInfos] = defaultRPCSetting

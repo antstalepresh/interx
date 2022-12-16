@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "07f03cfc-0b10-4ac8-a8c7-efff5c47d85a",
+		"_postman_id": "ed8b85a5-0c84-4be3-8fbc-3fcdec74fd5c",
 		"name": "Kira",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "10638705"
+		"_exporter_id": "22558990"
 	},
 	"item": [
 		{
@@ -108,58 +108,6 @@
 		{
 			"name": "Transactions",
 			"item": [
-				{
-					"name": "Query Withdraws",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://0.0.0.0:11000/api/withdraws?account=kira1nr6j3an2nvczg5ypfsra4jw20d8xty73dd2kr4&type=/cosmos.bank.v1beta1.MsgSend",
-							"protocol": "http",
-							"host": [
-								"0",
-								"0",
-								"0",
-								"0"
-							],
-							"port": "11000",
-							"path": [
-								"api",
-								"withdraws"
-							],
-							"query": [
-								{
-									"key": "account",
-									"value": "kira1nr6j3an2nvczg5ypfsra4jw20d8xty73dd2kr4"
-								},
-								{
-									"key": "type",
-									"value": "/cosmos.bank.v1beta1.MsgSend"
-								}
-							]
-						}
-					},
-					"response": []
-				},
 				{
 					"name": "Transaction hash",
 					"protocolProfileBehavior": {
@@ -280,66 +228,6 @@
 								"api",
 								"kira",
 								"txs"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Query Deposits",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://0.0.0.0:11000/api/deposits?account=kira1nr6j3an2nvczg5ypfsra4jw20d8xty73dd2kr4&type=/cosmos.bank.v1beta1.MsgSend&page_size=1&page=1",
-							"protocol": "http",
-							"host": [
-								"0",
-								"0",
-								"0",
-								"0"
-							],
-							"port": "11000",
-							"path": [
-								"api",
-								"deposits"
-							],
-							"query": [
-								{
-									"key": "account",
-									"value": "kira1nr6j3an2nvczg5ypfsra4jw20d8xty73dd2kr4"
-								},
-								{
-									"key": "type",
-									"value": "/cosmos.bank.v1beta1.MsgSend"
-								},
-								{
-									"key": "page_size",
-									"value": "1"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								}
 							]
 						}
 					},
@@ -554,6 +442,63 @@
 							"path": [
 								"api",
 								"unconfirmed_txs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://0.0.0.0:11000/api/transactions?address=kira1u5lh5wg5nsv7fwm27f6r03yue3pfwpy8jyd3nz&type=send,multisend&dateStart=12/07/2022&dateEnd=1670392178&direction=outbound&sort=dateASC&page=1&page_size=100",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "11000",
+							"path": [
+								"api",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "address",
+									"value": "kira1u5lh5wg5nsv7fwm27f6r03yue3pfwpy8jyd3nz"
+								},
+								{
+									"key": "type",
+									"value": "send,multisend"
+								},
+								{
+									"key": "dateStart",
+									"value": "12/07/2022"
+								},
+								{
+									"key": "dateEnd",
+									"value": "1670392178"
+								},
+								{
+									"key": "direction",
+									"value": "outbound"
+								},
+								{
+									"key": "sort",
+									"value": "dateASC"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "100"
+								}
 							]
 						}
 					},

@@ -11,7 +11,7 @@ VALIDATOR_ADDRESS=$(showAddress validator)
 addAccount testuser3
 TESTUSER_ADDRESS=$(showAddress testuser3)
 
-RESULT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 2> /dev/null || exit 1)
+RESULT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --broadcast-mode=block --output=json --yes --home=$SEKAID_HOME 2> /dev/null || exit 1)
 
 BLOCK_HEIGHT=$(echo $RESULT | jsonQuickParse "height" | tr -d '"')
 TX_HASH=$(echo $RESULT | jsonQuickParse "txhash" | tr -d '"')

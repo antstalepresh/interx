@@ -11,7 +11,7 @@ VALIDATOR_ADDRESS=$(showAddress validator)
 addAccount testuser2
 TESTUSER_ADDRESS=$(showAddress testuser2)
 
-BLOCK_HEIGHT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --output=json --yes --home=$SEKAID_HOME | txAwait 180 | jsonQuickParse "height" 2> /dev/null || exit 1)
+BLOCK_HEIGHT=$(sekaid tx bank send validator $TESTUSER_ADDRESS 5ukex --keyring-backend=test --chain-id=$NETWORK_NAME --fees 100ukex --broadcast-mode=block --output=json --yes --home=$SEKAID_HOME | jsonQuickParse "height" 2> /dev/null || exit 1)
 BLOCK_HASH=$(sekaid query block $BLOCK_HEIGHT | jq '.block_id.hash' | tr -d '"')
 
 INTERX_GATEWAY="127.0.0.1:11000"
