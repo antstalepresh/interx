@@ -82,13 +82,13 @@ type DepositWithdrawTransaction struct {
 
 // TransactionResponse is a struct to be used for transactions response
 type TransactionResponse struct {
-	Time      int64                        `json:"time"`
-	Hash      string                       `json:"hash"`
-	Status    string                       `json:"status"`
-	Direction string                       `json:"direction"`
-	Memo      string                       `json:"memo"`
-	Fee       []TransactionCoinSpentResult `json:"fee"`
-	Txs       []interface{}                `json:"txs"`
+	Time      int64         `json:"time"`
+	Hash      string        `json:"hash"`
+	Status    string        `json:"status"`
+	Direction string        `json:"direction"`
+	Memo      string        `json:"memo"`
+	Fee       sdk.Coins     `json:"fee"`
+	Txs       []interface{} `json:"txs"`
 }
 
 // TransactionFeeResult is a struct to be used for transactions response

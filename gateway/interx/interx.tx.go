@@ -489,14 +489,22 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 			hashStatus = "unconfirmed"
 		}
 
-		// Get memo and fee amounts
-		txResults = append(txResults, types.TransactionResponse{
+		txResponse := types.TransactionResponse{
 			Time:      blockTime,
 			Status:    hashStatus,
 			Direction: (*hashToDirectionMap)[transaction.Hash.String()],
 			Hash:      fmt.Sprintf("0x%X", transaction.Hash),
 			Txs:       txResponses,
-		})
+		}
+
+		// Get memo and fee amounts
+		txResult, err := parseTransaction(rpcAddr, *transaction)
+		if err == nil {
+			txResponse.Fee = txResult.Fees
+			txResponse.Memo = txResult.Memo
+		}
+
+		txResults = append(txResults, txResponse)
 	}
 
 	// sort txResults
