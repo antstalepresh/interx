@@ -264,13 +264,13 @@ type AllValidators struct {
 
 type ValidatorSigningInfo struct {
 	Address               string `json:"address"`
-	StartHeight           int64  `json:"start_height,string"`
-	InactiveUntil         string `json:"inactive_until"`
-	MischanceConfidence   int64  `json:"mischance_confidence,string"`
+	StartHeight           int64  `json:"startHeight,string"`
+	InactiveUntil         string `json:"inactiveUntil"`
+	MischanceConfidence   int64  `json:"mischanceConfidence,string"`
 	Mischance             int64  `json:"mischance,string"`
-	LastPresentBlock      int64  `json:"last_present_block,string"`
-	MissedBlocksCounter   int64  `json:"missed_blocks_counter,string"`
-	ProducedBlocksCounter int64  `json:"produced_blocks_counter,string"`
+	LastPresentBlock      int64  `json:"lastPresentBlock,string"`
+	MissedBlocksCounter   int64  `json:"missedBlocksCounter,string"`
+	ProducedBlocksCounter int64  `json:"producedBlocksCounter,string"`
 }
 
 const (
