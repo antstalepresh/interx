@@ -93,6 +93,7 @@ const (
 	QueryWriteContract  = "/api/{chain}/write/{contract}"
 	QueryEVMFaucet      = "/api/{chain}/faucet"
 
+	QueryBitcoinStatus = "/api/bitcoin/statuss"
 	QueryKiraEndpoints = "/api/kira/"
 )
 
@@ -170,3 +171,4 @@ var MsgTypes = map[string]string{
 	"basket-claim-rewards":     "MsgBasketClaimRewards",
 }
 var SupportedEVMChains = [1]string{"goerli"}
+var SupportedBitcoinChains = [1]string{"testnet"}

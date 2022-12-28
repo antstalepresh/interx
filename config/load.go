@@ -209,6 +209,7 @@ func LoadConfig(configFilePath string) {
 	}
 
 	Config.Evm = configFromFile.Evm
+	Config.Bitcoin = configFromFile.Bitcoin
 }
 
 // GenPrivKey is a function to generate a privKey

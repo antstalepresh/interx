@@ -76,28 +76,34 @@ type EVMConfig struct {
 	}
 }
 
+type BitcoinConfig struct {
+	RPC      string `json:"rpc"`
+	RPC_CRED string `json:"rpc_cred"`
+}
+
 // InterxConfig is a struct to be used for interx configuration
 type InterxConfig struct {
-	InterxVersion string               `json:"interx_version"`
-	SekaiVersion  string               `json:"sekai_version"`
-	ServeHTTPS    bool                 `json:"serve_https"`
-	GRPC          string               `json:"grpc"`
-	RPC           string               `json:"rpc"`
-	PORT          string               `json:"port"`
-	Node          types.NodeConfig     `json:"node"`
-	Mnemonic      string               `json:"mnemonic"`
-	AddrBooks     []string             `json:"addrbooks"`
-	NodeKey       *p2p.NodeKey         `json:"node_key"`
-	TxModes       []string             `json:"tx_modes"`
-	PrivKey       crypto.PrivKey       `json:"privkey"`
-	PubKey        crypto.PubKey        `json:"pubkey"`
-	Address       string               `json:"address"`
-	NodeDiscovery NodeDiscoveryConfig  `json:"node_discovery"`
-	Block         BlockConfig          `json:"block"`
-	Cache         CacheConfig          `json:"cache"`
-	Faucet        FaucetConfig         `json:"faucet"`
-	RPCMethods    RPCConfig            `json:"rpc_methods"`
-	Evm           map[string]EVMConfig `json:"evm"`
+	InterxVersion string                   `json:"interx_version"`
+	SekaiVersion  string                   `json:"sekai_version"`
+	ServeHTTPS    bool                     `json:"serve_https"`
+	GRPC          string                   `json:"grpc"`
+	RPC           string                   `json:"rpc"`
+	PORT          string                   `json:"port"`
+	Node          types.NodeConfig         `json:"node"`
+	Mnemonic      string                   `json:"mnemonic"`
+	AddrBooks     []string                 `json:"addrbooks"`
+	NodeKey       *p2p.NodeKey             `json:"node_key"`
+	TxModes       []string                 `json:"tx_modes"`
+	PrivKey       crypto.PrivKey           `json:"privkey"`
+	PubKey        crypto.PubKey            `json:"pubkey"`
+	Address       string                   `json:"address"`
+	NodeDiscovery NodeDiscoveryConfig      `json:"node_discovery"`
+	Block         BlockConfig              `json:"block"`
+	Cache         CacheConfig              `json:"cache"`
+	Faucet        FaucetConfig             `json:"faucet"`
+	RPCMethods    RPCConfig                `json:"rpc_methods"`
+	Evm           map[string]EVMConfig     `json:"evm"`
+	Bitcoin       map[string]BitcoinConfig `json:"bitcoin"`
 }
 
 // InterxConfigFromFile is a struct to be used for interx configuration file
@@ -126,5 +132,6 @@ type InterxConfigFromFile struct {
 		FeeAmounts           map[string]string `json:"fee_amounts"`
 		TimeLimit            int64             `json:"time_limit"`
 	} `json:"faucet"`
-	Evm map[string]EVMConfig `json:"evm"`
+	Evm     map[string]EVMConfig     `json:"evm"`
+	Bitcoin map[string]BitcoinConfig `json:"bitcoin"`
 }

@@ -179,6 +179,15 @@ func defaultConfig() InterxConfigFromFile {
 		configFromFile.Evm[item] = evmConfig
 	}
 
+	configFromFile.Bitcoin = make(map[string]BitcoinConfig)
+	for _, item := range SupportedBitcoinChains {
+		bitconConfig := BitcoinConfig{}
+		bitconConfig.RPC = ""
+		bitconConfig.RPC_CRED = ""
+
+		configFromFile.Bitcoin[item] = bitconConfig
+	}
+
 	return configFromFile
 }
 
