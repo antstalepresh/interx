@@ -17,6 +17,6 @@ func RegisterRequest(router *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr 
 	kira.RegisterRequest(router, gwCosmosmux, rpcAddr)
 	interx.RegisterRequest(router, gwCosmosmux, rpcAddr)
 	rosetta.RegisterRequest(router, gwCosmosmux, rpcAddr)
-	evm.RegisterRequest(router, rpcAddr)
 	bitcoin.RegisterRequest(router, rpcAddr)
+	evm.RegisterRequest(router, rpcAddr)
 }

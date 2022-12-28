@@ -1,14 +1,17 @@
 package bitcoin
 
 import (
-	"fmt"
+	"encoding/json"
+	"math"
 	"net/http"
+	"strings"
 
+	jsonrpc2 "github.com/KeisukeYamashita/go-jsonrpc"
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
 	"github.com/gorilla/mux"
 
-	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/btcsuite/btcd/btcjson"
 )
 
 // RegisterBitcoinStatusRoutes registers query status of Bitcoin chains.
@@ -23,19 +26,19 @@ type BitcoinStatus struct {
 		Network    string `json:"network"`
 		RPCAddress string `json:"rpc_address"`
 		Version    struct {
-			Net      string `json:"net"`
+			Net      int32  `json:"net"`
 			Sub      string `json:"sub"`
-			Protocol string `json:"protocol"`
+			Protocol int32  `json:"protocol"`
 		} `json:"version"`
 	} `json:"node_info"`
 	SyncInfo struct {
 		CatchingUp          bool   `json:"catching_up"`
 		EarliestBlockHash   string `json:"earliest_block_hash"`
-		EarliestBlockHeight uint64 `json:"earliest_block_height"`
-		EarliestBlockTime   uint64 `json:"earliest_block_time"`
+		EarliestBlockHeight int64  `json:"earliest_block_height"`
+		EarliestBlockTime   int64  `json:"earliest_block_time"`
 		LatestBlockHash     string `json:"latest_block_hash"`
-		LatestBlockHeight   uint64 `json:"latest_block_height"`
-		LatestBlockTime     uint64 `json:"latest_block_time"`
+		LatestBlockHeight   int64  `json:"latest_block_height"`
+		LatestBlockTime     int64  `json:"latest_block_time"`
 	} `json:"sync_info"`
 	GasPrice    uint64 `json:"gas_price"`
 	GasPriceAvg uint64 `json:"gas_price_avg"`
@@ -43,38 +46,95 @@ type BitcoinStatus struct {
 	GasPriceInc uint64 `json:"gas_price_inc"`
 }
 
-func queryBitcoinStatusHandle(r *http.Request, chain string) (interface{}, interface{}, int) {
+func GetResult(client *jsonrpc2.RPCClient, method string, x interface{}, params ...interface{}) error {
+	res := new(interface{})
+	data, err := client.Call(method, params...)
+	if err != nil {
+		return err
+	}
 
-	isSupportedChain, _ := GetChainConfig(chain)
+	err = data.GetObject(res)
+	if err != nil {
+		return err
+	}
+
+	bz, err := json.Marshal(res)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(bz, x)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func queryBitcoinStatusHandle(r *http.Request, chain string) (interface{}, interface{}, int) {
+	isSupportedChain, conf := GetChainConfig(chain)
 	if !isSupportedChain {
 		return common.ServeError(0, "", "unsupported chain", http.StatusBadRequest)
 	}
 
-	config := rpcclient.ConnConfig{
-		Host:         "65.109.5.45:18332",
-		User:         "bitcoin",
-		Pass:         "8c0b93fd94b0a2bfe8abcb0ecf5f9f1d43a4dfa9bc300fc3",
-		DisableTLS:   true,
-		HTTPPostMode: true,
-	}
-
-	client, err := rpcclient.New(&config, nil)
-	if err != nil {
-		fmt.Println(err)
-		return common.ServeError(0, "failed to make initialize connection ", err.Error(), http.StatusInternalServerError)
+	client := jsonrpc2.NewRPCClient(conf.RPC)
+	if conf.RPC_CRED != "" {
+		rpcInfo := strings.Split(conf.RPC_CRED, ":")
+		client.SetBasicAuth(rpcInfo[0], rpcInfo[1])
 	}
 
 	response := BitcoinStatus{}
-	chainInfo, err := client.GetBlockChainInfo()
+
+	chainInfo := btcjson.GetBlockChainInfoResult{}
+	err := GetResult(client, "getblockchaininfo", &chainInfo)
 	if err != nil {
 		return common.ServeError(0, "failed to get blockchain info ", err.Error(), http.StatusInternalServerError)
 	}
-	_, err = client.GetNetworkInfo()
+
+	networkInfo := btcjson.GetNetworkInfoResult{}
+	err = GetResult(client, "getnetworkinfo", &networkInfo)
 	if err != nil {
 		return common.ServeError(0, "failed to get network info ", err.Error(), http.StatusInternalServerError)
 	}
 
+	blockStats := btcjson.GetBlockStatsResult{}
+	err = GetResult(client, "getblockstats", &blockStats, 1)
+	if err != nil {
+		return common.ServeError(0, "failed to get block stats info ", err.Error(), http.StatusInternalServerError)
+	}
+
 	response.NodeInfo.Network = chainInfo.Chain
+	response.NodeInfo.RPCAddress = conf.RPC
+	response.NodeInfo.Version.Net = networkInfo.Version
+	response.NodeInfo.Version.Sub = networkInfo.SubVersion
+	response.NodeInfo.Version.Protocol = networkInfo.ProtocolVersion
+	response.SyncInfo.CatchingUp = true
+	response.SyncInfo.EarliestBlockHash = blockStats.Hash
+	response.SyncInfo.EarliestBlockHeight = blockStats.Height
+	response.SyncInfo.EarliestBlockTime = blockStats.Time
+	response.SyncInfo.LatestBlockHash = chainInfo.BestBlockHash
+
+	err = GetResult(client, "getblockstats", &blockStats, chainInfo.BestBlockHash)
+	if err != nil {
+		return common.ServeError(0, "failed to block stats info ", err.Error(), http.StatusInternalServerError)
+	}
+
+	smartFee := btcjson.EstimateSmartFeeResult{}
+	err = GetResult(client, "estimatesmartfee", &smartFee, 6, "CONSERVATIVE")
+	if err != nil {
+		return common.ServeError(0, "failed to smart fee info ", err.Error(), http.StatusInternalServerError)
+	}
+
+	response.SyncInfo.LatestBlockHeight = blockStats.Height
+	response.SyncInfo.LatestBlockTime = blockStats.Time
+
+	response.GasPrice = uint64(math.Max(*smartFee.FeeRate, networkInfo.RelayFee) * 1e8)
+	response.GasPriceAvg = uint64(blockStats.AverageFeeRate)
+	response.GasPriceMin = uint64(math.Max(networkInfo.RelayFee*1e8, float64(blockStats.MinFeeRate)))
+	response.GasPriceInc = uint64(networkInfo.IncrementalFee * 1e8)
+
+	if response.GasPrice == response.GasPriceMin {
+		response.GasPrice = response.GasPrice + response.GasPriceInc
+	}
 	return response, nil, http.StatusOK
 }
 

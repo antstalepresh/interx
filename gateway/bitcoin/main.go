@@ -8,6 +8,12 @@ import (
 // RegisterRequest is a function to register requests.
 func RegisterRequest(router *mux.Router, rpcAddr string) {
 	RegisterBitcoinStatusRoutes(router, rpcAddr)
+	RegisterBitcoinBlockRoutes(router, rpcAddr)
+	RegisterBtcTransactionRoutes(router, rpcAddr)
+	RegisterBtcAccountsRoutes(router, rpcAddr)
+	RegisterBtcTransferRoutes(router, rpcAddr)
+	RegisterBtcBalancesRoutes(router, rpcAddr)
+	// RegisterBitcoinFaucetRoutes(router, rpcAddr)
 }
 
 func GetChainConfig(chain string) (bool, *config.BitcoinConfig) {

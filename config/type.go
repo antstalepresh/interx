@@ -77,8 +77,14 @@ type EVMConfig struct {
 }
 
 type BitcoinConfig struct {
-	RPC      string `json:"rpc"`
-	RPC_CRED string `json:"rpc_cred"`
+	RPC                 string   `json:"rpc"`
+	RPC_CRED            string   `json:"rpc_cred"`
+	BTC_CONFIRMATIONS   uint64   `json:"btc_confirmations"`
+	BTC_MAX_RESCANS     uint64   `json:"btc_max_rescans"`
+	BTC_WATCH_ADDRESSES []string `json:"btc_watch_addresses"`
+	BTC_WALLETS         []string `json:"btc_wallets"`
+	BTC_WATCH_REGEX     string   `json:"btc_watch_regex"`
+	BTC_FAUCET          string   `json:"btc_faucet"`
 }
 
 // InterxConfig is a struct to be used for interx configuration

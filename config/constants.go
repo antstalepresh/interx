@@ -93,7 +93,14 @@ const (
 	QueryWriteContract  = "/api/{chain}/write/{contract}"
 	QueryEVMFaucet      = "/api/{chain}/faucet"
 
-	QueryBitcoinStatus = "/api/bitcoin/statuss"
+	QueryBitcoinStatus      = "/api/bitcoin/status"
+	QueryBitcoinBlock       = "/api/bitcoin/blocks/{identifier}"
+	QueryBitcoinTransaction = "/api/bitcoin/transactions/{hash}"
+	QueryBitcoinTransfer    = "/api/bitcoin/txs"
+	QueryBitcoinAccounts    = "/api/bitcoin/accounts/{address}"
+	QueryBitcoinBalances    = "/api/bitcoin/balances/{address}"
+	QueryBitcoinFaucet      = "/api/bitcoin/faucet"
+
 	QueryKiraEndpoints = "/api/kira/"
 )
 

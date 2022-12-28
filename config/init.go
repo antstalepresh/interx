@@ -181,11 +181,19 @@ func defaultConfig() InterxConfigFromFile {
 
 	configFromFile.Bitcoin = make(map[string]BitcoinConfig)
 	for _, item := range SupportedBitcoinChains {
-		bitconConfig := BitcoinConfig{}
-		bitconConfig.RPC = ""
-		bitconConfig.RPC_CRED = ""
-
-		configFromFile.Bitcoin[item] = bitconConfig
+		bitcoinConfig := BitcoinConfig{}
+		bitcoinConfig.RPC = ""
+		bitcoinConfig.RPC_CRED = ""
+		bitcoinConfig.BTC_CONFIRMATIONS = 100
+		bitcoinConfig.BTC_MAX_RESCANS = 4
+		bitcoinConfig.BTC_WALLETS = []string{
+			"tb1qzg0c8u8hxlcgnvj0sx5g7tq908phkldxv2tmyx",
+		}
+		if bitcoinConfig.BTC_FAUCET != "" {
+			bitcoinConfig.BTC_WATCH_ADDRESSES = []string{bitcoinConfig.BTC_FAUCET}
+		}
+		bitcoinConfig.BTC_WATCH_REGEX = ""
+		configFromFile.Bitcoin[item] = bitcoinConfig
 	}
 
 	return configFromFile
