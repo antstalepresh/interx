@@ -34,22 +34,26 @@ var (
 	}
 )
 
+// Used to parse response from sekai gRPC ("/kira/gov/votes/{proposal_id}")
 type Vote struct {
 	ProposalID uint64 `json:"proposal_id"`
 	Voter      string `json:"voter"`
 	Option     string `json:"option"`
 }
 
+// Used to sync sekai proposals
 type Proposal struct {
 	ProposalID string `json:"proposal_id"`
 	Result     string `json:"result"`
 }
 
+// Used to sync sekai proposals
 type ProposalUserCount struct {
 	Proposers string `json:"proposers"`
 	Voters    string `json:"voters"`
 }
 
+// Used to sync sekai proposals
 type AllProposals struct {
 	Status struct {
 		TotalProposals      int `json:"total_proposals"`
