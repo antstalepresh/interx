@@ -41,19 +41,19 @@ type Vote struct {
 	Option     string `json:"option"`
 }
 
-// Used to sync sekai proposals
+// Used to sync proposals with sekaid
 type Proposal struct {
 	ProposalID string `json:"proposal_id"`
 	Result     string `json:"result"`
 }
 
-// Used to sync sekai proposals
+// Used to sync proposals with sekaid
 type ProposalUserCount struct {
 	Proposers string `json:"proposers"`
 	Voters    string `json:"voters"`
 }
 
-// Used to sync sekai proposals
+// Used to sync proposals with sekaid
 type AllProposals struct {
 	Status struct {
 		TotalProposals      int `json:"total_proposals"`
