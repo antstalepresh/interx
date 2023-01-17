@@ -36,7 +36,7 @@ type InterxResponse struct {
 	CachingBlockDuration int64         `json:"caching_block_duration"`
 }
 
-// DataReferenceEntry is a struct to be used for data reference
+// Used to parse response from sekai gRPC ("/kira/gov/data/{key}")
 type DataReferenceEntry struct {
 	Hash      string `json:"hash"`
 	Reference string `json:"reference"`
@@ -72,14 +72,6 @@ type ResponseSign struct {
 	Response  string `json:"response"`
 }
 
-// DepositWithdrawTransaction is a struct to be used for deposit/withdraw transaction
-type DepositWithdrawTransaction struct {
-	Address string `json:"address"`
-	Type    string `json:"type"`
-	Denom   string `json:"denom,omitempty"`
-	Amount  int64  `json:"amount"`
-}
-
 // TransactionResponse is a struct to be used for transactions response
 type TransactionResponse struct {
 	Time      int64         `json:"time"`
@@ -89,12 +81,6 @@ type TransactionResponse struct {
 	Memo      string        `json:"memo"`
 	Fee       sdk.Coins     `json:"fee"`
 	Txs       []interface{} `json:"txs"`
-}
-
-// TransactionFeeResult is a struct to be used for transactions response
-type TransactionCoinSpentResult struct {
-	Amount int64  `json:"amount"`
-	Denom  string `json:"denom,omitempty"`
 }
 
 // Transaction is a struct to be used for query transaction response
@@ -125,6 +111,7 @@ type TransactionResult struct {
 	Memo           string        `json:"memo"`
 }
 
+// TransactionResult is a struct to be used for query unconfirmed transaction response
 type TransactionUnconfirmedResult struct {
 	Msgs      []TxMsg                 `json:"msgs"`
 	Fees      []sdk.Coin              `json:"fees"`
@@ -249,6 +236,7 @@ func (s QueryValidators) Less(i, j int) bool {
 	return false
 }
 
+// Used to sync all validator infos with sekai
 type AllValidators struct {
 	Status struct {
 		ActiveValidators   int `json:"active_validators"`
@@ -262,6 +250,7 @@ type AllValidators struct {
 	Validators []QueryValidator `json:"validators"`
 }
 
+// Used to parse response from sekai gRPC ("/kira/slashing/v1beta1/signing_infos")
 type ValidatorSigningInfo struct {
 	Address               string `json:"address"`
 	StartHeight           int64  `json:"startHeight,string"`

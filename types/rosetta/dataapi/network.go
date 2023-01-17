@@ -4,12 +4,14 @@ import (
 	"github.com/KiraCore/interx/types/rosetta"
 )
 
+// Used for parsing params of interx request
 type MetadataRequest struct {
 	Metadata interface{} `json:"metadata,omitempty"`
 }
 
 type NetworkListRequest MetadataRequest
 
+// Used for interx response
 type NetworkListResponse struct {
 	NetworkIdentifiers []rosetta.NetworkIdentifier `json:"network_identifiers"`
 }
@@ -19,15 +21,16 @@ type NetworkRequest struct {
 	Metadata          interface{}               `json:"metadata,omitempty"`
 }
 
-type NetworkOptionsRequest NetworkRequest
-
+// Used for interx response
 type NetworkOptionsResponse struct {
 	Version rosetta.Version `json:"version"`
 	Allow   rosetta.Allow   `json:"allow"`
 }
 
+// Used for parsing params of interx request
 type NetworkStatusRequest NetworkRequest
 
+// Used for interx response
 type NetworkStatusResponse struct {
 	CurrentBlockIdentifier rosetta.BlockIdentifier `json:"current_block_identifier"`
 	CurrentBlockTimestamp  int64                   `json:"current_block_timestamp"`
