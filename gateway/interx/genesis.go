@@ -28,6 +28,15 @@ func genesisPath() string {
 	return config.GetReferenceCacheDir() + "/genesis.json"
 }
 
+func JSONRemarshal(bytes []byte) ([]byte, error) {
+	var ifce interface{}
+	err := json.Unmarshal(bytes, &ifce)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(ifce)
+}
+
 func saveGenesis(rpcAddr string) error {
 	_, err := getGenesisCheckSum()
 	if err == nil {
@@ -52,8 +61,18 @@ func saveGenesis(rpcAddr string) error {
 		return err
 	}
 
+	bz, err := json.Marshal(genesis.Genesis)
+	if err != nil {
+		return err
+	}
+
+	orderedData, err := JSONRemarshal(bz)
+	if err != nil {
+		return err
+	}
+
 	global.Mutex.Lock()
-	err = genesis.Genesis.SaveAs(genesisPath())
+	err = ioutil.WriteFile(genesisPath(), orderedData, 0644)
 	global.Mutex.Unlock()
 
 	return err
