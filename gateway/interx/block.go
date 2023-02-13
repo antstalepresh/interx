@@ -486,9 +486,7 @@ func QueryBlockTransactionsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 
 // QueryTransactionResultHandle is a function to query transaction by a given hash.
 func QueryTransactionResultHandle(rpcAddr string, txHash string) (interface{}, interface{}, int) {
-	if strings.HasPrefix(txHash, "0x") {
-		txHash = strings.TrimPrefix(txHash, "0x")
-	}
+	txHash = strings.TrimPrefix(txHash, "0x")
 
 	response, err := SearchTxHashHandle(rpcAddr, "", "", "", 0, 0, 0, 0, txHash)
 	if err != nil {

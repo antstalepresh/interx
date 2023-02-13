@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,15 +34,6 @@ func RegisterInterxTxRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAdd
 	common.AddRPCMethod("GET", config.QueryKiraFunctions, "This is an API to query kira functions and metadata.", true)
 	common.AddRPCMethod("GET", config.QueryUnconfirmedTxs, "This is an API to query unconfirmed transactions.", true)
 	common.AddRPCMethod("GET", config.QueryTransactions, "This is an API to query transactions filtered by various options.", true)
-}
-
-func toSnakeCase(str string) string {
-	matchFirstCap := regexp.MustCompile("(.)([A-Z][a-z]+)")
-	matchAllCap := regexp.MustCompile("([a-z0-9])([A-Z])")
-
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
 }
 
 // GetTransactionsWithSync is a function to sync user transactions and return result
@@ -453,8 +443,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 	}
 
-	var transactions []*tmTypes.ResultTx
-	transactions = filteredTxs.Txs
+	transactions := filteredTxs.Txs
 
 	var txResults = []types.TransactionResponse{}
 	for _, transaction := range transactions {
@@ -480,6 +469,10 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 				continue
 			}
 			err = json.Unmarshal(bz, &a)
+			if err == nil {
+				continue
+			}
+
 			a["type"] = txType
 			txResponses = append(txResponses, a)
 		}

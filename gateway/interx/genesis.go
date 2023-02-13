@@ -3,8 +3,9 @@ package interx
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -37,42 +38,65 @@ func JSONRemarshal(bytes []byte) ([]byte, error) {
 	return json.Marshal(ifce)
 }
 
+func getChunkedGenesisData(rpcAddr string, chunkedNum int) ([]byte, int, error) {
+	data, _, _ := common.MakeTendermintRPCRequest(rpcAddr, "/genesis_chunked", fmt.Sprintf("chunk=%d", chunkedNum))
+
+	type GenesisChunkedResponse struct {
+		Chunk string `json:"chunk"`
+		Total string `json:"total"`
+		Data  []byte `json:"data"`
+	}
+
+	genesis := GenesisChunkedResponse{}
+	byteData, err := json.Marshal(data)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = json.Unmarshal(byteData, &genesis)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := strconv.Atoi(genesis.Total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return genesis.Data, total, nil
+}
+
 func saveGenesis(rpcAddr string) error {
 	_, err := getGenesisCheckSum()
 	if err == nil {
 		return nil
 	}
 
-	data, _, _ := common.MakeTendermintRPCRequest(rpcAddr, "/genesis", "")
-
-	type GenesisResponse struct {
-		Genesis tmtypes.GenesisDoc `json:"genesis"`
-	}
-
-	genesis := GenesisResponse{}
-	byteData, _ := json.Marshal(data)
-	err = tmjson.Unmarshal(byteData, &genesis)
+	cBytes, cTotal, err := getChunkedGenesisData(rpcAddr, 0)
 	if err != nil {
 		return err
 	}
 
-	err = genesis.Genesis.ValidateAndComplete()
+	if cTotal > 1 {
+		for i := 1; i < cTotal; i++ {
+			nextBytes, _, _ := getChunkedGenesisData(rpcAddr, i)
+			cBytes = append(cBytes, nextBytes...)
+		}
+	}
+
+	genesis := tmtypes.GenesisDoc{}
+	err = tmjson.Unmarshal(cBytes, &genesis)
 	if err != nil {
 		return err
 	}
 
-	bz, err := json.Marshal(genesis.Genesis)
-	if err != nil {
-		return err
-	}
-
-	orderedData, err := JSONRemarshal(bz)
+	err = genesis.ValidateAndComplete()
 	if err != nil {
 		return err
 	}
 
 	global.Mutex.Lock()
-	err = ioutil.WriteFile(genesisPath(), orderedData, 0644)
+	err = os.WriteFile(genesisPath(), cBytes, 0644)
 	global.Mutex.Unlock()
 
 	return err
@@ -80,7 +104,7 @@ func saveGenesis(rpcAddr string) error {
 
 func getGenesisCheckSum() (string, error) {
 	global.Mutex.Lock()
-	data, err := ioutil.ReadFile(genesisPath())
+	data, err := os.ReadFile(genesisPath())
 	global.Mutex.Unlock()
 
 	if err != nil {
@@ -97,7 +121,7 @@ func GetGenesisResults(rpcAddr string) (*tmtypes.GenesisDoc, string, error) {
 	}
 
 	global.Mutex.Lock()
-	data, err := ioutil.ReadFile(genesisPath())
+	data, err := os.ReadFile(genesisPath())
 	global.Mutex.Unlock()
 
 	if err != nil {

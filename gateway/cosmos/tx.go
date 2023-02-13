@@ -48,7 +48,7 @@ func postTxHandle(r *http.Request, request types.InterxRequest, rpcAddr string) 
 		}
 	}
 
-	if txModeAllowed == false {
+	if !txModeAllowed {
 		common.GetLogger().Error("[post-transaction] Invalid transaction mode")
 		return common.ServeError(0, "invalid transaction mode: ", req.Mode, http.StatusBadRequest)
 	}

@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/KiraCore/interx/config"
@@ -32,7 +31,7 @@ func PutCache(chainIDHash string, endpointHash string, requestHash string, value
 		return err
 	}
 
-	err = ioutil.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0644)
 	global.Mutex.Unlock()
 
 	if err != nil {
@@ -48,7 +47,7 @@ func GetCache(chainIDHash string, endpointHash string, requestHash string) (type
 
 	response := types.InterxResponse{}
 
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 
 	if err != nil {
 		return response, err
