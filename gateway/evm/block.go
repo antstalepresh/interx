@@ -40,6 +40,9 @@ func queryEVMBlockFromNode(nodeInfo config.EVMNodeConfig, blockHeightOrHash stri
 		}
 	} else {
 		blockHeight, err := strconv.ParseUint(blockHeightOrHash, 10, 64)
+		if err != nil {
+			return common.ServeError(0, "failed to get block by number", err.Error(), http.StatusInternalServerError)
+		}
 
 		data, err := client.Call("eth_getBlockByNumber", "0x"+fmt.Sprintf("%X", blockHeight), true)
 		if err != nil {

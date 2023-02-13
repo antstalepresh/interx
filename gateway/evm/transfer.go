@@ -76,7 +76,7 @@ func queryEVMTransferFromNode(nodeInfo config.EVMNodeConfig, rawTx string, estim
 		return common.ServeError(0, "failed to get pending sequence", err.Error(), http.StatusInternalServerError)
 	}
 
-	if estimate == true {
+	if estimate {
 		return response, nil, http.StatusOK
 	}
 

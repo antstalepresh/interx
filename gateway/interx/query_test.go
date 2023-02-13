@@ -122,6 +122,10 @@ func (suite *StatusTestSuite) TestStatusHandler() {
 	config.Config.Cache.CacheDir = "./"
 	os.Mkdir("./reference", 0777)
 	f, err := os.Create("./reference/genesis.json")
+	if err != nil {
+		panic(err)
+	}
+
 	resBytes, err := tmjson.Marshal(tmRPCTypes.ResultGenesis{
 		Genesis: &tmTypes.GenesisDoc{
 			GenesisTime:   time.Now(),
@@ -129,6 +133,9 @@ func (suite *StatusTestSuite) TestStatusHandler() {
 			InitialHeight: 1,
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	f.WriteString(string(resBytes))
 
