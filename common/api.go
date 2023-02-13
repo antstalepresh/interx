@@ -90,27 +90,6 @@ func DownloadResponseToFile(rpcAddr string, url string, query string, filepath s
 	return err
 }
 
-func makePostRequest(r *http.Request) (*types.RPCResponse, error) {
-	endpoint := fmt.Sprintf("%s%s", r.Host, r.URL)
-	// GetLogger().Info("[rpc-call] Entering rpc call: ", endpoint)
-
-	resp, err := http.PostForm(endpoint, r.Form)
-	if err != nil {
-		GetLogger().Error("[rpc-call] Unable to connect to ", endpoint)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	result := new(types.RPCResponse)
-	err = json.NewDecoder(resp.Body).Decode(result)
-	if err != nil {
-		GetLogger().Error("[rpc-call] Unable to decode response: : ", err)
-		return nil, err
-	}
-
-	return result, nil
-}
-
 // GetAccountBalances is a function to get balances of an address
 func GetAccountBalances(gwCosmosmux *runtime.ServeMux, r *http.Request, bech32addr string) []types.Coin {
 	_, err := sdk.AccAddressFromBech32(bech32addr)
@@ -460,7 +439,7 @@ func GetBlockchain(rpcAddr string) (*tmTypes.ResultBlockchainInfo, error) {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		GetLogger().Error("[rpc-call] Unable to connect to ", endpoint)
-		return nil, fmt.Errorf("Blockchain query error")
+		return nil, fmt.Errorf("blockchain query error")
 	}
 	defer resp.Body.Close()
 
@@ -475,7 +454,7 @@ func GetBlockchain(rpcAddr string) (*tmTypes.ResultBlockchainInfo, error) {
 
 	if response.Error != nil {
 		GetLogger().Error("[rpc-call] Blockchain query fail ")
-		return nil, fmt.Errorf("Blockchain query error")
+		return nil, fmt.Errorf("blockchain query error")
 	}
 
 	result := new(tmTypes.ResultBlockchainInfo)

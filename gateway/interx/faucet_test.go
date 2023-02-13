@@ -200,6 +200,10 @@ func (suite *FaucetTestSuite) TestServerFaucet() {
 	resultInfo, _, _ := serveFaucet(r, gwCosmosmux, request, test.INTERX_RPC, user_addr, "ukex")
 	resultHash := FaucetResponse{}
 	bz, err := json.Marshal(resultInfo)
+	if err != nil {
+		panic(err)
+	}
+
 	json.Unmarshal(bz, &resultHash)
 	suite.Require().EqualValues(resultHash.Hash, suite.faucetResponse.Result.Hash)
 	os.RemoveAll("./db")
