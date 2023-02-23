@@ -26,7 +26,7 @@ func queryEVMTransactionFromNode(nodeInfo config.EVMNodeConfig, transactionHash 
 
 	response := new(interface{})
 
-	if receipt == false {
+	if !receipt {
 		data, err := client.Call("eth_getTransactionByHash", transactionHash)
 		if err != nil {
 			return common.ServeError(0, "failed to get transaction by hash", err.Error(), http.StatusInternalServerError)

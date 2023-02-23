@@ -84,6 +84,10 @@ func queryEVMBalancesFromNode(nodeInfo config.EVMNodeConfig, address string, tok
 			return common.ServeError(0, "failed to get token symbol", "", http.StatusInternalServerError)
 		}
 		symbol, err := hex.DecodeString(strings.ReplaceAll(balance.Symbol[2:], "00", ""))
+		if err != nil {
+			return common.ServeError(0, "failed to decode token symbol", "", http.StatusInternalServerError)
+		}
+
 		balance.Symbol = string(symbol[1:])
 
 		call.To = token
