@@ -53,7 +53,7 @@ func GetLastBlockFetched(address string, isWithdraw bool) int64 {
 
 // SaveTransactions is a function to save user transactions to cache
 func SaveTransactions(address string, txsData tmTypes.ResultTxSearch, isWithdraw bool) error {
-	cachedData, err := GetTransactions(address, isWithdraw)
+	cachedData, _ := GetTransactions(address, isWithdraw)
 
 	// Append new txs to the cached txs array
 	if cachedData.TotalCount > 0 {

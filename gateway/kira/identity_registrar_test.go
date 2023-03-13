@@ -87,7 +87,14 @@ func (suite *IdentityRecordsTestSuite) TestAllIdentityHandler() {
 
 	res := tempIDRecord{}
 	bz, err := json.Marshal(response)
+	if err != nil {
+		panic(err)
+	}
+
 	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
 
 	suite.Require().EqualValues(res.Records[0].Address, "test_address")
 	suite.Require().EqualValues(statusCode, http.StatusOK)
@@ -108,7 +115,14 @@ func (suite *IdentityRecordsTestSuite) TestExecutionFeeHandler() {
 
 	res := tempIDRecord{}
 	bz, err := json.Marshal(response)
+	if err != nil {
+		panic(err)
+	}
+
 	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
 
 	suite.Require().EqualValues(res.Records[0].Address, "test_address")
 	suite.Require().EqualValues(statusCode, http.StatusOK)
@@ -134,7 +148,14 @@ func (suite *IdentityRecordsTestSuite) TestIdentityRecordVerifyRequestsByRequest
 
 	res := tempIDRecordByRequester{}
 	bz, err := json.Marshal(response)
+	if err != nil {
+		panic(err)
+	}
+
 	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TestIdentityRecordsTestSuite(t *testing.T) {
@@ -148,11 +169,10 @@ func TestIdentityRecordsTestSuite(t *testing.T) {
 	s := grpc.NewServer()
 	pb.RegisterQueryServer(s, &server{})
 	log.Printf("server listening at %v", lis.Addr())
-	// if err := s.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %v", err)
-	// }
 
-	go s.Serve(lis)
+	go func() {
+		_ = s.Serve(lis)
+	}()
 
 	suite.Run(t, testSuite)
 	s.Stop()

@@ -32,7 +32,10 @@ import (
 
 // getOpenAPIHandler serves an OpenAPI UI.
 func getOpenAPIHandler() http.Handler {
-	mime.AddExtensionType(".svg", "image/svg+xml")
+	err := mime.AddExtensionType(".svg", "image/svg+xml")
+	if err != nil {
+		panic(err)
+	}
 
 	statikFS, err := fs.New()
 	if err != nil {

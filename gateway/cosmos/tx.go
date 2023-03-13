@@ -89,9 +89,9 @@ func postTxHandle(r *http.Request, request types.InterxRequest, rpcAddr string) 
 // PostTxRequest is a function to post transaction.
 func PostTxRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[post-transaction] Entering transaction broadcast: ")
 
@@ -115,11 +115,11 @@ func queryTxHashHandle(hash string, rpcAddr string) (interface{}, interface{}, i
 // QueryTxHashRequest is a function to query transaction hash.
 func QueryTxHashRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		hash := queries["hash"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-txhash] Entering transaction hash query: ", hash)
 
@@ -175,9 +175,9 @@ func encodeTransactionHandle(r *http.Request, request types.InterxRequest, rpcAd
 // EncodeTransaction is a function to encode unsigned transaction.
 func EncodeTransaction(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[encode-transaction] Entering transaction request encoding")
 
