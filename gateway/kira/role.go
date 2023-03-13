@@ -29,9 +29,9 @@ func queryRolesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfac
 // QueryRolesRequest is a function to query all roles.
 func QueryRolesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-roles] Entering roles query")
 
@@ -75,9 +75,9 @@ func queryRolesByAddressHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) 
 // QueryRolesByAddressRequest is a function to query all roles by address.
 func QueryRolesByAddressRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-roles-by-address] Entering roles by address query")
 

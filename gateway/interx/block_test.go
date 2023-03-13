@@ -76,7 +76,8 @@ func (suite *BlockQueryTestSuite) TestHeightOrHashBlockQuery() {
 
 func (suite *BlockQueryTestSuite) TestBlockTransactionsHandle() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadBlockDbDriver()
 	database.LoadBlockNanoDbDriver()
 	response, error, statusCode := QueryBlockTransactionsHandle(test.TENDERMINT_RPC, "1")
@@ -132,11 +133,17 @@ func TestBlockQueryTestSuite(t *testing.T) {
 			if r.URL.Path == "/blockchain" {
 				response, _ := tmjson.Marshal(testSuite.blockQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/block" {
 				response, _ := tmjson.Marshal(testSuite.blockQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/tx_search" {
 				response := tmJsonRPCTypes.RPCResponse{
 					JSONRPC: "2.0",
@@ -147,11 +154,16 @@ func TestBlockQueryTestSuite(t *testing.T) {
 					panic(err)
 				}
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response1)
+				_, err = w.Write(response1)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go tendermintServer.ListenAndServe()
+	go func() {
+		_ = tendermintServer.ListenAndServe()
+	}()
 
 	suite.Run(t, testSuite)
 

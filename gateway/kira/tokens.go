@@ -69,9 +69,9 @@ func queryKiraTokensAliasesHandler(r *http.Request, gwCosmosmux *runtime.ServeMu
 // QueryKiraTokensAliasesRequest is a function to query all tokens aliases.
 func QueryKiraTokensAliasesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-tokens-aliases] Entering token aliases query")
 
@@ -151,9 +151,9 @@ func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux)
 // QueryKiraTokensRatesRequest is a function to query all tokens rates.
 func QueryKiraTokensRatesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-tokens-rates] Entering token rates query")
 

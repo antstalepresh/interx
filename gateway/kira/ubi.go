@@ -35,9 +35,9 @@ func QueryUBIRecordsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (int
 // QueryUBIRecordsRequest is a function to query list of all ubi records.
 func QueryUBIRecordsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-ubi-records] Entering upgrade plan query")
 

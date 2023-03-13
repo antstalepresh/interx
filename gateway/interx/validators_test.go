@@ -71,7 +71,11 @@ func (suite *ValidatorsTestSuite) TestValidatorInfosQuery() {
 
 	res := pb.QuerySigningInfosResponse{}
 	bz, _ := json.Marshal(response)
-	json.Unmarshal(bz, &res)
+	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		suite.Assert()
+	}
+
 	suite.Require().EqualValues(res.Validators[0].Address, "test_address")
 	suite.Require().EqualValues(statusCode, http.StatusOK)
 }
@@ -111,7 +115,11 @@ func (suite *ValidatorsTestSuite) TestSnapInfoQuery() {
 	if err != nil {
 		panic("parse error")
 	}
-	json.Unmarshal(bz, &res)
+
+	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
 
 	suite.Require().EqualValues(len(res.Validators), len(tasks.AllValidators.Validators))
 	suite.Require().EqualValues(statusCode, http.StatusOK)
@@ -128,11 +136,10 @@ func TestValidatorsTestSuite(t *testing.T) {
 	s := grpc.NewServer()
 	pb.RegisterQueryServer(s, &kiraserver{})
 	log.Printf("server listening at %v", lis.Addr())
-	// if err := s.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %v", err)
-	// }
 
-	go s.Serve(lis)
+	go func() {
+		_ = s.Serve(lis)
+	}()
 
 	testSuite.dumpConsensusQuery.Result, _ = json.Marshal("test")
 	tmServer := http.Server{
@@ -141,11 +148,16 @@ func TestValidatorsTestSuite(t *testing.T) {
 			if r.URL.Path == "/dump_consensus_state" {
 				response, _ := json.Marshal(testSuite.dumpConsensusQuery)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go tmServer.ListenAndServe()
+	go func() {
+		_ = tmServer.ListenAndServe()
+	}()
 
 	suite.Run(t, testSuite)
 	s.Stop()

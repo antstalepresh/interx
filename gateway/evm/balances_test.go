@@ -112,7 +112,9 @@ func TestBalancesQueryTestSuite(t *testing.T) {
 			}
 		}),
 	}
-	go evmServer.ListenAndServe()
+	go func() {
+		_ = evmServer.ListenAndServe()
+	}()
 
 	time.Sleep(1 * time.Second)
 	suite.Run(t, &testSuite)

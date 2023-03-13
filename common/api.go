@@ -84,7 +84,11 @@ func DownloadResponseToFile(rpcAddr string, url string, query string, filepath s
 	defer fileout.Close()
 
 	global.Mutex.Lock()
-	io.Copy(fileout, resp.Body)
+	_, err = io.Copy(fileout, resp.Body)
+	if err != nil {
+		GetLogger().Error("[rpc-call] Unable to save response")
+	}
+
 	global.Mutex.Unlock()
 
 	return err
@@ -329,7 +333,10 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 	}
 
 	// save block time
-	database.AddTokenAliases(result.Data)
+	err = database.AddTokenAliases(result.Data)
+	if err != nil {
+		GetLogger().Error("[grpc-call] Unable to save response")
+	}
 
 	return result.Data
 }

@@ -58,7 +58,10 @@ func saveReference(url string, path string) error {
 		global.Mutex.Lock()
 
 		if _, err := os.Stat(filepath.Dir(path)); os.IsNotExist(err) {
-			os.MkdirAll(filepath.Dir(path), 0700)
+			err1 := os.MkdirAll(filepath.Dir(path), 0700)
+			if err1 != nil {
+				return err1
+			}
 		}
 
 		err = ioutil.WriteFile(path, bodyBytes, 0644)

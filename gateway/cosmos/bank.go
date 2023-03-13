@@ -28,9 +28,9 @@ func querySupplyHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfac
 // QuerySupplyRequest is a function to query total supply.
 func QuerySupplyRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-supply] Entering total supply query")
 
@@ -83,11 +83,11 @@ func queryBalancesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interf
 // QueryBalancesRequest is a function to query balances.
 func QueryBalancesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		bech32addr := queries["address"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-balances] Entering balances query: ", bech32addr)
 
