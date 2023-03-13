@@ -343,11 +343,11 @@ func queryEVMFaucetRequestHandle(r *http.Request, chain string) (interface{}, in
 // RegisterEVMFaucetRequest is a function to faucet evm tokens
 func RegisterEVMFaucetRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-faucet] Entering transactions execute: ", chain)
 

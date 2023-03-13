@@ -223,9 +223,9 @@ func serveFaucet(r *http.Request, gwCosmosmux *runtime.ServeMux, request types.I
 // FaucetRequest is a function to handle faucet service.
 func FaucetRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		queries := r.URL.Query()
 		claims := queries["claim"]

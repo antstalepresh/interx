@@ -80,12 +80,12 @@ func queryEVMBlockRequestHandle(r *http.Request, chain string, blockHeightOrHash
 // QueryEVMBlockRequest is a function to query block of EVM chains.
 func QueryEVMBlockRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		blockHeightOrHash := queries["identifier"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-block] Entering block query: ", chain)
 

@@ -74,9 +74,9 @@ func queryNetworkListHandler(r *http.Request, request types.InterxRequest, rpcAd
 // QueryNetworkListRequest is a function to query network list.
 func QueryNetworkListRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[rosetta-query-networklist] Entering network list query")
 
@@ -115,9 +115,9 @@ func queryNetworkOptionsHandler(r *http.Request, request types.InterxRequest, rp
 // QueryNetworkOptionsRequest is a function to query network options.
 func QueryNetworkOptionsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[rosetta-query-networkoptions] Entering network list query")
 
@@ -222,9 +222,9 @@ func queryNetworkStatusHandler(r *http.Request, request types.InterxRequest, rpc
 // QueryNetworkStatusRequest is a function to query network status.
 func QueryNetworkStatusRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[rosetta-query-networkstatus] Entering network list query")
 

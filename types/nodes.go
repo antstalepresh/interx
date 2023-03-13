@@ -4,11 +4,6 @@ import (
 	"time"
 )
 
-const (
-	bucketTypeNew = 0x01
-	bucketTypeOld = 0x02
-)
-
 type NetAddress struct {
 	ID   string `json:"id"`
 	IP   string `json:"ip"`

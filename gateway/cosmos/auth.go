@@ -25,11 +25,11 @@ func queryAccountsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interf
 // QueryAccountsRequest is a function to query balances.
 func QueryAccountsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		bech32addr := queries["address"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-account] Entering account query: ", bech32addr)
 

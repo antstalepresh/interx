@@ -163,14 +163,23 @@ func (suite *DataReferenceTestSuite) TestDataReferenceKeysHandler() {
 	refInfo, _, _ := queryDataReferenceKeysHandle(r, gwCosmosmux)
 	res := pb.QueryDataReferenceKeysResponse{}
 	bz, err := json.Marshal(refInfo)
-	json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(res)
 	suite.Require().EqualValues(len(res.Keys), 2)
 }
 
 func (suite *DataReferenceTestSuite) TestDataReferenceByKeyHandler() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadReferenceDbDriver()
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
 	gwCosmosmux, err := GetGrpcServeMux(*addr)
@@ -181,9 +190,16 @@ func (suite *DataReferenceTestSuite) TestDataReferenceByKeyHandler() {
 	refInfo, _, _ := queryDataReferenceHandle(r, gwCosmosmux, "test")
 	res := pb.DataRegistryEntry{}
 	bz, err := json.Marshal(refInfo)
-	json.Unmarshal(bz, &res)
+	if err != nil {
+		panic(err)
+	}
+
+	_ = json.Unmarshal(bz, &res)
 	suite.Require().EqualValues(res.Hash, "test_hash")
-	os.RemoveAll("./db")
+	err = os.RemoveAll("./db")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (suite *DataReferenceTestSuite) TestNetworkPropertiesHandler() {
@@ -219,11 +235,10 @@ func TestDataReferenceTestSuite(t *testing.T) {
 	s := grpc.NewServer()
 	pb.RegisterQueryServer(s, &server{})
 	log.Printf("server listening at %v", lis.Addr())
-	// if err := s.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %v", err)
-	// }
 
-	go s.Serve(lis)
+	go func() {
+		_ = s.Serve(lis)
+	}()
 
 	suite.Run(t, testSuite)
 	s.Stop()

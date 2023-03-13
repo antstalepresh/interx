@@ -95,7 +95,10 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 		totalResult.Txs = append(totalResult.Txs, result.Txs...)
 		page++
 	}
-	database.SaveTransactions(address, totalResult, isWithdraw)
+	err := database.SaveTransactions(address, totalResult, isWithdraw)
+	if err != nil {
+		common.GetLogger().Error("[query-transaction] Failed to save cache result:", err)
+	}
 
 	return database.GetTransactions(address, isWithdraw)
 }
@@ -300,17 +303,17 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 
 	var (
-		account    string = ""
-		txTypes           = []string{}
-		directions        = []string{}
-		statuses          = []string{}
-		dateStart  int    = -1
-		dateEnd    int    = -1
-		sortBy     string = ""
-		pageSize   int    = -1
-		page       int    = -1
-		limit      int    = -1
-		offset     int    = -1
+		account    string
+		txTypes        = []string{}
+		directions     = []string{}
+		statuses       = []string{}
+		dateStart  int = -1
+		dateEnd    int = -1
+		sortBy     string
+		pageSize   int = -1
+		page       int = -1
+		limit      int = -1
+		offset     int = -1
 	)
 
 	//------------ Type ------------
@@ -533,9 +536,9 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 // QueryWithdraws is a function to query all transactions.
 func QueryTransactions(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-transactions] Entering transactions query")
 
@@ -653,9 +656,9 @@ func queryUnconfirmedTransactionsHandler(rpcAddr string, r *http.Request) (inter
 // QueryUnconfirmedTxs is a function to query unconfirmed transactions.
 func QueryUnconfirmedTxs(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Error("[query-unconfirmed-txs] Entering query")
 
