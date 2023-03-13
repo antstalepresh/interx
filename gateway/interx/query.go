@@ -53,9 +53,9 @@ func queryInterxFunctionsHandle(rpcAddr string) (interface{}, interface{}, int) 
 // QueryInterxFunctions is a function to list functions and metadata.
 func QueryInterxFunctions(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryInterxFunctionsHandle(rpcAddr)
 
@@ -120,9 +120,9 @@ func queryStatusHandle(rpcAddr string) (interface{}, interface{}, int) {
 // QueryStatusRequest is a function to query status.
 func QueryStatusRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-status] Entering status query")
 
@@ -154,9 +154,9 @@ func queryAddrBookHandler(rpcAddr string) (interface{}, interface{}, int) {
 // QueryAddrBook is a function to query address book.
 func QueryAddrBook(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryAddrBookHandler(rpcAddr)
 
@@ -176,9 +176,9 @@ func queryNetInfoHandler(rpcAddr string) (interface{}, interface{}, int) {
 // QueryNetInfo is a function to query net info.
 func QueryNetInfo(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryNetInfoHandler(rpcAddr)
 
@@ -290,9 +290,9 @@ func queryDashboardHandler(rpcAddr string, r *http.Request, gwCosmosmux *runtime
 // QueryDashboard is a function to query dashboard info.
 func QueryDashboard(rpcAddr string, gwCosmosmux *runtime.ServeMux) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryDashboardHandler(rpcAddr, r, gwCosmosmux)
 

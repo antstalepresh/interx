@@ -201,12 +201,12 @@ func queryReadSmartContractHandle(r *http.Request, chain string, contract string
 // QueryReadContractRequest is a function to read smart contract.
 func QueryReadContractRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		contract := queries["contract"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-read-contract] Entering read smart contract: ", chain)
 
@@ -403,12 +403,12 @@ func queryWriteSmartContractHandle(r *http.Request, chain string, contract strin
 // QueryWriteContractRequestf is a function to write smart contract.
 func QueryWriteContractRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		contract := queries["contract"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-write-contract] Entering write smart contract: ", chain)
 

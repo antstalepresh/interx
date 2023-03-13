@@ -61,9 +61,9 @@ func queryAccountBalanceHandler(r *http.Request, request types.InterxRequest, rp
 // QueryAccountBalanceRequest is a function to query account balance.
 func QueryAccountBalanceRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[rosetta-query-accountbalance] Entering account balance query")
 

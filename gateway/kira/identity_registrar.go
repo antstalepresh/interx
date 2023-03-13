@@ -38,9 +38,9 @@ func QueryIdentityRecordHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) 
 
 func QueryIdentityRecordRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-identity-record] entering query")
 
@@ -78,9 +78,9 @@ func QueryIdentityRecordsByAddressHandler(r *http.Request, gwCosmosmux *runtime.
 
 func QueryIdentityRecordsByAddressRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-identity-records-by-address] entering query")
 
@@ -134,9 +134,9 @@ func QueryAllIdentityRecordsHandler(r *http.Request, gwCosmosmux *runtime.ServeM
 
 func QueryAllIdentityRecordsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-all-identity-records] entering query")
 
@@ -168,9 +168,9 @@ func QueryIdentityRecordVerifyRequestHandler(r *http.Request, gwCosmosmux *runti
 
 func QueryIdentityRecordVerifyRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-identity-record-verify-request] entering query")
 
@@ -229,9 +229,9 @@ func QueryIdentityRecordVerifyRequestsByRequesterHandler(r *http.Request, gwCosm
 
 func QueryIdentityRecordVerifyRequestsByRequester(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-identity-record-verify-request-by-requester] entering query")
 
@@ -290,9 +290,9 @@ func QueryIdentityRecordVerifyRequestsByApproverHandler(r *http.Request, gwCosmo
 
 func QueryIdentityRecordVerifyRequestsByApprover(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-identity-record-verify-request-by-approver] entering query")
 
@@ -346,9 +346,9 @@ func QueryAllIdentityRecordVerifyRequestsHandler(r *http.Request, gwCosmosmux *r
 
 func QueryAllIdentityRecordVerifyRequests(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-all-identity-record-verify-requests] entering query")
 

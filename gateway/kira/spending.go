@@ -41,9 +41,9 @@ func QuerySpendingPoolsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (
 // QuerySpendingPoolsRequest is a function to query list of all spending pool names.
 func QuerySpendingPoolsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-spending-pool-names] Entering upgrade plan query")
 
@@ -83,9 +83,9 @@ func QuerySpendingPoolProposalHandler(r *http.Request, gwCosmosmux *runtime.Serv
 // QuerySpendingPoolProposalsRequest is a function to query list of spending pools proposal by name.
 func QuerySpendingPoolProposalsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-spending-pool-proposals] Entering upgrade plan query")
 
