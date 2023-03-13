@@ -24,9 +24,16 @@ func queryAbiHandle(r *http.Request, chain string, contract string) (interface{}
 	}
 
 	result, err, statusCode := common.MakeGetRequest(chainConfig.Etherscan.API, "", "module=contract&action=getabi&address="+contract+"&apikey="+chainConfig.Etherscan.APIToken)
+	if err != nil {
+		return common.ServeError(0, "", "failed to query abi", http.StatusInternalServerError)
+	}
+
 	abi := new(interface{})
 	common.GetLogger().Info(result.(map[string]interface{})["result"])
-	json.Unmarshal([]byte(result.(map[string]interface{})["result"].(string)), abi)
+	err = json.Unmarshal([]byte(result.(map[string]interface{})["result"].(string)), abi)
+	if err != nil {
+		return common.ServeError(0, "", "failed to decode result", http.StatusInternalServerError)
+	}
 
 	type EVMAbi struct {
 		Abi interface{} `json:"abi"`
@@ -39,12 +46,12 @@ func queryAbiHandle(r *http.Request, chain string, contract string) (interface{}
 // QueryAbiRequests is a function to query abi of smart contract.
 func QueryAbiRequests(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		contract := queries["contract"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-abi] Entering abi query: ", chain)
 

@@ -73,12 +73,12 @@ func queryEVMTransactionRequestHandle(r *http.Request, chain string, transaction
 // QueryEVMTransactionRequest is a function to query transaction of EVM chains.
 func QueryEVMTransactionRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		transactionHash := queries["hash"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-transaction] Entering transaction query: ", chain)
 

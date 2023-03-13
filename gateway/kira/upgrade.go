@@ -27,9 +27,9 @@ func QueryCurrentPlanHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 // QueryCurrentPlanRequest is a function to query current upgrade plan.
 func QueryCurrentPlanRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-current-upgrade-plan] Entering upgrade plan query")
 
@@ -62,9 +62,9 @@ func QueryNextPlanHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inter
 // QueryNextPlanRequest is a function to query next upgrade plan.
 func QueryNextPlanRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-next-upgrade-plan] Entering upgrade plan query")
 

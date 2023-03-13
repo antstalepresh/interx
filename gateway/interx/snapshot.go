@@ -51,9 +51,9 @@ func querySnapShotInfoHandler(rpcAddr string) (interface{}, interface{}, int) {
 // QuerySnapShotInfo is a function to get snapshot checksum.
 func QuerySnapShotInfo(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = querySnapShotInfoHandler(rpcAddr)
 

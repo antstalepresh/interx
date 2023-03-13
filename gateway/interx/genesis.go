@@ -137,9 +137,14 @@ func GetGenesisResults(rpcAddr string) (*tmtypes.GenesisDoc, string, error) {
 // QueryGenesis is a function to query genesis.
 func QueryGenesis(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+
 		fmt.Println(genesisPath())
 		if saveGenesis(rpcAddr) != nil {
-			common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+			response.Response, response.Error, statusCode = common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+			common.WrapResponse(w, request, *response, statusCode, false)
 		} else {
 			http.ServeFile(w, r, genesisPath())
 		}
@@ -147,7 +152,11 @@ func QueryGenesis(rpcAddr string) http.HandlerFunc {
 }
 
 func queryGenesisSumHandler(rpcAddr string) (interface{}, interface{}, int) {
-	saveGenesis(rpcAddr)
+	err := saveGenesis(rpcAddr)
+	if err != nil {
+		return common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+	}
+
 	checksum, err := getGenesisCheckSum()
 	if err != nil {
 		return common.ServeError(0, "", "interx error", http.StatusInternalServerError)
@@ -166,9 +175,9 @@ func queryGenesisSumHandler(rpcAddr string) (interface{}, interface{}, int) {
 // QueryGenesisSum is a function to get genesis checksum.
 func QueryGenesisSum(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryGenesisSumHandler(rpcAddr)
 
