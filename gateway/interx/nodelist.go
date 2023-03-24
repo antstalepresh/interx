@@ -128,9 +128,9 @@ func queryPubP2PNodeList(r *http.Request, rpcAddr string) (interface{}, interfac
 // QueryNodeList is a function to query node list.
 func QueryPubP2PNodeList(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-pub-node-list] Entering pub p2p node lists query")
 
@@ -254,9 +254,9 @@ func queryPrivP2PNodeList(r *http.Request, rpcAddr string) (interface{}, interfa
 // QueryNodeList is a function to query node list.
 func QueryPrivP2PNodeList(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-priv-node-list] Entering priv p2p node lists query")
 
@@ -332,9 +332,9 @@ func queryInterxList(r *http.Request, rpcAddr string) (interface{}, interface{},
 // QueryNodeList is a function to query node list.
 func QueryInterxList(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-interx-list] Entering interx lists query")
 
@@ -410,9 +410,9 @@ func querySnapList(r *http.Request, rpcAddr string) (interface{}, interface{}, i
 // QueryNodeList is a function to query node list.
 func QuerySnapList(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-snap-list] Entering snap lists query")
 

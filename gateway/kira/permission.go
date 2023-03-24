@@ -38,9 +38,9 @@ func queryPermissionsByAddressHandler(r *http.Request, gwCosmosmux *runtime.Serv
 // QueryPermissionsByAddressRequest is a function to query all permissions by address.
 func QueryPermissionsByAddressRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-permissions-by-address] Entering permissions by address query")
 

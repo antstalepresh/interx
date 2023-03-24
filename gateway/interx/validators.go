@@ -121,9 +121,9 @@ func queryValidatorsHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, rpcAd
 // QueryValidators is a function to list validators.
 func QueryValidators(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		if !common.RPCMethods["GET"][config.QueryValidators].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
@@ -181,9 +181,9 @@ func queryValidatorInfosHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (
 // QueryValidatorInfos is a function to list validators information.
 func QueryValidatorInfos(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		if !common.RPCMethods["GET"][config.QueryValidatorInfos].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
@@ -333,9 +333,9 @@ func queryConsensusHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, rpcAdd
 // QueryConsensus is a function to query consensus.
 func QueryConsensus(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		if !common.RPCMethods["GET"][config.QueryConsensus].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
@@ -365,9 +365,9 @@ func queryDumpConsensusStateHandler(r *http.Request, gwCosmosmux *runtime.ServeM
 // QueryDumpConsensusState is a function to query consensus.
 func QueryDumpConsensusState(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		if !common.RPCMethods["GET"][config.QueryDumpConsensusState].Enabled {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)

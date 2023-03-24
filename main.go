@@ -97,7 +97,10 @@ func main() {
 		// os.Args[2:] will be all arguments starting after the subcommand at os.Args[1]
 		switch os.Args[1] {
 		case "init":
-			initCommand.Parse(os.Args[2:])
+			err := initCommand.Parse(os.Args[2:])
+			if err != nil {
+				panic(err)
+			}
 
 			if initCommand.Parsed() {
 				// Check which subcommand was Parsed using the FlagSet.Parsed() function. Handle each case accordingly.
@@ -158,7 +161,10 @@ func main() {
 				return
 			}
 		case "start":
-			startCommand.Parse(os.Args[2:])
+			err := startCommand.Parse(os.Args[2:])
+			if err != nil {
+				panic(err)
+			}
 
 			if startCommand.Parsed() {
 				// Check which subcommand was Parsed using the FlagSet.Parsed() function. Handle each case accordingly.
@@ -176,7 +182,10 @@ func main() {
 				return
 			}
 		case "version":
-			versionCommand.Parse(os.Args[2:])
+			err := versionCommand.Parse(os.Args[2:])
+			if err != nil {
+				panic(err)
+			}
 
 			if versionCommand.Parsed() {
 				fmt.Println(config.InterxVersion)

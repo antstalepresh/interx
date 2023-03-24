@@ -28,9 +28,9 @@ func queryKiraFunctionsHandle(rpcAddr string) (interface{}, interface{}, int) {
 // QueryKiraFunctions is a function to list functions and metadata.
 func QueryKiraFunctions(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryKiraFunctionsHandle(rpcAddr)
 
@@ -41,9 +41,9 @@ func QueryKiraFunctions(rpcAddr string) http.HandlerFunc {
 // QueryKiraStatusRequest is a function to query kira status.
 func QueryKiraStatusRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-kira-status] Entering status query")
 
