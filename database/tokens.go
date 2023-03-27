@@ -22,6 +22,9 @@ func GetTokenAliases() ([]types.TokenAlias, error) {
 	}
 
 	err = json.Unmarshal([]byte(data), &tokens)
+	if err != nil {
+		return nil, err
+	}
 
 	return tokens, nil
 }

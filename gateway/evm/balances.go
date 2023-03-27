@@ -84,6 +84,10 @@ func queryEVMBalancesFromNode(nodeInfo config.EVMNodeConfig, address string, tok
 			return common.ServeError(0, "failed to get token symbol", "", http.StatusInternalServerError)
 		}
 		symbol, err := hex.DecodeString(strings.ReplaceAll(balance.Symbol[2:], "00", ""))
+		if err != nil {
+			return common.ServeError(0, "failed to decode token symbol", "", http.StatusInternalServerError)
+		}
+
 		balance.Symbol = string(symbol[1:])
 
 		call.To = token
@@ -151,12 +155,12 @@ func queryEVMBalancesRequestHandle(r *http.Request, chain string, address string
 // RegisterEVMBalancesRequest is a function to query evm account balances infomation
 func RegisterEVMBalancesRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		address := queries["address"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-balances] Entering transactions execute: ", chain)
 

@@ -41,11 +41,13 @@ var (
 	}
 )
 
+// Used to parse response from sekai gRPC ("/kira/gov/voters/{proposal_id}")
 type Permissions struct {
 	Blacklist []PermValue `json:"blacklist"`
 	Whitelist []PermValue `json:"whitelist"`
 }
 
+// Used to parse response from sekai gRPC ("/kira/gov/voters/{proposal_id}")
 type Voter struct {
 	Address     string   `json:"address"`
 	Roles       []string `json:"roles"`

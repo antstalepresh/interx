@@ -40,6 +40,9 @@ func queryEVMBlockFromNode(nodeInfo config.EVMNodeConfig, blockHeightOrHash stri
 		}
 	} else {
 		blockHeight, err := strconv.ParseUint(blockHeightOrHash, 10, 64)
+		if err != nil {
+			return common.ServeError(0, "failed to get block by number", err.Error(), http.StatusInternalServerError)
+		}
 
 		data, err := client.Call("eth_getBlockByNumber", "0x"+fmt.Sprintf("%X", blockHeight), true)
 		if err != nil {
@@ -77,12 +80,12 @@ func queryEVMBlockRequestHandle(r *http.Request, chain string, blockHeightOrHash
 // QueryEVMBlockRequest is a function to query block of EVM chains.
 func QueryEVMBlockRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		blockHeightOrHash := queries["identifier"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-block] Entering block query: ", chain)
 

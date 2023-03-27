@@ -79,7 +79,8 @@ func (suite *StatusTestSuite) SetupTest() {
 func (suite *StatusTestSuite) TestDashboardQuery() {
 	config.Config.Cache.CacheDir = "./"
 	config.Config.RPC = test.TENDERMINT_RPC
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadBlockDbDriver()
 	database.LoadBlockNanoDbDriver()
 	common.NodeStatus.Block = 100
@@ -102,26 +103,50 @@ func (suite *StatusTestSuite) TestDashboardQuery() {
 	if err != nil {
 		panic("parse error")
 	}
-	json.Unmarshal(bz, &interxRes)
+
+	err = json.Unmarshal(bz, &interxRes)
+	if err != nil {
+		panic(err)
+	}
+
 	suite.Require().EqualValues(statusCode, http.StatusOK)
 	os.RemoveAll("./db")
 }
 
 func (suite *StatusTestSuite) TestAddrBookQuery() {
-	os.Mkdir("./config", 0777)
-	os.Create("./config/test_addr.json")
+	err := os.Mkdir("./config", 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = os.Create("./config/test_addr.json")
+	if err != nil {
+		panic(err)
+	}
+
 	config.Config.AddrBooks = []string{
 		"./config/test_addr.json",
 	}
 	_, _, statusCode := queryAddrBookHandler("")
 	suite.Require().EqualValues(statusCode, http.StatusOK)
-	os.RemoveAll("./config")
+	err = os.RemoveAll("./config")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (suite *StatusTestSuite) TestStatusHandler() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./reference", 0777)
+	err := os.Mkdir("./reference", 0777)
+	if err != nil {
+		panic(err)
+	}
+
 	f, err := os.Create("./reference/genesis.json")
+	if err != nil {
+		panic(err)
+	}
+
 	resBytes, err := tmjson.Marshal(tmRPCTypes.ResultGenesis{
 		Genesis: &tmTypes.GenesisDoc{
 			GenesisTime:   time.Now(),
@@ -129,8 +154,14 @@ func (suite *StatusTestSuite) TestStatusHandler() {
 			InitialHeight: 1,
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
 
-	f.WriteString(string(resBytes))
+	_, err = f.WriteString(string(resBytes))
+	if err != nil {
+		panic(err)
+	}
 
 	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, "")
 	if err != nil {
@@ -158,8 +189,16 @@ func (suite *StatusTestSuite) TestNetInfoHandler() {
 
 	tmRes := tmRPCTypes.ResultNetInfo{}
 	suiteRes := tmRPCTypes.ResultNetInfo{}
-	tmjson.Unmarshal(suite.netInfoQueryResponse.Result, &suiteRes)
-	json.Unmarshal(bz, &tmRes)
+
+	err := tmjson.Unmarshal(suite.netInfoQueryResponse.Result, &suiteRes)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(bz, &tmRes)
+	if err != nil {
+		panic(err)
+	}
 
 	suite.Require().EqualValues(suiteRes.NPeers, tmRes.NPeers)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
@@ -188,6 +227,10 @@ func TestStatusTestSuite(t *testing.T) {
 			VotesBitArray: "test_votesbitarray",
 		},
 	})
+	if err != nil {
+		panic(err)
+	}
+
 	testSuite.consensusQueryResponse.Result = tmRPCTypes.ResultDumpConsensusState{
 		RoundState: bz,
 	}
@@ -238,11 +281,10 @@ func TestStatusTestSuite(t *testing.T) {
 	s := grpc.NewServer()
 	pb.RegisterQueryServer(s, &server{})
 	log.Printf("server listening at %v", lis.Addr())
-	// if err := s.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %v", err)
-	// }
 
-	go s.Serve(lis)
+	go func() {
+		_ = s.Serve(lis)
+	}()
 
 	// Mock Tendermint
 	tmServer := http.Server{
@@ -251,11 +293,17 @@ func TestStatusTestSuite(t *testing.T) {
 			if r.URL.Path == "/status" {
 				response, _ := json.Marshal(testSuite.kiraStatusResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/net_info" {
 				response, _ := json.Marshal(testSuite.netInfoQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/unconfirmed_txs" {
 				response := tmJsonRPCTypes.RPCResponse{
 					JSONRPC: "2.0",
@@ -266,23 +314,37 @@ func TestStatusTestSuite(t *testing.T) {
 					panic(err)
 				}
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response1)
+				_, err = w.Write(response1)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/dump_consensus_state" {
 				response, _ := json.Marshal(testSuite.consensusQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/blockchain" {
 				response, _ := tmjson.Marshal(testSuite.blockQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/block" {
 				response, _ := tmjson.Marshal(testSuite.blockHeightQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go tmServer.ListenAndServe()
+	go func() {
+		_ = tmServer.ListenAndServe()
+	}()
 
 	suite.Run(t, testSuite)
 	tmServer.Close()

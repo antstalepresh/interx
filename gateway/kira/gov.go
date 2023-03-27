@@ -62,9 +62,9 @@ func queryDataReferenceKeysHandle(r *http.Request, gwCosmosmux *runtime.ServeMux
 // QueryDataReferenceKeysRequest is a function to query data reference keys.
 func QueryDataReferenceKeysRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-reference-keys] Entering data reference keys query")
 
@@ -124,11 +124,11 @@ func queryDataReferenceHandle(r *http.Request, gwCosmosmux *runtime.ServeMux, ke
 // QueryDataReferenceRequest is a function to query data reference by key.
 func QueryDataReferenceRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		key := queries["key"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-reference] Entering data reference query by key: ", key)
 
@@ -161,9 +161,9 @@ func QueryNetworkPropertiesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux
 // QueryDataReferenceKeysRequest is a function to query data reference keys.
 func QueryNetworkPropertiesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-network-properties] Entering network properties query")
 
@@ -189,7 +189,11 @@ func QueryNetworkPropertiesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 }
 
 func QueryExecutionFeeHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		return common.ServeError(0, "failed to parse query parameters", err.Error(), http.StatusBadRequest)
+	}
+
 	message := r.FormValue("message")
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov/execution_fee", "/kira/gov/execution_fee/"+message, -1)
 	return common.ServeGRPC(r, gwCosmosmux)
@@ -198,9 +202,9 @@ func QueryExecutionFeeHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 // QueryExecutionFeeRequest is a function to query execution fee by transaction type.
 func QueryExecutionFeeRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-execution-fee] Entering execution fee query")
 
@@ -233,9 +237,9 @@ func QueryExecutionFeesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (i
 // QueryExecutionFeeRequest is a function to query execution fee by transaction type.
 func QueryExecutionFeesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-execution-fees] Entering execution fees query")
 

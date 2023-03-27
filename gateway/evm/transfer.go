@@ -76,7 +76,7 @@ func queryEVMTransferFromNode(nodeInfo config.EVMNodeConfig, rawTx string, estim
 		return common.ServeError(0, "failed to get pending sequence", err.Error(), http.StatusInternalServerError)
 	}
 
-	if estimate == true {
+	if estimate {
 		return response, nil, http.StatusOK
 	}
 
@@ -150,11 +150,11 @@ func queryEVMTransferRequestHandle(r *http.Request, chain string) (interface{}, 
 // QueryEVMTransferRequest is a function to query transfer of EVM chains.
 func QueryEVMTransferRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-transfer] Entering transactions execute: ", chain)
 

@@ -4,11 +4,6 @@ import (
 	"time"
 )
 
-const (
-	bucketTypeNew = 0x01
-	bucketTypeOld = 0x02
-)
-
 type NetAddress struct {
 	ID   string `json:"id"`
 	IP   string `json:"ip"`
@@ -26,6 +21,7 @@ type KnownAddress struct {
 	LastBanTime time.Time  `json:"last_ban_time"`
 }
 
+// Used to parse data from address file
 type AddrBookJSON struct {
 	Key   string         `json:"key"`
 	Addrs []KnownAddress `json:"addrs"`

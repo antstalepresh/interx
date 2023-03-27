@@ -99,7 +99,7 @@ func queryEVMStatusFromNode(nodeInfo config.EVMNodeConfig) (interface{}, interfa
 	if err != nil {
 		isSyncing = true
 	}
-	response.SyncInfo.CatchingUp = isSyncing != false
+	response.SyncInfo.CatchingUp = isSyncing
 
 	latestBlock := new(struct {
 		Hash      string `json:"hash"`
@@ -114,9 +114,9 @@ func queryEVMStatusFromNode(nodeInfo config.EVMNodeConfig) (interface{}, interfa
 	if err != nil {
 		return common.ServeError(0, "failed to get latest block ", err.Error(), http.StatusInternalServerError)
 	}
-	response.SyncInfo.LatestBlockHash = *&latestBlock.Hash
-	response.SyncInfo.LatestBlockHeight, _ = strconv.ParseUint((*&latestBlock.Number)[2:], 16, 64)
-	response.SyncInfo.LatestBlockTime, _ = strconv.ParseUint((*&latestBlock.Timestamp)[2:], 16, 64)
+	response.SyncInfo.LatestBlockHash = latestBlock.Hash
+	response.SyncInfo.LatestBlockHeight, _ = strconv.ParseUint((latestBlock.Number)[2:], 16, 64)
+	response.SyncInfo.LatestBlockTime, _ = strconv.ParseUint((latestBlock.Timestamp)[2:], 16, 64)
 
 	earliestBlock := new(struct {
 		Hash      string `json:"hash"`
@@ -131,9 +131,9 @@ func queryEVMStatusFromNode(nodeInfo config.EVMNodeConfig) (interface{}, interfa
 	if err != nil {
 		return common.ServeError(0, "failed to get earliest block ", err.Error(), http.StatusInternalServerError)
 	}
-	response.SyncInfo.EarliestBlockHash = *&earliestBlock.Hash
-	response.SyncInfo.EarliestBlockHeight, _ = strconv.ParseUint((*&earliestBlock.Number)[2:], 16, 64)
-	response.SyncInfo.EarliestBlockTime, _ = strconv.ParseUint((*&earliestBlock.Timestamp)[2:], 16, 64)
+	response.SyncInfo.EarliestBlockHash = earliestBlock.Hash
+	response.SyncInfo.EarliestBlockHeight, _ = strconv.ParseUint((earliestBlock.Number)[2:], 16, 64)
+	response.SyncInfo.EarliestBlockTime, _ = strconv.ParseUint((earliestBlock.Timestamp)[2:], 16, 64)
 
 	data, err = client.Call("eth_gasPrice")
 	if err != nil {
@@ -171,11 +171,11 @@ func queryEVMStatusHandle(r *http.Request, chain string) (interface{}, interface
 // QueryEVMStatusRequest is a function to query status of EVM chains.
 func QueryEVMStatusRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-status] Entering status query: ", chain)
 

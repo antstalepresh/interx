@@ -189,23 +189,41 @@ func LoadConfig(configFilePath string) {
 	Config.RPCMethods = getRPCSettings()
 
 	if _, err := os.Stat(Config.Cache.CacheDir); os.IsNotExist(err) {
-		os.Mkdir(Config.Cache.CacheDir, os.ModePerm)
+		err1 := os.Mkdir(Config.Cache.CacheDir, os.ModePerm)
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 	if _, err := os.Stat(Config.Cache.CacheDir + "/reference/"); os.IsNotExist(err) {
-		os.Mkdir(Config.Cache.CacheDir+"/reference/", os.ModePerm)
+		err1 := os.Mkdir(Config.Cache.CacheDir+"/reference/", os.ModePerm)
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 	if _, err := os.Stat(Config.Cache.CacheDir + "/response/"); os.IsNotExist(err) {
-		os.Mkdir(Config.Cache.CacheDir+"/response/", os.ModePerm)
+		err1 := os.Mkdir(Config.Cache.CacheDir+"/response/", os.ModePerm)
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 	if _, err := os.Stat(Config.Cache.CacheDir + "/db/"); os.IsNotExist(err) {
-		os.Mkdir(Config.Cache.CacheDir+"/db/", os.ModePerm)
+		err1 := os.Mkdir(Config.Cache.CacheDir+"/db/", os.ModePerm)
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 	if _, err := os.Stat(GetReferenceCacheDir() + "/genesis.json"); !os.IsNotExist(err) {
-		os.Remove(GetReferenceCacheDir() + "/genesis.json")
+		err1 := os.Remove(GetReferenceCacheDir() + "/genesis.json")
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 
 	if _, err := os.Stat(GetDbCacheDir() + "/token-aliases.json"); !os.IsNotExist(err) {
-		os.Remove(GetDbCacheDir() + "/token-aliases.json")
+		err1 := os.Remove(GetDbCacheDir() + "/token-aliases.json")
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 
 	Config.Evm = configFromFile.Evm

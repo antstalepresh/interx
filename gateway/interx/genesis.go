@@ -3,8 +3,9 @@ package interx
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
@@ -28,32 +29,74 @@ func genesisPath() string {
 	return config.GetReferenceCacheDir() + "/genesis.json"
 }
 
+func JSONRemarshal(bytes []byte) ([]byte, error) {
+	var ifce interface{}
+	err := json.Unmarshal(bytes, &ifce)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(ifce)
+}
+
+func getChunkedGenesisData(rpcAddr string, chunkedNum int) ([]byte, int, error) {
+	data, _, _ := common.MakeTendermintRPCRequest(rpcAddr, "/genesis_chunked", fmt.Sprintf("chunk=%d", chunkedNum))
+
+	type GenesisChunkedResponse struct {
+		Chunk string `json:"chunk"`
+		Total string `json:"total"`
+		Data  []byte `json:"data"`
+	}
+
+	genesis := GenesisChunkedResponse{}
+	byteData, err := json.Marshal(data)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = json.Unmarshal(byteData, &genesis)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := strconv.Atoi(genesis.Total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return genesis.Data, total, nil
+}
+
 func saveGenesis(rpcAddr string) error {
 	_, err := getGenesisCheckSum()
 	if err == nil {
 		return nil
 	}
 
-	data, _, _ := common.MakeTendermintRPCRequest(rpcAddr, "/genesis", "")
-
-	type GenesisResponse struct {
-		Genesis tmtypes.GenesisDoc `json:"genesis"`
-	}
-
-	genesis := GenesisResponse{}
-	byteData, _ := json.Marshal(data)
-	err = tmjson.Unmarshal(byteData, &genesis)
+	cBytes, cTotal, err := getChunkedGenesisData(rpcAddr, 0)
 	if err != nil {
 		return err
 	}
 
-	err = genesis.Genesis.ValidateAndComplete()
+	if cTotal > 1 {
+		for i := 1; i < cTotal; i++ {
+			nextBytes, _, _ := getChunkedGenesisData(rpcAddr, i)
+			cBytes = append(cBytes, nextBytes...)
+		}
+	}
+
+	genesis := tmtypes.GenesisDoc{}
+	err = tmjson.Unmarshal(cBytes, &genesis)
+	if err != nil {
+		return err
+	}
+
+	err = genesis.ValidateAndComplete()
 	if err != nil {
 		return err
 	}
 
 	global.Mutex.Lock()
-	err = genesis.Genesis.SaveAs(genesisPath())
+	err = os.WriteFile(genesisPath(), cBytes, 0644)
 	global.Mutex.Unlock()
 
 	return err
@@ -61,7 +104,7 @@ func saveGenesis(rpcAddr string) error {
 
 func getGenesisCheckSum() (string, error) {
 	global.Mutex.Lock()
-	data, err := ioutil.ReadFile(genesisPath())
+	data, err := os.ReadFile(genesisPath())
 	global.Mutex.Unlock()
 
 	if err != nil {
@@ -78,7 +121,7 @@ func GetGenesisResults(rpcAddr string) (*tmtypes.GenesisDoc, string, error) {
 	}
 
 	global.Mutex.Lock()
-	data, err := ioutil.ReadFile(genesisPath())
+	data, err := os.ReadFile(genesisPath())
 	global.Mutex.Unlock()
 
 	if err != nil {
@@ -94,9 +137,14 @@ func GetGenesisResults(rpcAddr string) (*tmtypes.GenesisDoc, string, error) {
 // QueryGenesis is a function to query genesis.
 func QueryGenesis(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+
 		fmt.Println(genesisPath())
 		if saveGenesis(rpcAddr) != nil {
-			common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+			response.Response, response.Error, statusCode = common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+			common.WrapResponse(w, request, *response, statusCode, false)
 		} else {
 			http.ServeFile(w, r, genesisPath())
 		}
@@ -104,7 +152,11 @@ func QueryGenesis(rpcAddr string) http.HandlerFunc {
 }
 
 func queryGenesisSumHandler(rpcAddr string) (interface{}, interface{}, int) {
-	saveGenesis(rpcAddr)
+	err := saveGenesis(rpcAddr)
+	if err != nil {
+		return common.ServeError(0, "", "interx error", http.StatusInternalServerError)
+	}
+
 	checksum, err := getGenesisCheckSum()
 	if err != nil {
 		return common.ServeError(0, "", "interx error", http.StatusInternalServerError)
@@ -123,9 +175,9 @@ func queryGenesisSumHandler(rpcAddr string) (interface{}, interface{}, int) {
 // QueryGenesisSum is a function to get genesis checksum.
 func QueryGenesisSum(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		response.Response, response.Error, statusCode = queryGenesisSumHandler(rpcAddr)
 

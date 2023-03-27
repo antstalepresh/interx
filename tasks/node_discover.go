@@ -47,10 +47,6 @@ func timeout() time.Duration {
 	return timeoutDuration
 }
 
-func getTendermintRPCAddress(ipAddr string) string {
-	return "http://" + ipAddr + ":" + config.Config.NodeDiscovery.DefaultTendermintPort
-}
-
 func getInterxAddress(ipAddr string) string {
 	return "http://" + ipAddr + ":" + config.Config.NodeDiscovery.DefaultInterxPort
 }
@@ -58,9 +54,12 @@ func QueryNetInfo(rpcAddr string) (*tmTypes.ResultNetInfo, error) {
 	result := new(tmTypes.ResultNetInfo)
 
 	u, err := url.Parse(rpcAddr)
+	if err != nil {
+		return result, err
+	}
+
 	_, err = net.DialTimeout("tcp", u.Host, timeout())
 	if err != nil {
-		// common.GetLogger().Info(err)
 		return result, err
 	}
 
@@ -99,9 +98,12 @@ func QueryNetInfoFromInterx(interxAddr string) (*tmTypes.ResultNetInfo, error) {
 	result := new(tmTypes.ResultNetInfo)
 
 	u, err := url.Parse(interxAddr)
+	if err != nil {
+		return result, err
+	}
+
 	_, err = net.DialTimeout("tcp", u.Host, timeout())
 	if err != nil {
-		// common.GetLogger().Info(err)
 		return result, err
 	}
 

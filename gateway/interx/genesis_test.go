@@ -31,8 +31,16 @@ func (suite *GenesisQueryTestSuite) SetupTest() {
 
 func (suite *GenesisQueryTestSuite) TestQueryGenesisSumHandler() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./reference", 0777)
-	os.Create("./reference/genesis.json")
+	err := os.Mkdir("./reference", 0777)
+	if err != nil {
+		suite.Assert()
+	}
+
+	_, err = os.Create("./reference/genesis.json")
+	if err != nil {
+		suite.Assert()
+	}
+
 	response, _, statusCode := queryGenesisSumHandler(test.TENDERMINT_RPC)
 
 	byteData, err := json.Marshal(response)
@@ -73,11 +81,16 @@ func TestGenesisQueryTestSuite(t *testing.T) {
 			if r.URL.Path == "/genesis" {
 				response, _ := tmjson.Marshal(testSuite.genesisQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go tendermintServer.ListenAndServe()
+	go func() {
+		_ = tendermintServer.ListenAndServe()
+	}()
 
 	suite.Run(t, testSuite)
 

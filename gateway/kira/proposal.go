@@ -65,9 +65,9 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 // QueryProposalsRequest is a function to query all proposals.
 func QueryProposalsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-proposals] Entering proposals query")
 
@@ -100,11 +100,11 @@ func queryProposalHandler(r *http.Request, gwCosmosmux *runtime.ServeMux, propos
 // QueryProposalRequest is a function to query a proposal by a given proposal_id.
 func QueryProposalRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-proposal] Entering proposal query by proposal_id: ", proposalID)
 
@@ -190,11 +190,11 @@ func queryVotersHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfa
 // QueryVotersRequest is a function to voters by a given proposal_id.
 func QueryVotersRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-voters] Entering proposal query by proposal_id: ", proposalID)
 
@@ -265,11 +265,11 @@ func queryVotesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfac
 // QueryVotesRequest is a function to votes by a given proposal_id.
 func QueryVotesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		proposalID := queries["proposal_id"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-votes] Entering proposal query by proposal_id: ", proposalID)
 

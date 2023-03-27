@@ -84,31 +84,14 @@ func DownloadResponseToFile(rpcAddr string, url string, query string, filepath s
 	defer fileout.Close()
 
 	global.Mutex.Lock()
-	io.Copy(fileout, resp.Body)
+	_, err = io.Copy(fileout, resp.Body)
+	if err != nil {
+		GetLogger().Error("[rpc-call] Unable to save response")
+	}
+
 	global.Mutex.Unlock()
 
 	return err
-}
-
-func makePostRequest(r *http.Request) (*types.RPCResponse, error) {
-	endpoint := fmt.Sprintf("%s%s", r.Host, r.URL)
-	// GetLogger().Info("[rpc-call] Entering rpc call: ", endpoint)
-
-	resp, err := http.PostForm(endpoint, r.Form)
-	if err != nil {
-		GetLogger().Error("[rpc-call] Unable to connect to ", endpoint)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	result := new(types.RPCResponse)
-	err = json.NewDecoder(resp.Body).Decode(result)
-	if err != nil {
-		GetLogger().Error("[rpc-call] Unable to decode response: : ", err)
-		return nil, err
-	}
-
-	return result, nil
 }
 
 // GetAccountBalances is a function to get balances of an address
@@ -350,7 +333,10 @@ func GetTokenAliases(gwCosmosmux *runtime.ServeMux, r *http.Request) []types.Tok
 	}
 
 	// save block time
-	database.AddTokenAliases(result.Data)
+	err = database.AddTokenAliases(result.Data)
+	if err != nil {
+		GetLogger().Error("[grpc-call] Unable to save response")
+	}
 
 	return result.Data
 }
@@ -460,7 +446,7 @@ func GetBlockchain(rpcAddr string) (*tmTypes.ResultBlockchainInfo, error) {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		GetLogger().Error("[rpc-call] Unable to connect to ", endpoint)
-		return nil, fmt.Errorf("Blockchain query error")
+		return nil, fmt.Errorf("blockchain query error")
 	}
 	defer resp.Body.Close()
 
@@ -475,7 +461,7 @@ func GetBlockchain(rpcAddr string) (*tmTypes.ResultBlockchainInfo, error) {
 
 	if response.Error != nil {
 		GetLogger().Error("[rpc-call] Blockchain query fail ")
-		return nil, fmt.Errorf("Blockchain query error")
+		return nil, fmt.Errorf("blockchain query error")
 	}
 
 	result := new(tmTypes.ResultBlockchainInfo)

@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -20,8 +19,6 @@ import (
 )
 
 // Regexp definitions
-var keyMatchRegex = regexp.MustCompile(`\"(\w+)\":`)
-var wordBarrierRegex = regexp.MustCompile(`(\w)([A-Z])`)
 var gasWantedRemoveRegex = regexp.MustCompile(`\s*\"gas_wanted\" *: *\".*\"(,|)`)
 var gasUsedRemoveRegex = regexp.MustCompile(`\s*\"gas_used\" *: *\".*\"(,|)`)
 
@@ -148,7 +145,7 @@ func GetInterxRequest(r *http.Request) types.InterxRequest {
 	request := types.InterxRequest{}
 
 	request.Method = r.Method
-	request.Endpoint = fmt.Sprintf("%s", r.URL)
+	request.Endpoint = r.URL.String()
 	request.Params, _ = ioutil.ReadAll(r.Body)
 
 	return request
@@ -233,7 +230,7 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 				CachingBlockDuration: conf.CachingBlockDuration,
 			})
 			if err != nil {
-				// GetLogger().Error("[gateway] Failed to save in the cache: ", err.Error())
+				GetLogger().Error("[gateway] Failed to save in the cache: ", err.Error())
 			}
 			// GetLogger().Info("[gateway] Save finished")
 		}
@@ -261,12 +258,18 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 
 		switch v := response.Response.(type) {
 		case string:
-			w.Write([]byte(v))
+			_, err := w.Write([]byte(v))
+			if err != nil {
+				GetLogger().Error("[gateway] Failed to make a response", err.Error())
+			}
 			return
 		}
 
 		encoded, _ := conventionalMarshaller{response.Response}.MarshalAndConvert(request.Endpoint)
-		w.Write(encoded)
+		_, err := w.Write(encoded)
+		if err != nil {
+			GetLogger().Error("[gateway] Failed to make a response", err.Error())
+		}
 	} else {
 		w.WriteHeader(statusCode)
 
@@ -275,7 +278,10 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 		}
 
 		encoded, _ := conventionalMarshaller{response.Error}.MarshalAndConvert(request.Endpoint)
-		w.Write(encoded)
+		_, err := w.Write(encoded)
+		if err != nil {
+			GetLogger().Error("[gateway] Failed to make a response", err.Error())
+		}
 	}
 }
 

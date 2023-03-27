@@ -45,6 +45,7 @@ type ValidatorInfo struct {
 	VotingPower string  `json:"voting_power,omitempty"`
 }
 
+// Used to parse response from tendermint api ("/status")
 type KiraStatus struct {
 	NodeInfo      NodeInfo      `json:"node_info,omitempty"`
 	SyncInfo      SyncInfo      `json:"sync_info,omitempty"`

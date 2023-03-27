@@ -59,9 +59,9 @@ func queryBlocksHandle(rpcAddr string, r *http.Request) (interface{}, interface{
 // QueryBlocksRequest is a function to query Blocks.
 func QueryBlocksRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-blocks] Entering Blocks query")
 
@@ -99,11 +99,11 @@ func queryBlockByHeightOrHashHandle(rpcAddr string, height string) (interface{},
 // QueryBlockByHeightOrHashRequest is a function to query Blocks.
 func QueryBlockByHeightOrHashRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		height := queries["height"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-blocks-by-height] Entering Block query by height: ", height)
 
@@ -455,11 +455,11 @@ func QueryBlockTransactionsHandle(rpcAddr string, height string) (interface{}, i
 // QueryBlockTransactionsRequest is a function to query transactions of a block.
 func QueryBlockTransactionsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		height := queries["height"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-block-transactions-by-height] Entering Block query by height: ", height)
 
@@ -486,9 +486,7 @@ func QueryBlockTransactionsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 
 // QueryTransactionResultHandle is a function to query transaction by a given hash.
 func QueryTransactionResultHandle(rpcAddr string, txHash string) (interface{}, interface{}, int) {
-	if strings.HasPrefix(txHash, "0x") {
-		txHash = strings.TrimPrefix(txHash, "0x")
-	}
+	txHash = strings.TrimPrefix(txHash, "0x")
 
 	response, err := SearchTxHashHandle(rpcAddr, "", "", "", 0, 0, 0, 0, txHash)
 	if err != nil {
@@ -510,11 +508,11 @@ func QueryTransactionResultHandle(rpcAddr string, txHash string) (interface{}, i
 // QueryTransactionResultRequest is a function to query transactions by a given hash.
 func QueryTransactionResultRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		txHash := queries["txHash"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-transaction-by-hash] Entering transaction query by hash: %s", txHash)
 

@@ -39,11 +39,7 @@ func isClaimExist(address string) bool {
 	err := faucetDb.Open(FaucetClaim{}).Where("address", "=", address).First().AsEntity(&data)
 	EnableStdout()
 
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 func getClaim(address string) time.Time {

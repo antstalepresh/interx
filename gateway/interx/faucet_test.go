@@ -162,7 +162,8 @@ func (suite *FaucetTestSuite) SetupTest() {
 
 func (suite *FaucetTestSuite) TestServerFaucet() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadFaucetDbDriver()
 
 	config.Config.Faucet = config.FaucetConfig{
@@ -200,7 +201,15 @@ func (suite *FaucetTestSuite) TestServerFaucet() {
 	resultInfo, _, _ := serveFaucet(r, gwCosmosmux, request, test.INTERX_RPC, user_addr, "ukex")
 	resultHash := FaucetResponse{}
 	bz, err := json.Marshal(resultInfo)
-	json.Unmarshal(bz, &resultHash)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(bz, &resultHash)
+	if err != nil {
+		panic(err)
+	}
+
 	suite.Require().EqualValues(resultHash.Hash, suite.faucetResponse.Result.Hash)
 	os.RemoveAll("./db")
 }
@@ -230,11 +239,10 @@ func TestFaucetTestSuite(t *testing.T) {
 	s := grpc.NewServer()
 	pb.RegisterQueryServer(s, &server{})
 	log.Printf("server listening at %v", lis.Addr())
-	// if err := s.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to serve: %v", err)
-	// }
 
-	go s.Serve(lis)
+	go func() {
+		_ = s.Serve(lis)
+	}()
 
 	testSuite.faucetResponse.Result.Hash = "faucet_hash"
 	interxServer := http.Server{
@@ -243,11 +251,16 @@ func TestFaucetTestSuite(t *testing.T) {
 			if r.URL.Path == "/broadcast_tx_async" {
 				response, _ := json.Marshal(testSuite.faucetResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go interxServer.ListenAndServe()
+	go func() {
+		_ = interxServer.ListenAndServe()
+	}()
 
 	suite.Run(t, testSuite)
 	interxServer.Close()

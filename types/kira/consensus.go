@@ -50,10 +50,6 @@ type RoundState struct {
 	TriggeredTimeoutPrecommit bool `json:"triggered_timeout_precommit"`
 }
 
-type ResultDumpConsensusState struct {
-	RoundState RoundState `json:"round_state"`
-}
-
 // Interx Response
 type ConsensusResponse struct {
 	Height    string    `json:"height"` // Height we are working on

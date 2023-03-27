@@ -37,7 +37,8 @@ func (suite *InterxTxTestSuite) SetupTest() {
 
 func (suite *InterxTxTestSuite) TestQueryUnconfirmedTransactionsHandler() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadBlockDbDriver()
 	database.LoadBlockNanoDbDriver()
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
@@ -64,12 +65,16 @@ func (suite *InterxTxTestSuite) TestQueryUnconfirmedTransactionsHandler() {
 	suite.Require().EqualValues(result.Total, resultTxSearch.Total)
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
-	os.RemoveAll("./db")
+	err = os.RemoveAll("./db")
+	if err != nil {
+		suite.Assert()
+	}
 }
 
 func (suite *InterxTxTestSuite) TestBlockTransactionsHandler() {
 	config.Config.Cache.CacheDir = "./"
-	os.Mkdir("./db", 0777)
+	_ = os.Mkdir("./db", 0777)
+
 	database.LoadBlockDbDriver()
 	database.LoadBlockNanoDbDriver()
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
@@ -156,11 +161,17 @@ func TestInterxTxTestSuite(t *testing.T) {
 			if r.URL.Path == "/block" {
 				response, _ := tmjson.Marshal(testSuite.blockQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/tx" {
 				response, _ := tmjson.Marshal(testSuite.txQueryResponse)
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response)
+				_, err := w.Write(response)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/tx_search" {
 				response := tmJsonRPCTypes.RPCResponse{
 					JSONRPC: "2.0",
@@ -178,7 +189,10 @@ func TestInterxTxTestSuite(t *testing.T) {
 					panic(err)
 				}
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response1)
+				_, err = w.Write(response1)
+				if err != nil {
+					panic(err)
+				}
 			} else if r.URL.Path == "/unconfirmed_txs" {
 				response := tmJsonRPCTypes.RPCResponse{
 					JSONRPC: "2.0",
@@ -189,11 +203,16 @@ func TestInterxTxTestSuite(t *testing.T) {
 					panic(err)
 				}
 				w.Header().Set("Content-Type", "application/json")
-				w.Write(response1)
+				_, err = w.Write(response1)
+				if err != nil {
+					panic(err)
+				}
 			}
 		}),
 	}
-	go tendermintServer.ListenAndServe()
+	go func() {
+		_ = tendermintServer.ListenAndServe()
+	}()
 	time.Sleep(2 * time.Second)
 
 	suite.Run(t, testSuite)

@@ -3,7 +3,6 @@ package evm
 import (
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -67,12 +66,12 @@ func decodeAbiArgument(param string, arg *abi.Argument) (v interface{}, err erro
 		val := big.NewInt(0)
 		_, success := val.SetString(param, 10)
 		if !success {
-			err = errors.New(fmt.Sprintf("Invalid numeric (base 10) value: %v", param))
+			err = fmt.Errorf("invalid numeric (base 10) value: %v", param)
 		}
 		v = val
 	case abi.AddressTy:
 		if !((len(param) == (goeth.AddressLength*2 + 2)) || (len(param) == goeth.AddressLength*2)) {
-			err = errors.New(fmt.Sprintf("Invalid address length (%v), must be 40 (unprefixed) or 42 (prefixed) chars", len(param)))
+			err = fmt.Errorf("invalid address length (%v), must be 40 (unprefixed) or 42 (prefixed) chars", len(param))
 		} else {
 			var addr goeth.Address
 			if len(param) == (goeth.AddressLength*2 + 2) {
@@ -86,7 +85,7 @@ func decodeAbiArgument(param string, arg *abi.Argument) (v interface{}, err erro
 		}
 	case abi.HashTy:
 		if !((len(param) == (goeth.HashLength*2 + 2)) || (len(param) == goeth.HashLength*2)) {
-			err = errors.New(fmt.Sprintf("Invalid hash length, must be 64 (unprefixed) or 66 (prefixed) chars"))
+			err = fmt.Errorf("invalid hash length, must be 64 (unprefixed) or 66 (prefixed) chars")
 		} else {
 			var hash goeth.Hash
 			if len(param) == (goeth.HashLength*2 + 2) {
@@ -112,7 +111,7 @@ func decodeAbiArgument(param string, arg *abi.Argument) (v interface{}, err erro
 		v = val
 		err = json.Unmarshal([]byte(param), v)
 	default:
-		err = errors.New(fmt.Sprintf("Not supported parameter type: %v", arg.Type))
+		err = fmt.Errorf("not supported parameter type: %v", arg.Type)
 	}
 	return v, err
 }
@@ -202,12 +201,12 @@ func queryReadSmartContractHandle(r *http.Request, chain string, contract string
 // QueryReadContractRequest is a function to read smart contract.
 func QueryReadContractRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		contract := queries["contract"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-read-contract] Entering read smart contract: ", chain)
 
@@ -404,12 +403,12 @@ func queryWriteSmartContractHandle(r *http.Request, chain string, contract strin
 // QueryWriteContractRequestf is a function to write smart contract.
 func QueryWriteContractRequest(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		queries := mux.Vars(r)
 		chain := queries["chain"]
 		contract := queries["contract"]
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-evm-write-contract] Entering write smart contract: ", chain)
 

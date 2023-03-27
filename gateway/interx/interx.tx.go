@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,15 +34,6 @@ func RegisterInterxTxRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAdd
 	common.AddRPCMethod("GET", config.QueryKiraFunctions, "This is an API to query kira functions and metadata.", true)
 	common.AddRPCMethod("GET", config.QueryUnconfirmedTxs, "This is an API to query unconfirmed transactions.", true)
 	common.AddRPCMethod("GET", config.QueryTransactions, "This is an API to query transactions filtered by various options.", true)
-}
-
-func toSnakeCase(str string) string {
-	matchFirstCap := regexp.MustCompile("(.)([A-Z][a-z]+)")
-	matchAllCap := regexp.MustCompile("([a-z0-9])([A-Z])")
-
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
 }
 
 // GetTransactionsWithSync is a function to sync user transactions and return result
@@ -105,7 +95,10 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 		totalResult.Txs = append(totalResult.Txs, result.Txs...)
 		page++
 	}
-	database.SaveTransactions(address, totalResult, isWithdraw)
+	err := database.SaveTransactions(address, totalResult, isWithdraw)
+	if err != nil {
+		common.GetLogger().Error("[query-transaction] Failed to save cache result:", err)
+	}
 
 	return database.GetTransactions(address, isWithdraw)
 }
@@ -310,17 +303,17 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 
 	var (
-		account    string = ""
-		txTypes           = []string{}
-		directions        = []string{}
-		statuses          = []string{}
-		dateStart  int    = -1
-		dateEnd    int    = -1
-		sortBy     string = ""
-		pageSize   int    = -1
-		page       int    = -1
-		limit      int    = -1
-		offset     int    = -1
+		account    string
+		txTypes        = []string{}
+		directions     = []string{}
+		statuses       = []string{}
+		dateStart  int = -1
+		dateEnd    int = -1
+		sortBy     string
+		pageSize   int = -1
+		page       int = -1
+		limit      int = -1
+		offset     int = -1
 	)
 
 	//------------ Type ------------
@@ -453,8 +446,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
 	}
 
-	var transactions []*tmTypes.ResultTx
-	transactions = filteredTxs.Txs
+	transactions := filteredTxs.Txs
 
 	var txResults = []types.TransactionResponse{}
 	for _, transaction := range transactions {
@@ -480,6 +472,10 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 				continue
 			}
 			err = json.Unmarshal(bz, &a)
+			if err == nil {
+				continue
+			}
+
 			a["type"] = txType
 			txResponses = append(txResponses, a)
 		}
@@ -540,9 +536,9 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 // QueryWithdraws is a function to query all transactions.
 func QueryTransactions(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Info("[query-transactions] Entering transactions query")
 
@@ -660,9 +656,9 @@ func queryUnconfirmedTransactionsHandler(rpcAddr string, r *http.Request) (inter
 // QueryUnconfirmedTxs is a function to query unconfirmed transactions.
 func QueryUnconfirmedTxs(rpcAddr string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
-		statusCode := http.StatusOK
 
 		common.GetLogger().Error("[query-unconfirmed-txs] Entering query")
 
