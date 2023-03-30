@@ -179,6 +179,23 @@ func defaultConfig() InterxConfigFromFile {
 		configFromFile.Evm[item] = evmConfig
 	}
 
+	configFromFile.Bitcoin = make(map[string]BitcoinConfig)
+	for _, item := range SupportedBitcoinChains {
+		bitcoinConfig := BitcoinConfig{}
+		bitcoinConfig.RPC = "http://127.0.0.1:18332"
+		bitcoinConfig.RPC_CRED = "admin:1234"
+		bitcoinConfig.BTC_CONFIRMATIONS = 100
+		bitcoinConfig.BTC_MAX_RESCANS = 4
+		bitcoinConfig.BTC_WALLETS = []string{
+			"tb1qzg0c8u8hxlcgnvj0sx5g7tq908phkldxv2tmyx",
+		}
+		if bitcoinConfig.BTC_FAUCET != "" {
+			bitcoinConfig.BTC_WATCH_ADDRESSES = []string{bitcoinConfig.BTC_FAUCET}
+		}
+		bitcoinConfig.BTC_WATCH_REGEX = ""
+		configFromFile.Bitcoin[item] = bitcoinConfig
+	}
+
 	return configFromFile
 }
 
