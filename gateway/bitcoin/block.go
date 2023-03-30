@@ -92,6 +92,10 @@ func queryBitcoinBlockRequestHandle(r *http.Request, chain string, blockHeightOr
 		response1.Stats = response2
 	} else {
 		blockHeight, err := strconv.ParseUint(blockHeightOrHash, 10, 64)
+		if err != nil {
+			return common.ServeError(0, "failed to parse blockheight", err.Error(), http.StatusInternalServerError)
+		}
+
 		// get block stats
 		err = GetResult(client, "getblockstats", &response2, blockHeight)
 		if err != nil {

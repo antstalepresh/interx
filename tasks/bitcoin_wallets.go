@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"fmt"
 	"strings"
 
 	jsonrpc2 "github.com/KeisukeYamashita/go-jsonrpc"
@@ -75,27 +74,22 @@ func SyncBitcoinWallets() {
 				return
 			}
 
-			addresses := []string{}
 			for _, _address := range listaddresses {
-				addresses = append(addresses, _address.Address)
 				global.AddressToWallet[_address.Address] = walletAddress
 			}
 		}
 	}
 
-	// Append unlisted interx addresses to the address queue to sync at first.
+	// Append interx watch addresses to the address queue to sync at first.
 	global.AddressQueue = []global.QueueItem{}
 	for _, watchAddress := range conf.BTC_WATCH_ADDRESSES {
-		if len(global.AddressToWallet[watchAddress]) == 0 {
-			global.AddressQueue = append(global.AddressQueue, global.QueueItem{
-				Address:       watchAddress,
-				IsWhiteListed: true,
-			})
-		}
+		global.AddressQueue = append(global.AddressQueue, global.QueueItem{
+			Address:       watchAddress,
+			IsWhiteListed: true,
+		})
 	}
 
 	if len(global.AddressQueue) > 0 {
-		fmt.Println("=================", global.AddressQueue)
 		SyncQueueAddressBalances(conf)
 	}
 }

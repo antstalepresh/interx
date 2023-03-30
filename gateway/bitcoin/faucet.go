@@ -1,72 +1,85 @@
 package bitcoin
 
-// import (
-// 	"net/http"
-// 	"strings"
+import (
+	"net/http"
+	"strings"
 
-// 	jsonrpc2 "github.com/KeisukeYamashita/go-jsonrpc"
-// 	"github.com/KiraCore/interx/common"
-// 	"github.com/KiraCore/interx/config"
-// 	"github.com/gorilla/mux"
-// )
+	jsonrpc2 "github.com/KeisukeYamashita/go-jsonrpc"
+	"github.com/KiraCore/interx/common"
+	"github.com/KiraCore/interx/config"
+	"github.com/gorilla/mux"
+)
 
-// // RegisterBitcoinFaucetRoutes registers faucet services.
-// func RegisterBitcoinFaucetRoutes(r *mux.Router, rpcAddr string) {
-// 	r.HandleFunc(config.BitcoinFaucet, BitcoinFaucetRequest(rpcAddr)).Methods("GET")
+// RegisterBitcoinFaucetRoutes registers faucet services.
+func RegisterBitcoinFaucetRoutes(r *mux.Router, rpcAddr string) {
+	r.HandleFunc(config.QueryBitcoinFaucet, BitcoinFaucetRequest(rpcAddr)).Methods("GET")
 
-// 	common.AddRPCMethod("GET", config.BitcoinFaucet, "This is an API to claim faucet tokens.", true)
-// }
+	common.AddRPCMethod("GET", config.QueryBitcoinFaucet, "This is an API to claim faucet tokens.", true)
+}
 
-// type BitcoinFaucetInfo struct {
-// 	Address string  `json:"address"`
-// 	Balance float64 `json:"balance"`
-// }
+type BitcoinFaucetInfo struct {
+	Address string  `json:"address"`
+	Balance float64 `json:"balance"`
+}
 
-// func bitcoinFaucetInfo(r *http.Request, chain string, addr string) (interface{}, interface{}, int) {
-// 	result, err, status := queryBtcBalancesRequestHandle(r, chain, addr)
+func bitcoinFaucetInfo(r *http.Request, chain string) (interface{}, interface{}, int) {
+	isSupportedChain, conf := GetChainConfig(chain)
+	if !isSupportedChain {
+		return common.ServeError(0, "", "unsupported chain", http.StatusBadRequest)
+	}
 
-// 	if status == http.StatusOK && err == nil {
-// 		return
-// 	}
-// 	return queryBtcBalancesRequestHandle(r, chain, addr)
-// }
+	if len(conf.BTC_FAUCET) == 0 {
+		return common.ServeError(0, "", "faucet address is not set", http.StatusInternalServerError)
+	}
 
-// func bitcoinFaucetHandle(r *http.Request, chain string) (interface{}, interface{}, int) {
-// 	isSupportedChain, conf := GetChainConfig(chain)
-// 	if !isSupportedChain {
-// 		return common.ServeError(0, "", "unsupported chain", http.StatusBadRequest)
-// 	}
+	result, err, status := queryBtcBalancesRequestHandle(r, chain, conf.BTC_FAUCET)
+	if status != http.StatusOK || err != nil {
+		return result, err, status
+	}
 
-// 	client := jsonrpc2.NewRPCClient(conf.RPC)
-// 	if conf.RPC_CRED != "" {
-// 		rpcInfo := strings.Split(conf.RPC_CRED, ":")
-// 		client.SetBasicAuth(rpcInfo[0], rpcInfo[1])
-// 	}
+	info := BitcoinFaucetInfo{
+		Address: conf.BTC_FAUCET,
+		Balance: result.(BalancesResult).Balance.Confirmed,
+	}
+	return info, err, status
+}
 
-// 	response := BitcoinFaucet{}
+func bitcoinFaucetHandle(r *http.Request, chain string, addr string) (interface{}, interface{}, int) {
+	isSupportedChain, conf := GetChainConfig(chain)
+	if !isSupportedChain {
+		return common.ServeError(0, "", "unsupported chain", http.StatusBadRequest)
+	}
 
-// 	return response, nil, http.StatusOK
-// }
+	client := jsonrpc2.NewRPCClient(conf.RPC)
+	if conf.RPC_CRED != "" {
+		rpcInfo := strings.Split(conf.RPC_CRED, ":")
+		client.SetBasicAuth(rpcInfo[0], rpcInfo[1])
+	}
 
-// // BitcoinFaucetRequest is a function to claim tokens from faucet account.
-// func BitcoinFaucetRequest(rpcAddr string) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		chain := "testnet"
-// 		request := common.GetInterxRequest(r)
-// 		response := common.GetResponseFormat(request, rpcAddr)
-// 		statusCode := http.StatusOK
+	response := new(interface{})
 
-// 		queries := r.URL.Query()
-// 		claimAddr := queries["claim"]
+	return response, nil, http.StatusOK
+}
 
-// 		common.GetLogger().Info("[bitcoin-faucet] Entering faucet request: ", chain)
+// BitcoinFaucetRequest is a function to claim tokens from faucet account.
+func BitcoinFaucetRequest(rpcAddr string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		chain := "testnet"
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+		statusCode := http.StatusOK
 
-// 		if len(claimAddr) == 0 {
-// 			response.Response, response.Error, statusCode = bitcoinFaucetInfo(r, chain, claimAddr)
-// 		} else {
-// 			response.Response, response.Error, statusCode = bitcoinFaucetHandle(r, chain)
-// 		}
+		queries := r.URL.Query()
+		claimAddr := queries["claim"]
 
-// 		common.WrapResponse(w, request, *response, statusCode, false)
-// 	}
-// }
+		common.GetLogger().Info("[bitcoin-faucet] Entering faucet request: ", chain)
+
+		if len(claimAddr) != 0 {
+			response.Response, response.Error, statusCode = bitcoinFaucetHandle(r, chain, claimAddr[0])
+		} else {
+			response.Response, response.Error, statusCode = bitcoinFaucetInfo(r, chain)
+		}
+
+		common.WrapResponse(w, request, *response, statusCode, false)
+	}
+}
