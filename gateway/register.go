@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"github.com/KiraCore/interx/gateway/bitcoin"
 	"github.com/KiraCore/interx/gateway/cosmos"
 	"github.com/KiraCore/interx/gateway/evm"
 	"github.com/KiraCore/interx/gateway/interx"
@@ -16,5 +17,6 @@ func RegisterRequest(router *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr 
 	kira.RegisterRequest(router, gwCosmosmux, rpcAddr)
 	interx.RegisterRequest(router, gwCosmosmux, rpcAddr)
 	rosetta.RegisterRequest(router, gwCosmosmux, rpcAddr)
+	bitcoin.RegisterRequest(router, rpcAddr)
 	evm.RegisterRequest(router, rpcAddr)
 }
