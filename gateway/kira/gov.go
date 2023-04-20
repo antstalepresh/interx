@@ -16,6 +16,64 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
+type NetworkProperties struct {
+	MinTxFee                     string `json:"minTxFee"`
+	MaxTxFee                     string `json:"maxTxFee"`
+	VoteQuorum                   string `json:"voteQuorum"`
+	MinimumProposalEndTime       string `json:"minimumProposalEndTime"`
+	ProposalEnactmentTime        string `json:"proposalEnactmentTime"`
+	MinProposalEndBlocks         string `json:"minProposalEndBlocks"`
+	MinProposalEnactmentBlocks   string `json:"minProposalEnactmentBlocks"`
+	EnableForeignFeePayments     bool   `json:"enableForeignFeePayments"`
+	MischanceRankDecreaseAmount  string `json:"mischanceRankDecreaseAmount"`
+	MaxMischance                 string `json:"maxMischance"`
+	MischanceConfidence          string `json:"mischanceConfidence"`
+	InactiveRankDecreasePercent  string `json:"inactiveRankDecreasePercent"`
+	MinValidators                string `json:"minValidators"`
+	PoorNetworkMaxBankSend       string `json:"poorNetworkMaxBankSend"`
+	UnjailMaxTime                string `json:"unjailMaxTime"`
+	EnableTokenWhitelist         bool   `json:"enableTokenWhitelist"`
+	EnableTokenBlacklist         bool   `json:"enableTokenBlacklist"`
+	MinIdentityApprovalTip       string `json:"minIdentityApprovalTip"`
+	UniqueIdentityKeys           string `json:"uniqueIdentityKeys"`
+	UbiHardcap                   string `json:"ubiHardcap"`
+	ValidatorsFeeShare           string `json:"validatorsFeeShare"`
+	InflationRate                string `json:"inflationRate"`
+	InflationPeriod              string `json:"inflationPeriod"`
+	UnstakingPeriod              string `json:"unstakingPeriod"`
+	MaxDelegators                string `json:"maxDelegators"`
+	MinDelegationPushout         string `json:"minDelegationPushout"`
+	SlashingPeriod               string `json:"slashingPeriod"`
+	MaxJailedPercentage          string `json:"maxJailedPercentage"`
+	MaxSlashingPercentage        string `json:"maxSlashingPercentage"`
+	MinCustodyReward             string `json:"minCustodyReward"`
+	MaxCustodyBufferSize         string `json:"maxCustodyBufferSize"`
+	MaxCustodyTxSize             string `json:"maxCustodyTxSize"`
+	AbstentionRankDecreaseAmount string `json:"abstentionRankDecreaseAmount"`
+	MaxAbstention                string `json:"maxAbstention"`
+	MinCollectiveBond            string `json:"minCollectiveBond"`
+	MinCollectiveBondingTime     string `json:"minCollectiveBondingTime"`
+	MaxCollectiveOutputs         string `json:"maxCollectiveOutputs"`
+	MinCollectiveClaimPeriod     string `json:"minCollectiveClaimPeriod"`
+	ValidatorRecoveryBond        string `json:"validatorRecoveryBond"`
+	MaxAnnualInflation           string `json:"maxAnnualInflation"`
+	MaxProposalTitleSize         string `json:"maxProposalTitleSize"`
+	MaxProposalDescriptionSize   string `json:"maxProposalDescriptionSize"`
+	MaxProposalPollOptionSize    string `json:"maxProposalPollOptionSize"`
+	MaxProposalPollOptionCount   string `json:"maxProposalPollOptionCount"`
+	MaxProposalReferenceSize     string `json:"maxProposalReferenceSize"`
+	MaxProposalChecksumSize      string `json:"maxProposalChecksumSize"`
+	MinDappBond                  string `json:"minDappBond"`
+	MaxDappBond                  string `json:"maxDappBond"`
+	DappBondDuration             string `json:"dappBondDuration"`
+	DappVerifierBond             string `json:"dappVerifierBond"`
+	DappAutoDenounceTime         string `json:"dappAutoDenounceTime"`
+}
+
+type NetworkPropertiesResponse struct {
+	Properties *NetworkProperties `json:"properties"`
+}
+
 // RegisterKiraGovRoutes registers kira gov query routers.
 func RegisterKiraGovRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr string) {
 	r.HandleFunc(config.QueryDataReferenceKeys, QueryDataReferenceKeysRequest(gwCosmosmux, rpcAddr)).Methods("GET")
@@ -155,7 +213,30 @@ func QueryDataReferenceRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) ht
 
 func QueryNetworkPropertiesHandle(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
+	if success != nil {
+		result := NetworkPropertiesResponse{}
+		byteData, err := json.Marshal(success)
+		if err != nil {
+			common.GetLogger().Error("[query-network-properties] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+		err = json.Unmarshal(byteData, &result)
+		if err != nil {
+			common.GetLogger().Error("[query-network-properties] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		result.Properties.InactiveRankDecreasePercent = convertRate(result.Properties.InactiveRankDecreasePercent)
+		result.Properties.ValidatorsFeeShare = convertRate(result.Properties.ValidatorsFeeShare)
+		result.Properties.InflationRate = convertRate(result.Properties.InflationRate)
+		result.Properties.MaxSlashingPercentage = convertRate(result.Properties.MaxSlashingPercentage)
+		result.Properties.MaxAnnualInflation = convertRate(result.Properties.MaxAnnualInflation)
+		result.Properties.DappVerifierBond = convertRate(result.Properties.DappVerifierBond)
+
+		success = result
+	}
+	return success, failure, status
 }
 
 // QueryDataReferenceKeysRequest is a function to query data reference keys.
