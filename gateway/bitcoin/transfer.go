@@ -46,6 +46,14 @@ type CreateRawTransaction struct {
 	LockTime int64                      `json:"locktime"`
 }
 
+type RawTxResponse struct {
+	RawTx string `json:"raw_tx"`
+}
+
+type SendTxResult struct {
+	Txid string `json:"txid"`
+}
+
 // RegisterBtcTransferRoutes registers query status of Bitcoin chains.
 func RegisterBtcTransferRoutes(r *mux.Router, rpcAddr string) {
 	r.HandleFunc(config.QueryBitcoinTransfer, QueryBtcTransferRequest(rpcAddr)).Methods("GET")
@@ -132,10 +140,6 @@ func queryBtcTransferRequestHandle(r *http.Request, chain string) (interface{}, 
 	} else {
 		rawTx := r.FormValue("rawTx")
 		if rawTx != "" {
-			type SendTxResult struct {
-				Txid string `json:"txid"`
-			}
-
 			res := btcjson.TxRawResult{}
 			err := GetResult(client, "sendrawtransaction", &res, rawTx)
 			if err != nil {
@@ -149,14 +153,6 @@ func queryBtcTransferRequestHandle(r *http.Request, chain string) (interface{}, 
 
 		data := r.FormValue("data")
 		if data != "" {
-			type RawTxResponse struct {
-				RawTx string `json:"raw_tx"`
-			}
-
-			type RawTxResult struct {
-				Result string `json:"result"`
-			}
-
 			paramData := CreateRawTransaction{}
 			err := json.Unmarshal([]byte(data), &paramData)
 			if err != nil {
