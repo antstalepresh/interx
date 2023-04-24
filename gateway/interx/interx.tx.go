@@ -26,6 +26,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+type TxsResponse struct {
+	Transactions []types.TransactionResponse `json:"transactions"`
+	TotalCount   int                         `json:"total_count"`
+}
+
 // RegisterInterxTxRoutes registers tx query routers.
 func RegisterInterxTxRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr string) {
 	r.HandleFunc(config.QueryUnconfirmedTxs, QueryUnconfirmedTxs(rpcAddr)).Methods("GET")
@@ -472,7 +477,7 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 				continue
 			}
 			err = json.Unmarshal(bz, &a)
-			if err == nil {
+			if err != nil {
 				continue
 			}
 
@@ -522,13 +527,10 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 	}
 	txResults = txResults[offset:int(math.Min(float64(offset+limit), float64(len(txResults))))]
 
-	res := struct {
-		Transactions []types.TransactionResponse `json:"transactions"`
-		TotalCount   int                         `json:"total_count"`
-	}{}
-
-	res.TotalCount = totalCount
-	res.Transactions = txResults
+	res := TxsResponse{
+		TotalCount:   totalCount,
+		Transactions: txResults,
+	}
 
 	return res, nil, http.StatusOK
 }

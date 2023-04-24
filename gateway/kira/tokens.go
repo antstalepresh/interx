@@ -9,6 +9,7 @@ import (
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
@@ -29,16 +30,13 @@ func queryKiraTokensAliasesHandler(r *http.Request, gwCosmosmux *runtime.ServeMu
 		Name     string   `json:"name"`
 		Symbol   string   `json:"symbol"`
 		Icon     string   `json:"icon"`
-		Amount   int64    `json:"amount,string"`
+		Amount   sdk.Int  `json:"amount"`
 	}
 
 	tokens := common.GetTokenAliases(gwCosmosmux, r.Clone(r.Context()))
 	tokensSupply := common.GetTokenSupply(gwCosmosmux, r.Clone(r.Context()))
 
-	fmt.Println(tokens, tokensSupply)
-
 	result := make([]TokenAliasesResult, 0)
-
 	for _, token := range tokens {
 		flag := false
 		for _, denom := range token.Denoms {
