@@ -9,6 +9,7 @@ import (
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
