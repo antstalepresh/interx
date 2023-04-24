@@ -2,7 +2,6 @@ package data
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -193,7 +192,6 @@ func queryNetworkStatusHandler(r *http.Request, request types.InterxRequest, rpc
 		}
 
 		currentBlockTimestamp, err := time.Parse(time.RFC3339, result.SyncInfo.LatestBlockTime)
-		fmt.Println(err)
 		if err == nil {
 			response.CurrentBlockTimestamp = currentBlockTimestamp.Unix()
 		} else {

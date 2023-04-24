@@ -60,7 +60,7 @@ func (suite *InterxTxTestSuite) TestQueryUnconfirmedTransactionsHandler() {
 	}
 
 	resultTxSearch := tmRPCTypes.ResultUnconfirmedTxs{}
-	err = tmjson.Unmarshal(suite.blockTransactionsQueryResponse.Result, &resultTxSearch)
+	err = json.Unmarshal(suite.blockTransactionsQueryResponse.Result, &resultTxSearch)
 	suite.Require().NoError(err)
 	suite.Require().EqualValues(result.Total, resultTxSearch.Total)
 	suite.Require().Nil(error)
@@ -96,10 +96,11 @@ func (suite *InterxTxTestSuite) TestBlockTransactionsHandler() {
 		suite.Assert()
 	}
 
-	resultTxSearch := tmRPCTypes.ResultTxSearch{}
-	err = tmjson.Unmarshal(suite.blockTransactionsQueryResponse.Result, &resultTxSearch)
+	resultTxSearch := TxsResponse{}
+	err = json.Unmarshal(suite.blockTransactionsQueryResponse.Result, &resultTxSearch)
 	suite.Require().NoError(err)
 	suite.Require().EqualValues(result.TotalCount, resultTxSearch.TotalCount)
+	suite.Require().EqualValues(len(result.Transactions[0].Txs), len(resultTxSearch.Transactions[0].Txs))
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
 	os.RemoveAll("./db")
@@ -137,8 +138,17 @@ func TestInterxTxTestSuite(t *testing.T) {
 
 	testSuite.blockQueryResponse.Result = resBytes
 
-	resBytes, err = tmjson.Marshal(tmRPCTypes.ResultTxSearch{
+	txMsg := make(map[string]interface{})
+	txMsg["type"] = "send"
+	resBytes, err = json.Marshal(TxsResponse{
 		TotalCount: 1,
+		Transactions: []types.TransactionResponse{
+			{
+				Txs: []interface{}{
+					txMsg,
+				},
+			},
+		},
 	})
 
 	if err != nil {
