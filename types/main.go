@@ -141,8 +141,8 @@ type TokenAlias struct {
 }
 
 type TokenSupply struct {
-	Amount int64  `json:"amount,string"`
-	Denom  string `json:"denom"`
+	Amount sdk.Int `json:"amount"`
+	Denom  string  `json:"denom"`
 }
 
 // ID is a field for facuet claim struct.

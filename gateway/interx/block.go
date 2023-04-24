@@ -140,7 +140,7 @@ func getTransactionsFromLog(attributes []abciTypes.EventAttribute) []sdk.Coin {
 			coin, err := sdk.ParseCoinNormalized(evMap["amount"])
 			if err == nil {
 				feeTx := sdk.Coin{
-					Amount: sdk.NewInt(coin.Amount.Int64()),
+					Amount: coin.Amount,
 					Denom:  coin.GetDenom(),
 				}
 				feeTxs = append(feeTxs, feeTx)

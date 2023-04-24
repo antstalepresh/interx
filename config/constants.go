@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.30"
+	InterxVersion = "v0.4.31"
 	SekaiVersion  = "v0.3.13.38"
 	CosmosVersion = "v0.45.10"
 
