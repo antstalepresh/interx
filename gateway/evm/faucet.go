@@ -51,14 +51,24 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 	faucetAccountBalance := big.NewInt(0)
 	Y := big.NewInt(0) // userBalance
 
-	X, ok := chainConfig.Faucet.FaucetAmounts[token]
+	_X, ok := chainConfig.Faucet.FaucetAmounts[token]
 	if !ok {
 		return common.ServeError(0, "", "unsupported token", http.StatusBadRequest)
 	}
 
-	M, ok := chainConfig.Faucet.FaucetMinimumAmounts[token]
+	X, ok := new(big.Int).SetString(_X, 10)
+	if !ok {
+		return common.ServeError(0, "", "parse error", http.StatusBadRequest)
+	}
+
+	_M, ok := chainConfig.Faucet.FaucetMinimumAmounts[token]
 	if !ok {
 		return common.ServeError(0, "", "unsupported token", http.StatusBadRequest)
+	}
+
+	M, ok := new(big.Int).SetString(_M, 10)
+	if !ok {
+		return common.ServeError(0, "", "parse error", http.StatusBadRequest)
 	}
 
 	if token == "0x0000000000000000000000000000000000000000" {
@@ -129,17 +139,17 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 		}
 	}
 
-	if Y.Cmp(&X) == 1 || Y.Cmp(&X) == 0 {
+	if Y.Cmp(X) == 1 || Y.Cmp(X) == 0 {
 		return common.ServeError(0, "", "the account already has enough balance", http.StatusInternalServerError)
 	}
 
-	Z := X.Sub(&X, Y)
+	Z := X.Sub(X, Y)
 
 	if Z.Cmp(faucetAccountBalance) == 1 {
 		return common.ServeError(0, "", "faucet account doesn't have enough balance", http.StatusInternalServerError)
 	}
 
-	if Z.Cmp(&M) == -1 {
+	if Z.Cmp(M) == -1 {
 		return common.ServeError(0, "", "transfer amount exceed the minimum amount", http.StatusInternalServerError)
 	}
 

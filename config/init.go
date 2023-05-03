@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-	"math/big"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -171,10 +170,10 @@ func defaultConfig() InterxConfigFromFile {
 		evmConfig.Etherscan.API = ""
 		evmConfig.Etherscan.APIToken = ""
 		evmConfig.Faucet.PrivateKey = "0000000000000000000000000000000000000000000000000000000000000000"
-		evmConfig.Faucet.FaucetAmounts = make(map[string]big.Int)
-		evmConfig.Faucet.FaucetAmounts["0x0000000000000000000000000000000000000000"] = *big.NewInt(10000000000000000)
-		evmConfig.Faucet.FaucetMinimumAmounts = make(map[string]big.Int)
-		evmConfig.Faucet.FaucetMinimumAmounts["0x0000000000000000000000000000000000000000"] = *big.NewInt(1000000000000000)
+		evmConfig.Faucet.FaucetAmounts = make(map[string]string)
+		evmConfig.Faucet.FaucetAmounts["0x0000000000000000000000000000000000000000"] = "10000000000000000"
+		evmConfig.Faucet.FaucetMinimumAmounts = make(map[string]string)
+		evmConfig.Faucet.FaucetMinimumAmounts["0x0000000000000000000000000000000000000000"] = "1000000000000000"
 		evmConfig.Faucet.TimeLimit = 20
 
 		configFromFile.Evm[item] = evmConfig
