@@ -6,11 +6,11 @@ set -x
 echo "INFO: Started local tests in '$PWD'..."
 timerStart
 
-# echoInfo "INFO: Stopping local network..."
-# ./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )
+echoInfo "INFO: Stopping local network..."
+./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )
 
-# echoInfo "INFO: Launching local network..."
-# ./scripts/test-local/network-start.sh || ( systemctl2 stop sekai && exit 1 )
+echoInfo "INFO: Launching local network..."
+./scripts/test-local/network-start.sh || ( systemctl2 stop sekai && exit 1 )
 
 echoInfo "INFO: Testing data reference query..."
 ./scripts/test-local/Data/query-data-reference.sh || ( systemctl2 stop sekai && exit 1 )
@@ -111,7 +111,7 @@ echoInfo "INFO: Testing validator status query..."
 echoInfo "INFO: Testing validators query..."
 ./scripts/test-local/Validators/query-validators.sh || ( systemctl2 stop sekai && exit 1 )
 
-# echoInfo "INFO: Stopping local network..."
-# ./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )
+echoInfo "INFO: Stopping local network..."
+./scripts/test-local/network-stop.sh || ( systemctl2 stop sekai && exit 1 )
 
 echoInfo "INFO: Success, all local tests passed, elapsed: $(prettyTime $(timerSpan))"
