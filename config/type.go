@@ -70,8 +70,8 @@ type EVMConfig struct {
 	} `json:"etherscan"`
 	Faucet struct {
 		PrivateKey           string            `json:"private_key"`
-		FaucetAmounts        map[string]uint64 `json:"faucet_amounts"`
-		FaucetMinimumAmounts map[string]uint64 `json:"faucet_minimum_amounts"`
+		FaucetAmounts        map[string]string `json:"faucet_amounts"`
+		FaucetMinimumAmounts map[string]string `json:"faucet_minimum_amounts"`
 		TimeLimit            int64             `json:"time_limit"`
 	}
 }

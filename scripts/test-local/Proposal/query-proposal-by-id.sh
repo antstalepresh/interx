@@ -16,6 +16,6 @@ PROPOSAL_ID_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/proposals?all=tru
 RESULT_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/gov/proposals/$PROPOSAL_ID_INTERX | jq '.proposal.content.messages[0]' || exit 1)
 RESULT_CLI=$(showProposal $PROPOSAL_ID_INTERX | jq '.content.messages[0]')
 
-[ $RESULT_INTERX != $RESULT_CLI ] && echoErr "ERROR: Expected proposal description to be '$RESULT_CLI', but got '$RESULT_INTERX'" && exit 1
+[[ $RESULT_INTERX != $RESULT_CLI ]] && echoErr "ERROR: Expected proposal description to be '$RESULT_CLI', but got '$RESULT_INTERX'" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"

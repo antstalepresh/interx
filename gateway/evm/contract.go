@@ -242,8 +242,8 @@ func WriteContractCall(nodeInfo config.EVMNodeConfig, from string, contract stri
 		To       string `json:"to"`
 		ChainId  uint64 `json:"chainId"`
 		Nonce    uint64 `json:"nonce"`
-		GasLimit uint64 `json:"gasLimit"`
-		GasPrice uint64 `json:"gasPrice"`
+		GasLimit string `json:"gasLimit"`
+		GasPrice string `json:"gasPrice"`
 		Value    string `json:"value"`
 		Data     string `json:"data"`
 	}
@@ -262,7 +262,9 @@ func WriteContractCall(nodeInfo config.EVMNodeConfig, from string, contract stri
 	if err != nil {
 		return common.ServeError(0, "failed to get gas price ", err.Error(), http.StatusInternalServerError)
 	}
-	response.GasPrice, _ = strconv.ParseUint((gasPrice)[2:], 16, 64)
+	gasPriceBig := *new(big.Int)
+	gasPriceBig.SetString((gasPrice)[2:], 16)
+	response.GasPrice = gasPriceBig.String()
 
 	result, err = client.Call("eth_chainId")
 	if err != nil {
@@ -307,7 +309,9 @@ func WriteContractCall(nodeInfo config.EVMNodeConfig, from string, contract stri
 	if err != nil {
 		return common.ServeError(0, "failed to get gas limit ", err.Error(), http.StatusInternalServerError)
 	}
-	response.GasLimit, _ = strconv.ParseUint((gasLimit)[2:], 16, 64)
+	gasLimitBig := *new(big.Int)
+	gasLimitBig.SetString((gasLimit)[2:], 16)
+	response.GasLimit = gasLimitBig.String()
 
 	return response, nil, http.StatusOK
 }

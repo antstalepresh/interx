@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -71,7 +72,7 @@ func TestStatusQueryTestSuite(t *testing.T) {
 	testSuite.Response.NodeInfo.Version.Net = 1
 	testSuite.Response.NodeInfo.Version.Sub = "1"
 	testSuite.Response.NodeInfo.Version.Protocol = 11
-	testSuite.Response.GasPrice = 0.12 * 1e8
+	testSuite.Response.GasPrice = big.NewFloat(0.12 * 1e8).String()
 
 	serv := jrpc.New()
 	if err := serv.RegisterMethod("getblockchaininfo", getBlockchainInfo); err != nil {
