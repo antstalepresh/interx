@@ -27,13 +27,13 @@ LAST_PRESENT_BLOCK_INTERX=$(echo $SIGNING_INFO_INTERX | jq '.last_present_block'
 MISSED_BLOCKS_COUNTER_INTERX=$(echo $SIGNING_INFO_INTERX | jq '.missed_blocks_counter' | tr -d '"')
 PRODUCED_BLOCKS_COUNTER_INTERX=$(echo $SIGNING_INFO_INTERX | jq '.produced_blocks_counter' | tr -d '"')
 
-[ $RESULT_NUM != $RESULT_FROM_INTERX_NUM ] && echoErr "ERROR: Expected validator amount to be '$RESULT_NUM', but got '$RESULT_FROM_INTERX_NUM'" && exit 1
+[[ $RESULT_NUM != $RESULT_FROM_INTERX_NUM ]] && echoErr "ERROR: Expected validator amount to be '$RESULT_NUM', but got '$RESULT_FROM_INTERX_NUM'" && exit 1
 if [ $RESULT_NUM -ge 1 ] ; then
-    [ $START_HEIGHT_SEKAI != $START_HEIGHT_INTERX ] && echoErr "ERROR: Expected start height to be '$START_HEIGHT_SEKAI', but got '$START_HEIGHT_INTERX'" && exit 1
-    [ $MISCHANCE_CONFIDENCE_SEKAI != $MISCHANCE_CONFIDENCE_INTERX ] && echoErr "ERROR: Expected mischance confidence to be '$MISCHANCE_CONFIDENCE_SEKAI', but got '$MISCHANCE_CONFIDENCE_INTERX'" && exit 1
+    [[ $START_HEIGHT_SEKAI != $START_HEIGHT_INTERX ]] && echoErr "ERROR: Expected start height to be '$START_HEIGHT_SEKAI', but got '$START_HEIGHT_INTERX'" && exit 1
+    [[ $MISCHANCE_CONFIDENCE_SEKAI != $MISCHANCE_CONFIDENCE_INTERX ]] && echoErr "ERROR: Expected mischance confidence to be '$MISCHANCE_CONFIDENCE_SEKAI', but got '$MISCHANCE_CONFIDENCE_INTERX'" && exit 1
     [ $LAST_PRESENT_BLOCK_SEKAI -ge 1 ] && [ $LAST_PRESENT_BLOCK_INTERX == 0 ] && echoErr "ERROR: Expected last present block to be '$LAST_PRESENT_BLOCK_SEKAI', but got '$LAST_PRESENT_BLOCK_INTERX'" && exit 1
-    [ $MISSED_BLOCKS_COUNTER_SEKAI != $MISSED_BLOCKS_COUNTER_INTERX ] && echoErr "ERROR: Expected missed blocks counter to be '$MISSED_BLOCKS_COUNTER_SEKAI', but got '$MISSED_BLOCKS_COUNTER_INTERX'" && exit 1
-    [ $PRODUCED_BLOCKS_COUNTER_SEKAI -ge 1] && [ $PRODUCED_BLOCKS_COUNTER_INTERX == 0 ] && echoErr "ERROR: Expected produced blocks counter to be '$PRODUCED_BLOCKS_COUNTER_SEKAI', but got '$PRODUCED_BLOCKS_COUNTER_INTERX'" && exit 1
+    [[ $MISSED_BLOCKS_COUNTER_SEKAI != $MISSED_BLOCKS_COUNTER_INTERX ]] && echoErr "ERROR: Expected missed blocks counter to be '$MISSED_BLOCKS_COUNTER_SEKAI', but got '$MISSED_BLOCKS_COUNTER_INTERX'" && exit 1
+    [ $PRODUCED_BLOCKS_COUNTER_SEKAI -ge 1] && [[ $PRODUCED_BLOCKS_COUNTER_INTERX == 0 ]] && echoErr "ERROR: Expected produced blocks counter to be '$PRODUCED_BLOCKS_COUNTER_SEKAI', but got '$PRODUCED_BLOCKS_COUNTER_INTERX'" && exit 1
 fi
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"

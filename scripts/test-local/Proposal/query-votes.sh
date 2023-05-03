@@ -17,6 +17,6 @@ voteYes $PROPOSAL_ID_INTERX validator
 NUM_VOTERS_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/votes/$PROPOSAL_ID_INTERX" | jq '. | length' | tr -d '"' || exit 1)
 NUM_VOTERS_CLI=$(sekaid query customgov votes $PROPOSAL_ID_INTERX --output=json | jq '.votes | length' | tr -d '"')
 
-[ $NUM_VOTERS_INTERX != $NUM_VOTERS_CLI ] && echoErr "ERROR: Expected number of votes to be '$NUM_VOTERS_CLI', but got '$NUM_VOTERS_INTERX'" && exit 1
+[[ $NUM_VOTERS_INTERX != $NUM_VOTERS_CLI ]] && echoErr "ERROR: Expected number of votes to be '$NUM_VOTERS_CLI', but got '$NUM_VOTERS_INTERX'" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"
