@@ -1,6 +1,8 @@
 package config
 
 import (
+	"math/big"
+
 	"github.com/KiraCore/interx/types"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/tendermint/tendermint/p2p"
@@ -69,10 +71,10 @@ type EVMConfig struct {
 		APIToken string `json:"api_token"`
 	} `json:"etherscan"`
 	Faucet struct {
-		PrivateKey           string            `json:"private_key"`
-		FaucetAmounts        map[string]uint64 `json:"faucet_amounts"`
-		FaucetMinimumAmounts map[string]uint64 `json:"faucet_minimum_amounts"`
-		TimeLimit            int64             `json:"time_limit"`
+		PrivateKey           string             `json:"private_key"`
+		FaucetAmounts        map[string]big.Int `json:"faucet_amounts"`
+		FaucetMinimumAmounts map[string]big.Int `json:"faucet_minimum_amounts"`
+		TimeLimit            int64              `json:"time_limit"`
 	}
 }
 

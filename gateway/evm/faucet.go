@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/KiraCore/interx/common"
@@ -49,8 +48,8 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 	publicKeyECDSA, _ := publicKey.(*ecdsa.PublicKey)
 	faucetAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
 
-	faucetAccountBalance := uint64(0)
-	Y := uint64(0) // userBalance
+	faucetAccountBalance := big.NewInt(0)
+	Y := big.NewInt(0) // userBalance
 
 	X, ok := chainConfig.Faucet.FaucetAmounts[token]
 	if !ok {
@@ -72,7 +71,10 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 		if err != nil {
 			return common.ServeError(0, "failed to get eth balance of faucet account", err.Error(), http.StatusInternalServerError)
 		}
-		faucetAccountBalance, _ = strconv.ParseUint((ethBalanceString)[2:], 16, 64)
+		faucetAccountBalance, ok = faucetAccountBalance.SetString((ethBalanceString)[2:], 16)
+		if !ok {
+			return common.ServeError(0, "", "failed to parse string", http.StatusInternalServerError)
+		}
 
 		// user eth balance
 		data, err = client.Call("eth_getBalance", address, "latest")
@@ -83,7 +85,10 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 		if err != nil {
 			return common.ServeError(0, "failed to get eth balance of user", err.Error(), http.StatusInternalServerError)
 		}
-		Y, _ = strconv.ParseUint((ethBalanceString)[2:], 16, 64)
+		Y, ok = Y.SetString((ethBalanceString)[2:], 16)
+		if !ok {
+			return common.ServeError(0, "", "failed to parse string", http.StatusInternalServerError)
+		}
 	} else {
 
 		// faucet account token balance
@@ -99,7 +104,10 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 			return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
 		}
 		if tokenBalancesString != "0x" {
-			faucetAccountBalance, _ = strconv.ParseUint((tokenBalancesString)[2:], 16, 64)
+			faucetAccountBalance, ok = faucetAccountBalance.SetString((tokenBalancesString)[2:], 16)
+			if !ok {
+				return common.ServeError(0, "", "failed to parse string", http.StatusInternalServerError)
+			}
 		}
 
 		// user token balance
@@ -114,21 +122,24 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 			return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
 		}
 		if tokenBalancesString != "0x" {
-			Y, _ = strconv.ParseUint((tokenBalancesString)[2:], 16, 64)
+			Y, ok = Y.SetString((tokenBalancesString)[2:], 16)
+			if !ok {
+				return common.ServeError(0, "", "failed to parse string", http.StatusInternalServerError)
+			}
 		}
 	}
 
-	if Y >= X {
+	if Y.Cmp(&X) == 1 || Y.Cmp(&X) == 0 {
 		return common.ServeError(0, "", "the account already has enough balance", http.StatusInternalServerError)
 	}
 
-	Z := X - Y
+	Z := X.Sub(&X, Y)
 
-	if Z > faucetAccountBalance {
+	if Z.Cmp(faucetAccountBalance) == 1 {
 		return common.ServeError(0, "", "faucet account doesn't have enough balance", http.StatusInternalServerError)
 	}
 
-	if Z < M {
+	if Z.Cmp(&M) == -1 {
 		return common.ServeError(0, "", "transfer amount exceed the minimum amount", http.StatusInternalServerError)
 	}
 
@@ -145,8 +156,8 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 			return common.ServeError(0, "failed to get nonce", err.Error(), http.StatusInternalServerError)
 		}
 
-		value := big.NewInt(int64(Z)) // in wei (1 eth)
-		gasLimit := uint64(21000)     // in units
+		value := Z                // in wei (1 eth)
+		gasLimit := uint64(21000) // in units
 		gasPrice, err := client.SuggestGasPrice(context.Background())
 		if err != nil {
 			return common.ServeError(0, "failed to get gas price", err.Error(), http.StatusInternalServerError)
@@ -201,8 +212,7 @@ func queryEVMFaucetFromNode(chain string, chainConfig *config.EVMConfig, nodeInf
 
 		paddedAddress := goEthCommon.LeftPadBytes(toAddress.Bytes(), 32)
 
-		amount := new(big.Int)
-		amount.SetInt64(int64(Z))
+		amount := Z
 		paddedAmount := goEthCommon.LeftPadBytes(amount.Bytes(), 32)
 
 		var data []byte
@@ -257,11 +267,11 @@ func queryEVMFaucetInfoFromNode(chainConfig *config.EVMConfig, nodeInfo config.E
 	// FaucetAccountInfo is a struct to be used for Faucet Account Info
 	type FaucetAccountInfo struct {
 		Address  string            `json:"address"`
-		Balances map[string]uint64 `json:"balances"`
+		Balances map[string]string `json:"balances"`
 	}
 	faucetInfo := FaucetAccountInfo{}
 	faucetInfo.Address = faucetAddress.String()
-	faucetInfo.Balances = make(map[string]uint64)
+	faucetInfo.Balances = make(map[string]string)
 
 	for k := range chainConfig.Faucet.FaucetAmounts {
 		if k == "0x0000000000000000000000000000000000000000" {
@@ -274,7 +284,10 @@ func queryEVMFaucetInfoFromNode(chainConfig *config.EVMConfig, nodeInfo config.E
 			if err != nil {
 				return common.ServeError(0, "failed to get eth balance of faucet account", err.Error(), http.StatusInternalServerError)
 			}
-			faucetInfo.Balances[k], _ = strconv.ParseUint((ethBalanceString)[2:], 16, 64)
+
+			ethBalanceStringBig := *new(big.Int)
+			ethBalanceStringBig.SetString((ethBalanceString)[2:], 16)
+			faucetInfo.Balances[k] = ethBalanceStringBig.String()
 		} else {
 			// faucet account token balance
 			call := new(EVMCall)
@@ -289,9 +302,11 @@ func queryEVMFaucetInfoFromNode(chainConfig *config.EVMConfig, nodeInfo config.E
 				return common.ServeError(0, "failed to get token balances", err.Error(), http.StatusInternalServerError)
 			}
 			if tokenBalancesString != "0x" {
-				faucetInfo.Balances[k], _ = strconv.ParseUint((tokenBalancesString)[2:], 16, 64)
+				tokenBalancesStringBig := *new(big.Int)
+				tokenBalancesStringBig.SetString((tokenBalancesString)[2:], 16)
+				faucetInfo.Balances[k] = tokenBalancesStringBig.String()
 			} else {
-				faucetInfo.Balances[k] = 0
+				faucetInfo.Balances[k] = "0"
 			}
 		}
 	}
