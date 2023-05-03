@@ -3,6 +3,7 @@ package bitcoin
 import (
 	"encoding/json"
 	"math"
+	"math/big"
 	"net/http"
 	"strings"
 
@@ -40,10 +41,10 @@ type BitcoinStatus struct {
 		LatestBlockHeight   int64  `json:"latest_block_height"`
 		LatestBlockTime     int64  `json:"latest_block_time"`
 	} `json:"sync_info"`
-	GasPrice    uint64 `json:"gas_price"`
+	GasPrice    string `json:"gas_price"`
 	GasPriceAvg uint64 `json:"gas_price_avg"`
-	GasPriceMin uint64 `json:"gas_price_min"`
-	GasPriceInc uint64 `json:"gas_price_inc"`
+	GasPriceMin string `json:"gas_price_min"`
+	GasPriceInc string `json:"gas_price_inc"`
 }
 
 func GetResult(client *jsonrpc2.RPCClient, method string, x interface{}, params ...interface{}) error {
@@ -127,13 +128,17 @@ func queryBitcoinStatusHandle(r *http.Request, chain string) (interface{}, inter
 	response.SyncInfo.LatestBlockHeight = blockStats.Height
 	response.SyncInfo.LatestBlockTime = blockStats.Time
 
-	response.GasPrice = uint64(math.Max(*smartFee.FeeRate, networkInfo.RelayFee) * 1e8)
+	gasPrice := big.NewFloat(math.Max(*smartFee.FeeRate, networkInfo.RelayFee) * 1e8)
+	response.GasPrice = gasPrice.String()
+
 	response.GasPriceAvg = uint64(blockStats.AverageFeeRate)
-	response.GasPriceMin = uint64(math.Max(networkInfo.RelayFee*1e8, float64(blockStats.MinFeeRate)))
-	response.GasPriceInc = uint64(networkInfo.IncrementalFee * 1e8)
+	response.GasPriceMin = big.NewFloat(math.Max(networkInfo.RelayFee*1e8, float64(blockStats.MinFeeRate))).String()
+
+	gasPriceInc := big.NewFloat(networkInfo.IncrementalFee * 1e8)
+	response.GasPriceInc = gasPriceInc.String()
 
 	if response.GasPrice == response.GasPriceMin {
-		response.GasPrice = response.GasPrice + response.GasPriceInc
+		response.GasPrice = gasPrice.Add(gasPrice, gasPriceInc).String()
 	}
 	return response, nil, http.StatusOK
 }

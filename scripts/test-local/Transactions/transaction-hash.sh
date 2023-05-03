@@ -22,7 +22,7 @@ RESULT_FROM_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/txs/$TX_ID || exit 1)
 RESULT_ID=$(echo $RESULT_FROM_INTERX  | jq '.hash')
 RESULT_HEIGHT=$(echo $RESULT_FROM_INTERX | jq '.height')
 
-[ '"'$TX_ID'"' != $RESULT_ID ] && echoErr "ERROR: Expected tx hash to be '$TX_ID', but got '$RESULT_ID'" && exit 1
-[ '"'$BLOCK_HEIGHT'"' != "$RESULT_HEIGHT" ] && echoErr "ERROR: Expected tx block height to be '$BLOCK_HEIGHT', but got '$RESULT_HEIGHT'" && exit 1
+[[ '"'$TX_ID'"' != $RESULT_ID ]] && echoErr "ERROR: Expected tx hash to be '$TX_ID', but got '$RESULT_ID'" && exit 1
+[[ '"'$BLOCK_HEIGHT'"' != "$RESULT_HEIGHT" ]] && echoErr "ERROR: Expected tx block height to be '$BLOCK_HEIGHT', but got '$RESULT_HEIGHT'" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"

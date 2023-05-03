@@ -21,9 +21,9 @@ import (
 type EVMTransaction struct {
 	Nonce     uint64 `json:"nonce"`
 	GasLimit  uint64 `json:"gasLimit"`
-	GasPrice  int64  `json:"gasPrice"`
-	GasFeeCap int64  `json:"gasFeeCap"`
-	GasTipCap int64  `json:"gasTipCap"`
+	GasPrice  string `json:"gasPrice"`
+	GasFeeCap string `json:"gasFeeCap"`
+	GasTipCap string `json:"gasTipCap"`
 	From      string `json:"from"`
 	To        string `json:"to"`
 	Value     string `json:"value"`
@@ -32,7 +32,7 @@ type EVMTransaction struct {
 
 type EVMTransferQueryResponse struct {
 	Gas             uint64         `json:"gas"`
-	GasPrice        int64          `json:"gasPrice"`
+	GasPrice        string         `json:"gasPrice"`
 	SequenceLatest  uint64         `json:"sequence_latest"`
 	SequencePending uint64         `json:"sequence_pending"`
 	DeocdedTx       EVMTransaction `json:"decoded_tx"`
@@ -120,9 +120,9 @@ func queryEVMTransferRequestHandle(r *http.Request, chain string) (interface{}, 
 
 		evmTransaction.Nonce = tx.Nonce()
 		evmTransaction.GasLimit = tx.Gas()
-		evmTransaction.GasPrice = tx.GasPrice().Int64()
-		evmTransaction.GasFeeCap = tx.GasFeeCap().Int64()
-		evmTransaction.GasTipCap = tx.GasTipCap().Int64()
+		evmTransaction.GasPrice = tx.GasPrice().String()
+		evmTransaction.GasFeeCap = tx.GasFeeCap().String()
+		evmTransaction.GasTipCap = tx.GasTipCap().String()
 		evmTransaction.From = msg.From().String()
 		evmTransaction.To = tx.To().String()
 		evmTransaction.Value = tx.Value().String()

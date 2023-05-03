@@ -17,6 +17,6 @@ INTERX_GATEWAY="127.0.0.1:11000"
 RESULT_FROM_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/accounts/$ACCOUNT_ADDRESS | jq '.account' || echo "error")
 RESULT_SUM_FROM_INTERX="$(echo $RESULT_FROM_INTERX | jq '.accountNumber')$(echo $RESULT_FROM_INTERX | jq '."@type"')$(echo $RESULT_FROM_INTERX | jq '.address')"
 
-[ "$RESULT_SUM_FROM_SEKAI" != "$RESULT_SUM_FROM_INTERX" ] && echoErr "ERROR: Expected validator account info to be '$RESULT_SUM_FROM_SEKAI', but got '$RESULT_SUM_FROM_INTERX'" && exit 1
+[[ "$RESULT_SUM_FROM_SEKAI" != "$RESULT_SUM_FROM_INTERX" ]] && echoErr "ERROR: Expected validator account info to be '$RESULT_SUM_FROM_SEKAI', but got '$RESULT_SUM_FROM_INTERX'" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"

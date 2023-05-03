@@ -1,6 +1,7 @@
 package evm
 
 import (
+	"math/big"
 	"net/http"
 	"strconv"
 
@@ -38,7 +39,7 @@ type EVMStatus struct {
 		LatestBlockHeight   uint64 `json:"latest_block_height"`
 		LatestBlockTime     uint64 `json:"latest_block_time"`
 	} `json:"sync_info"`
-	GasPrice uint64 `json:"gas_price"`
+	GasPrice string `json:"gas_price"`
 }
 
 func queryEVMStatusFromNode(nodeInfo config.EVMNodeConfig) (interface{}, interface{}, int) {
@@ -143,7 +144,9 @@ func queryEVMStatusFromNode(nodeInfo config.EVMNodeConfig) (interface{}, interfa
 	if err != nil {
 		return common.ServeError(0, "failed to get gas price ", err.Error(), http.StatusInternalServerError)
 	}
-	response.GasPrice, _ = strconv.ParseUint((gasPrice)[2:], 16, 64)
+	gasPriceBig := *new(big.Int)
+	gasPriceBig.SetString((gasPrice)[2:], 16)
+	response.GasPrice = gasPriceBig.String()
 
 	return response, nil, http.StatusOK
 }
