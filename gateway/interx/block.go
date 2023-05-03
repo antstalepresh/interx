@@ -156,7 +156,7 @@ func getTransactionsFromLog(attributes []abciTypes.EventAttribute) []sdk.Coin {
 		coin, err := sdk.ParseCoinNormalized(evMap["amount"])
 		if err == nil {
 			feeTx := sdk.Coin{
-				Amount: sdk.NewInt(coin.Amount.Int64()),
+				Amount: coin.Amount,
 				Denom:  coin.GetDenom(),
 			}
 			feeTxs = append(feeTxs, feeTx)
@@ -235,7 +235,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 			for _, coin := range msgSend.Amount {
 				amounts = append(amounts, sdk.Coin{
 					Denom:  coin.GetDenom(),
-					Amount: sdk.NewInt(coin.Amount.Int64()),
+					Amount: coin.Amount,
 				})
 			}
 
@@ -257,7 +257,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				for _, coin := range input.Coins {
 					amounts = append(amounts, sdk.Coin{
 						Denom:  coin.GetDenom(),
-						Amount: sdk.NewInt(coin.Amount.Int64()),
+						Amount: coin.Amount,
 					})
 				}
 
@@ -278,7 +278,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				Amounts: []sdk.Coin{
 					{
 						Denom:  createValidatorMsg.Value.Denom,
-						Amount: sdk.NewInt(createValidatorMsg.Value.Amount.Int64()),
+						Amount: createValidatorMsg.Value.Amount,
 					},
 				},
 			})
@@ -292,7 +292,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				Amounts: []sdk.Coin{
 					{
 						Denom:  delegateMsg.Amount.Denom,
-						Amount: sdk.NewInt(delegateMsg.Amount.Amount.Int64()),
+						Amount: delegateMsg.Amount.Amount,
 					},
 				},
 			})
@@ -306,7 +306,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				Amounts: []sdk.Coin{
 					{
 						Denom:  reDelegateMsg.Amount.Denom,
-						Amount: sdk.NewInt(reDelegateMsg.Amount.Amount.Int64()),
+						Amount: reDelegateMsg.Amount.Amount,
 					},
 				},
 			})
@@ -320,7 +320,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				Amounts: []sdk.Coin{
 					{
 						Denom:  unDelegateMsg.Amount.Denom,
-						Amount: sdk.NewInt(unDelegateMsg.Amount.Amount.Int64()),
+						Amount: unDelegateMsg.Amount.Amount,
 					},
 				},
 			})
@@ -343,7 +343,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				Amounts: []sdk.Coin{
 					{
 						Denom:  coin.Denom,
-						Amount: sdk.NewInt(coin.Amount.Int64()),
+						Amount: coin.Amount,
 					},
 				},
 			})
@@ -372,7 +372,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 							Amounts: []sdk.Coin{
 								{
 									Denom:  coin.Denom,
-									Amount: sdk.NewInt(coin.Amount.Int64()),
+									Amount: coin.Amount,
 								},
 							},
 						})
@@ -394,7 +394,7 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 						Amounts: []sdk.Coin{
 							{
 								Denom:  coin.Denom,
-								Amount: sdk.NewInt(coin.Amount.Int64()),
+								Amount: coin.Amount,
 							},
 						},
 					})

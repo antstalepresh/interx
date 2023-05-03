@@ -25,6 +25,6 @@ done < <(echo "$RESULT_FROM_INTERX" | jq '.header.height, .num_txs')
 
 echo $FLAG
 
-[ $FLAG == "false" ] && echoErr "ERROR: Expected block height and tx information were not fetched from the API" && exit 1
+[[ $FLAG == "false" ]] && echoErr "ERROR: Expected block height and tx information were not fetched from the API" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"

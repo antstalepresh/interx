@@ -15,6 +15,6 @@ PROPOSAL_ID_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/proposals?all=tru
 NUM_VOTERS_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/voters/$PROPOSAL_ID_INTERX" | jq '. | length' | tr -d '"' || exit 1)
 NUM_VOTERS_CLI=$(sekaid query customgov voters $PROPOSAL_ID_INTERX --output=json | jq '.voters | length' | tr -d '"')
 
-[ $NUM_VOTERS_INTERX != $NUM_VOTERS_CLI ] && echoErr "ERROR: Expected number of voters to be '$NUM_VOTERS_CLI', but got '$NUM_VOTERS_INTERX'" && exit 1
+[[ $NUM_VOTERS_INTERX != $NUM_VOTERS_CLI ]] && echoErr "ERROR: Expected number of voters to be '$NUM_VOTERS_CLI', but got '$NUM_VOTERS_INTERX'" && exit 1
 
 echoInfo "INFO: $TEST_NAME - Integration Test - END, elapsed: $(prettyTime $(timerSpan $TEST_NAME))"
