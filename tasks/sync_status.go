@@ -55,6 +55,7 @@ func getStatus(rpcAddr string, isLog bool) {
 
 	// save block height/time
 	blockTime, _ := time.Parse(time.RFC3339, result.Result.Block.Header.Time)
+	common.BlockTimes[common.NodeStatus.Block] = blockTime.Unix()
 	database.AddBlockTime(common.NodeStatus.Block, blockTime.Unix())
 	database.AddBlockNanoTime(common.NodeStatus.Block, blockTime.UnixNano())
 	common.AddNewBlock(common.NodeStatus.Block, blockTime.UnixNano())
@@ -62,6 +63,7 @@ func getStatus(rpcAddr string, isLog bool) {
 
 // SyncStatus is a function for syncing sekaid status.
 func SyncStatus(rpcAddr string, isLog bool) {
+	common.LoadAllBlocks()
 	for {
 		getStatus(rpcAddr, isLog)
 
