@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/KiraCore/interx/common"
@@ -67,7 +68,7 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 		events = append(events, fmt.Sprintf("tx.height>%d", lastBlock))
 
 		// search transactions
-		endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
+		endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
 		common.GetLogger().Info("[query-transaction] Entering transaction search: ", endpoint)
 
 		resp, err := http.Get(endpoint)
@@ -96,10 +97,18 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 			break
 		}
 
-		totalResult.TotalCount += result.TotalCount
+		if result.TotalCount == 0 {
+			break
+		}
+
 		totalResult.Txs = append(totalResult.Txs, result.Txs...)
+
+		if result.TotalCount < limit {
+			break
+		}
 		page++
 	}
+	totalResult.TotalCount = len(totalResult.Txs)
 	err := database.SaveTransactions(address, totalResult, isWithdraw)
 	if err != nil {
 		common.GetLogger().Error("[query-transaction] Failed to save cache result:", err)
@@ -109,7 +118,7 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 }
 
 // GetFilteredTransactions is a function to filter transactions by various options
-func GetFilteredTransactions(rpcAddr string, address string, types []string, directions []string, dateStart int, dateEnd int, statuses []string, sortBy string) (*tmTypes.ResultTxSearch, *map[string]string, *map[string]string, error) {
+func GetFilteredTransactions(rpcAddr string, address string, txtypes []string, directions []string, dateStart int, dateEnd int, statuses []string, sortBy string) ([]types.TransactionResponse, error) {
 	result, _ := searchUnconfirmed(rpcAddr, "100")
 	hashToStatusMap := make(map[string]string)
 	hashToDirectionMap := make(map[string]string)
@@ -132,7 +141,7 @@ func GetFilteredTransactions(rpcAddr string, address string, types []string, dir
 			hashToDirectionMap[cachedTx.Hash.String()] = "inbound"
 		}
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 		cachedTxs.TotalCount += cachedTxs1.TotalCount
 		cachedTxs.Txs = append(cachedTxs.Txs, cachedTxs1.Txs...)
@@ -144,62 +153,111 @@ func GetFilteredTransactions(rpcAddr string, address string, types []string, dir
 			hashToDirectionMap[cachedTx.Hash.String()] = "outbound"
 		}
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 		cachedTxs.TotalCount += cachedTxs2.TotalCount
 		cachedTxs.Txs = append(cachedTxs.Txs, cachedTxs2.Txs...)
 	}
 
-	filteredTxsByTimeMsgStatus := &tmTypes.ResultTxSearch{
-		Txs:        []*tmTypes.ResultTx{},
-		TotalCount: 0,
-	}
+	var wg sync.WaitGroup
+	txResults := make(chan types.TransactionResponse, len(cachedTxs.Txs))
+
 	for _, cachedTx := range cachedTxs.Txs {
-		// Filter by time
-		txTime, err := common.GetBlockTime(rpcAddr, cachedTx.Height)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Block not found: ", cachedTx.Height)
-			continue
-		}
+		wg.Add(1)
 
-		if (dateStart != -1 && txTime < int64(dateStart)) || (dateEnd != -1 && txTime > int64(dateEnd)) {
-			continue
-		}
+		// Launch goroutine for handling all txs in parallel
+		cachedTx := cachedTx
 
-		// Filter by msg
-		tx, err := config.EncodingCg.TxConfig.TxDecoder()(cachedTx.Tx)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to decode transaction: ", err)
-			continue
-		}
+		go func() {
+			defer wg.Done()
 
-		contain := false
-		for _, msg := range tx.GetMsgs() {
-			txType := kiratypes.MsgType(msg)
-			if slices.Contains(types, txType) {
-				contain = true
-				break
+			// Filter by time
+			txTime, err := common.GetBlockTime(rpcAddr, cachedTx.Height)
+			if err != nil {
+				common.GetLogger().Error("[query-transactions] Block not found: ", cachedTx.Height)
+				return
 			}
-		}
 
-		if !contain && len(types) != 0 {
-			continue
-		}
+			if (dateStart != -1 && txTime < int64(dateStart)) || (dateEnd != -1 && txTime > int64(dateEnd)) {
+				return
+			}
 
-		// Filter by status
-		if len(statuses) != 0 && !slices.Contains(statuses, "unconfirmed") && hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
-			continue
-		}
+			// Filter by msg
+			tx, err := config.EncodingCg.TxConfig.TxDecoder()(cachedTx.Tx)
+			if err != nil {
+				common.GetLogger().Error("[query-transactions] Failed to decode transaction: ", err)
+				return
+			}
 
-		if len(statuses) != 0 && !slices.Contains(statuses, "confirmed") && hashToStatusMap[cachedTx.Hash.String()] == "" {
-			continue
-		}
+			contain := false
+			txResponses := []interface{}{}
+			for _, msg := range tx.GetMsgs() {
+				txType := kiratypes.MsgType(msg)
+				if slices.Contains(txtypes, txType) {
+					contain = true
+					break
+				}
 
-		filteredTxsByTimeMsgStatus.Txs = append(filteredTxsByTimeMsgStatus.Txs, cachedTx)
-		filteredTxsByTimeMsgStatus.TotalCount++
+				// Append type field to each tx msg
+				a := make(map[string]interface{})
+				bz, err := json.Marshal(msg)
+				if err != nil {
+					continue
+				}
+				err = json.Unmarshal(bz, &a)
+				if err != nil {
+					continue
+				}
+
+				a["type"] = txType
+				txResponses = append(txResponses, a)
+			}
+
+			if !contain && len(txtypes) != 0 {
+				return
+			}
+
+			// Filter by status
+			if len(statuses) != 0 && !slices.Contains(statuses, "unconfirmed") && hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
+				return
+			}
+
+			if len(statuses) != 0 && !slices.Contains(statuses, "confirmed") && hashToStatusMap[cachedTx.Hash.String()] == "" {
+				return
+			}
+
+			hashStatus := "confirmed"
+			if hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
+				hashStatus = "unconfirmed"
+			}
+			txResponse := types.TransactionResponse{
+				Time:      txTime,
+				Status:    hashStatus,
+				Direction: hashToDirectionMap[cachedTx.Hash.String()],
+				Hash:      fmt.Sprintf("0x%X", cachedTx.Hash),
+				Txs:       txResponses,
+			}
+
+			// // Get memo and fee amounts
+			txResult, err := parseTransaction(rpcAddr, *cachedTx)
+			if err == nil {
+				txResponse.Fee = txResult.Fees
+				txResponse.Memo = txResult.Memo
+			}
+
+			txResults <- txResponse
+		}()
 	}
 
-	return filteredTxsByTimeMsgStatus, &hashToStatusMap, &hashToDirectionMap, nil
+	wg.Wait()
+	close(txResults)
+
+	// Receive values from the channel and append them to a slice
+	var res []types.TransactionResponse
+	for txResponse := range txResults {
+		res = append(res, txResponse)
+	}
+	return res, nil
 }
 
 // SearchTxHashHandle is a function to query transactions
@@ -446,66 +504,9 @@ func QueryBlockTransactionsHandler(rpcAddr string, r *http.Request) (interface{}
 		}
 	}
 
-	filteredTxs, hashToStatusMap, hashToDirectionMap, err := GetFilteredTransactions(rpcAddr, account, txTypes, directions, dateStart, dateEnd, statuses, sortBy)
+	txResults, err := GetFilteredTransactions(rpcAddr, account, txTypes, directions, dateStart, dateEnd, statuses, sortBy)
 	if err != nil {
 		return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-	}
-
-	transactions := filteredTxs.Txs
-
-	var txResults = []types.TransactionResponse{}
-	for _, transaction := range transactions {
-		tx, err := config.EncodingCg.TxConfig.TxDecoder()(transaction.Tx)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to decode transaction: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		blockTime, err := common.GetBlockTime(rpcAddr, transaction.Height)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Block not found: ", transaction.Height)
-			return common.ServeError(0, "", fmt.Sprintf("block not found: %d", transaction.Height), http.StatusInternalServerError)
-		}
-
-		txResponses := []interface{}{}
-
-		for _, msg := range tx.GetMsgs() {
-			txType := kiratypes.MsgType(msg)
-			a := make(map[string]interface{})
-			bz, err := json.Marshal(msg)
-			if err != nil {
-				continue
-			}
-			err = json.Unmarshal(bz, &a)
-			if err != nil {
-				continue
-			}
-
-			a["type"] = txType
-			txResponses = append(txResponses, a)
-		}
-
-		hashStatus := "confirmed"
-		if (*hashToStatusMap)[transaction.Hash.String()] == "unconfirmed" {
-			hashStatus = "unconfirmed"
-		}
-
-		txResponse := types.TransactionResponse{
-			Time:      blockTime,
-			Status:    hashStatus,
-			Direction: (*hashToDirectionMap)[transaction.Hash.String()],
-			Hash:      fmt.Sprintf("0x%X", transaction.Hash),
-			Txs:       txResponses,
-		}
-
-		// Get memo and fee amounts
-		txResult, err := parseTransaction(rpcAddr, *transaction)
-		if err == nil {
-			txResponse.Fee = txResult.Fees
-			txResponse.Memo = txResult.Memo
-		}
-
-		txResults = append(txResults, txResponse)
 	}
 
 	// sort txResults

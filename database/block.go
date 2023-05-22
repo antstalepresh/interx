@@ -45,6 +45,19 @@ func GetBlockTime(height int64) (int64, error) {
 	return data.Timestamp, nil
 }
 
+// GetAllBlocks is a function to get all blockTimes
+func GetAllBlocks() []interface{} {
+	if blockDb == nil {
+		panic("cache dir not set")
+	}
+
+	DisableStdout()
+	rawData := blockDb.Open(BlockData{}).RawArray()
+	EnableStdout()
+
+	return rawData
+}
+
 // AddBlockTime is a function to add blockTime
 func AddBlockTime(height int64, timestamp int64) {
 	if blockDb == nil {
