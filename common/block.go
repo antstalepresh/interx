@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/KiraCore/interx/config"
+	"github.com/KiraCore/interx/database"
 )
 
 type BlockHeightTime struct {
@@ -14,6 +15,7 @@ type BlockHeightTime struct {
 var (
 	N                 int               = 0
 	LatestNBlockTimes []BlockHeightTime = make([]BlockHeightTime, 0)
+	BlockTimes        map[int64]int64   = make(map[int64]int64)
 )
 
 func GetAverageBlockTime() float64 {
@@ -29,6 +31,15 @@ func GetAverageBlockTime() float64 {
 	// GetLogger().Infof("[GetAverageBlockTime] %v", LatestNBlockTimes)
 
 	return total / float64(len(LatestNBlockTimes))
+}
+
+func LoadAllBlocks() {
+	blocks := database.GetAllBlocks()
+	for _, rawBlock := range blocks {
+		blockData := rawBlock.(map[string]interface{})
+
+		BlockTimes[int64(blockData["height"].(float64))] = int64(blockData["timestamp"].(float64))
+	}
 }
 
 func AddNewBlock(height int64, timestamp int64) {

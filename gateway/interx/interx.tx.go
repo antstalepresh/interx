@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/KiraCore/interx/common"
@@ -67,7 +68,7 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 		events = append(events, fmt.Sprintf("tx.height>%d", lastBlock))
 
 		// search transactions
-		endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
+		endpoint := fmt.Sprintf("%s/tx_search?query=\"%s\"&page=%d&per_page=%d&order_by=\"desc\"", rpcAddr, strings.Join(events, "%20AND%20"), page, limit)
 		common.GetLogger().Info("[query-transaction] Entering transaction search: ", endpoint)
 
 		resp, err := http.Get(endpoint)
@@ -96,10 +97,18 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 			break
 		}
 
-		totalResult.TotalCount += result.TotalCount
+		if result.TotalCount == 0 {
+			break
+		}
+
 		totalResult.Txs = append(totalResult.Txs, result.Txs...)
+
+		if result.TotalCount < limit {
+			break
+		}
 		page++
 	}
+	totalResult.TotalCount = len(totalResult.Txs)
 	err := database.SaveTransactions(address, totalResult, isWithdraw)
 	if err != nil {
 		common.GetLogger().Error("[query-transaction] Failed to save cache result:", err)
@@ -110,7 +119,6 @@ func GetTransactionsWithSync(rpcAddr string, address string, isWithdraw bool) (*
 
 // GetFilteredTransactions is a function to filter transactions by various options
 func GetFilteredTransactions(rpcAddr string, address string, txtypes []string, directions []string, dateStart int, dateEnd int, statuses []string, sortBy string) ([]types.TransactionResponse, error) {
-	txResults := []types.TransactionResponse{}
 	result, _ := searchUnconfirmed(rpcAddr, "100")
 	hashToStatusMap := make(map[string]string)
 	hashToDirectionMap := make(map[string]string)
@@ -151,85 +159,105 @@ func GetFilteredTransactions(rpcAddr string, address string, txtypes []string, d
 		cachedTxs.Txs = append(cachedTxs.Txs, cachedTxs2.Txs...)
 	}
 
+	var wg sync.WaitGroup
+	txResults := make(chan types.TransactionResponse, len(cachedTxs.Txs))
+
 	for _, cachedTx := range cachedTxs.Txs {
-		// Filter by time
-		txTime, err := common.GetBlockTime(rpcAddr, cachedTx.Height)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Block not found: ", cachedTx.Height)
-			continue
-		}
+		wg.Add(1)
 
-		if (dateStart != -1 && txTime < int64(dateStart)) || (dateEnd != -1 && txTime > int64(dateEnd)) {
-			continue
-		}
+		// Launch goroutine for handling all txs in parallel
+		cachedTx := cachedTx
 
-		// Filter by msg
-		tx, err := config.EncodingCg.TxConfig.TxDecoder()(cachedTx.Tx)
-		if err != nil {
-			common.GetLogger().Error("[query-transactions] Failed to decode transaction: ", err)
-			continue
-		}
+		go func() {
+			defer wg.Done()
 
-		contain := false
-		txResponses := []interface{}{}
-		for _, msg := range tx.GetMsgs() {
-			txType := kiratypes.MsgType(msg)
-			if slices.Contains(txtypes, txType) {
-				contain = true
-				break
-			}
-
-			// append type field to each tx msg
-			a := make(map[string]interface{})
-			bz, err := json.Marshal(msg)
+			// Filter by time
+			txTime, err := common.GetBlockTime(rpcAddr, cachedTx.Height)
 			if err != nil {
-				continue
+				common.GetLogger().Error("[query-transactions] Block not found: ", cachedTx.Height)
+				return
 			}
-			err = json.Unmarshal(bz, &a)
+
+			if (dateStart != -1 && txTime < int64(dateStart)) || (dateEnd != -1 && txTime > int64(dateEnd)) {
+				return
+			}
+
+			// Filter by msg
+			tx, err := config.EncodingCg.TxConfig.TxDecoder()(cachedTx.Tx)
 			if err != nil {
-				continue
+				common.GetLogger().Error("[query-transactions] Failed to decode transaction: ", err)
+				return
 			}
 
-			a["type"] = txType
-			txResponses = append(txResponses, a)
-		}
+			contain := false
+			txResponses := []interface{}{}
+			for _, msg := range tx.GetMsgs() {
+				txType := kiratypes.MsgType(msg)
+				if slices.Contains(txtypes, txType) {
+					contain = true
+					break
+				}
 
-		if !contain && len(txtypes) != 0 {
-			continue
-		}
+				// Append type field to each tx msg
+				a := make(map[string]interface{})
+				bz, err := json.Marshal(msg)
+				if err != nil {
+					continue
+				}
+				err = json.Unmarshal(bz, &a)
+				if err != nil {
+					continue
+				}
 
-		// Filter by status
-		if len(statuses) != 0 && !slices.Contains(statuses, "unconfirmed") && hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
-			continue
-		}
+				a["type"] = txType
+				txResponses = append(txResponses, a)
+			}
 
-		if len(statuses) != 0 && !slices.Contains(statuses, "confirmed") && hashToStatusMap[cachedTx.Hash.String()] == "" {
-			continue
-		}
+			if !contain && len(txtypes) != 0 {
+				return
+			}
 
-		hashStatus := "confirmed"
-		if hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
-			hashStatus = "unconfirmed"
-		}
-		txResponse := types.TransactionResponse{
-			Time:      txTime,
-			Status:    hashStatus,
-			Direction: hashToDirectionMap[cachedTx.Hash.String()],
-			Hash:      fmt.Sprintf("0x%X", cachedTx.Hash),
-			Txs:       txResponses,
-		}
+			// Filter by status
+			if len(statuses) != 0 && !slices.Contains(statuses, "unconfirmed") && hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
+				return
+			}
 
-		// Get memo and fee amounts
-		txResult, err := parseTransaction(rpcAddr, *cachedTx)
-		if err == nil {
-			txResponse.Fee = txResult.Fees
-			txResponse.Memo = txResult.Memo
-		}
+			if len(statuses) != 0 && !slices.Contains(statuses, "confirmed") && hashToStatusMap[cachedTx.Hash.String()] == "" {
+				return
+			}
 
-		txResults = append(txResults, txResponse)
+			hashStatus := "confirmed"
+			if hashToStatusMap[cachedTx.Hash.String()] == "unconfirmed" {
+				hashStatus = "unconfirmed"
+			}
+			txResponse := types.TransactionResponse{
+				Time:      txTime,
+				Status:    hashStatus,
+				Direction: hashToDirectionMap[cachedTx.Hash.String()],
+				Hash:      fmt.Sprintf("0x%X", cachedTx.Hash),
+				Txs:       txResponses,
+			}
+
+			// // Get memo and fee amounts
+			txResult, err := parseTransaction(rpcAddr, *cachedTx)
+			if err == nil {
+				txResponse.Fee = txResult.Fees
+				txResponse.Memo = txResult.Memo
+			}
+
+			txResults <- txResponse
+		}()
 	}
 
-	return txResults, nil
+	wg.Wait()
+	close(txResults)
+
+	// Receive values from the channel and append them to a slice
+	var res []types.TransactionResponse
+	for txResponse := range txResults {
+		res = append(res, txResponse)
+	}
+	return res, nil
 }
 
 // SearchTxHashHandle is a function to query transactions
