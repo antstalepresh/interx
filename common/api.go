@@ -211,8 +211,9 @@ func GetPermittedTxTypes(rpcAddr string, account string) (map[string]string, err
 
 // GetBlockTime is a function to get block time
 func GetBlockTime(rpcAddr string, height int64) (int64, error) {
-	blockTime, err := database.GetBlockTime(height)
-	if err == nil {
+	// blockTime, err := database.GetBlockTime(height)
+	blockTime, found := BlockTimes[height]
+	if found {
 		return blockTime, nil
 	}
 
@@ -249,6 +250,7 @@ func GetBlockTime(rpcAddr string, height int64) (int64, error) {
 	blockTime = result.Block.Header.Time.Unix()
 
 	// save block time
+	BlockTimes[NodeStatus.Block] = blockTime
 	database.AddBlockTime(height, blockTime)
 
 	// save block nano time
@@ -297,6 +299,7 @@ func GetBlockNanoTime(rpcAddr string, height int64) (int64, error) {
 	blockTime = result.Block.Header.Time.UnixNano()
 
 	// save block time
+	BlockTimes[height] = result.Block.Header.Time.Unix()
 	database.AddBlockTime(height, result.Block.Header.Time.Unix())
 
 	// save block nano time
