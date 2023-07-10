@@ -20,7 +20,7 @@ import (
 	"github.com/KiraCore/interx/types/kira"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	pb "github.com/cosmos/cosmos-sdk/x/bank/types"
+	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/go-bip39"
 	"github.com/stretchr/testify/suite"
 	tmjson "github.com/tendermint/tendermint/libs/json"
@@ -279,7 +279,7 @@ func TestStatusTestSuite(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterQueryServer(s, &server{})
+	bankTypes.RegisterQueryServer(s, &bankServer{})
 	log.Printf("server listening at %v", lis.Addr())
 
 	go func() {

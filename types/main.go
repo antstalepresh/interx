@@ -140,6 +140,15 @@ type TokenAlias struct {
 	Symbol   string   `json:"symbol"`
 }
 
+type TokenRate struct {
+	Denom       string `json:"denom"`
+	FeePayments bool   `json:"feePayments"`
+	FeeRate     string `json:"feeRate"`
+	StakeCap    string `json:"stakeCap"`
+	StakeMin    string `json:"stakeMin"`
+	StakeToken  bool   `json:"stakeToken"`
+}
+
 type TokenSupply struct {
 	Amount sdk.Int `json:"amount"`
 	Denom  string  `json:"denom"`
@@ -173,6 +182,27 @@ type IdentityRecord struct {
 	Verifiers []string    `json:"verifiers"`
 }
 
+type ValidatorPool struct {
+	ID                 int64    `json:"id,string"`
+	Validator          string   `json:"validator,omitempty"`
+	Enabled            bool     `json:"enabled,omitempty"`
+	Slashed            string   `json:"slashed"`
+	TotalStakingTokens []string `json:"totalStakingTokens"`
+	TotalShareTokens   []string `json:"totalShareTokens"`
+	TotalRewards       []string `json:"totalRewards"`
+	Commission         string   `json:"commission"`
+}
+
+// ValidatorPoolResult is a struct to be used for query staking pool response
+type ValidatorPoolResult struct {
+	ID              int64    `json:"id,omitempty"`
+	Slashed         string   `json:"slashed"`
+	Commission      string   `json:"commission"`
+	TotalDelegators int64    `json:"total_delegators"`
+	VotingPower     []string `json:"voting_power"`
+	Tokens          []string `json:"tokens"`
+}
+
 type QueryValidator struct {
 	Top int `json:"top,string"`
 
@@ -194,6 +224,8 @@ type QueryValidator struct {
 	LastPresentBlock      int64  `json:"last_present_block,string"`
 	MissedBlocksCounter   int64  `json:"missed_blocks_counter,string"`
 	ProducedBlocksCounter int64  `json:"produced_blocks_counter,string"`
+	StakingPoolId         int64  `json:"staking_pool_id,string"`
+	StakingPoolStatus     string `json:"staking_pool_status,string"`
 
 	// From Identity Records
 	Description       string `json:"description,omitempty"`

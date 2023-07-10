@@ -19,7 +19,8 @@ import (
 )
 
 var (
-	AllValidators types.AllValidators
+	AllValidators   types.AllValidators
+	AddrToValidator map[string]string = make(map[string]string)
 )
 
 const (
@@ -120,14 +121,39 @@ func QueryValidators(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 		offset += limit
 	}
 
-	for index, validator := range result.Validators {
+	type ValidatorPoolsResponse struct {
+		Pools []types.ValidatorPool `json:"pools,omitempty"`
+	}
 
+	// Query all pools
+	valToPool := make(map[string]types.ValidatorPool)
+	stakingPoolsQueryRequest, _ := http.NewRequest("GET", "http://"+gatewayAddr+"/kira/multistaking/v1beta1/staking_pools", nil)
+	stakingPoolsQueryResponse, _, _ := common.ServeGRPC(stakingPoolsQueryRequest, gwCosmosmux)
+	if stakingPoolsQueryResponse != nil {
+		byteData, err := json.Marshal(stakingPoolsQueryResponse)
+		if err != nil {
+			return err
+		}
+
+		pools := ValidatorPoolsResponse{}
+		err = json.Unmarshal(byteData, &pools)
+		if err != nil {
+			return err
+		}
+
+		for _, pool := range pools.Pools {
+			valToPool[pool.Validator] = pool
+		}
+	}
+
+	for index, validator := range result.Validators {
 		pubkeyHexString := validator.Pubkey[14 : len(validator.Pubkey)-1]
 		bytes, _ := hex.DecodeString(pubkeyHexString)
 		pubkey := ed25519.PubKey{
 			Key: bytes,
 		}
 		address := sdk.ConsAddress(pubkey.Address()).String()
+		AddrToValidator[validator.Address] = sdk.ValAddress(sdk.MustAccAddressFromBech32(validator.Address)).String()
 
 		var valSigningInfo types.ValidatorSigningInfo
 		for _, signingInfo := range validatorInfosResponse.ValValidatorInfos {
@@ -163,6 +189,12 @@ func QueryValidators(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 		result.Validators[index].LastPresentBlock = valSigningInfo.LastPresentBlock
 		result.Validators[index].MissedBlocksCounter = valSigningInfo.MissedBlocksCounter
 		result.Validators[index].ProducedBlocksCounter = valSigningInfo.ProducedBlocksCounter
+		result.Validators[index].StakingPoolId = valToPool[validator.Valkey].ID
+		if valToPool[validator.Valkey].Enabled {
+			result.Validators[index].StakingPoolStatus = "ACTIVE"
+		} else {
+			result.Validators[index].StakingPoolStatus = "INACTIVE"
+		}
 	}
 
 	sort.Sort(types.QueryValidators(result.Validators))

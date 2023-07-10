@@ -1,7 +1,7 @@
 package config
 
 const (
-	InterxVersion = "v0.4.34"
+	InterxVersion = "v0.4.35"
 	SekaiVersion  = "v0.3.13.38"
 	CosmosVersion = "v0.45.10"
 
@@ -42,6 +42,7 @@ const (
 	QueryIdentityRecordVerifyRequestsByApprover  = "/api/kira/gov/identity_verify_requests_by_approver/{approver}"
 	QueryAllIdentityRecordVerifyRequests         = "/api/kira/gov/all_identity_verify_requests"
 
+	QueryStakingPool           = "/api/kira/staking-pool"
 	QuerySpendingPools         = "/api/kira/spending-pools"
 	QuerySpendingPoolProposals = "/api/kira/spending-pool-proposals"
 

@@ -32,7 +32,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	pb "github.com/cosmos/cosmos-sdk/x/bank/types"
+	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/go-bip39"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
@@ -118,20 +118,20 @@ func GetGrpcServeMux(grpcAddr string) (*runtime.ServeMux, error) {
 	return gwCosmosmux, nil
 }
 
-type server struct {
-	pb.UnimplementedQueryServer
-	pb.UnimplementedMsgServer
+type bankServer struct {
+	bankTypes.UnimplementedQueryServer
+	bankTypes.UnimplementedMsgServer
 }
 
-func (s *server) AllBalances(ctx context.Context, in *pb.QueryAllBalancesRequest) (*pb.QueryAllBalancesResponse, error) {
+func (s *bankServer) AllBalances(ctx context.Context, in *bankTypes.QueryAllBalancesRequest) (*bankTypes.QueryAllBalancesResponse, error) {
 	if in.Address == faucet_addr {
-		return &pb.QueryAllBalancesResponse{Balances: sdk.Coins{{Denom: "ukex", Amount: sdk.NewInt(10000000)}}}, nil
+		return &bankTypes.QueryAllBalancesResponse{Balances: sdk.Coins{{Denom: "ukex", Amount: sdk.NewInt(10000000)}}}, nil
 	} else {
-		return &pb.QueryAllBalancesResponse{Balances: sdk.Coins{{Denom: "ukex", Amount: sdk.NewInt(0)}}}, nil
+		return &bankTypes.QueryAllBalancesResponse{Balances: sdk.Coins{{Denom: "ukex", Amount: sdk.NewInt(0)}}}, nil
 	}
 }
 
-func (*server) Send(ctx context.Context, req *pb.MsgSend) (*pb.MsgSendResponse, error) {
+func (*bankServer) Send(ctx context.Context, req *bankTypes.MsgSend) (*bankTypes.MsgSendResponse, error) {
 	return nil, nil
 }
 
@@ -237,7 +237,7 @@ func TestFaucetTestSuite(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterQueryServer(s, &server{})
+	bankTypes.RegisterQueryServer(s, &bankServer{})
 	log.Printf("server listening at %v", lis.Addr())
 
 	go func() {
