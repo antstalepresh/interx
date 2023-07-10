@@ -42,6 +42,7 @@ const (
 	QueryIdentityRecordVerifyRequestsByApprover  = "/api/kira/gov/identity_verify_requests_by_approver/{approver}"
 	QueryAllIdentityRecordVerifyRequests         = "/api/kira/gov/all_identity_verify_requests"
 
+	QueryStakingPool           = "/api/kira/staking-pool"
 	QuerySpendingPools         = "/api/kira/spending-pools"
 	QuerySpendingPoolProposals = "/api/kira/spending-pool-proposals"
 

@@ -19,6 +19,7 @@ import (
 	cosmosAuth "github.com/KiraCore/interx/proto-gen/cosmos/auth/v1beta1"
 	cosmosBank "github.com/KiraCore/interx/proto-gen/cosmos/bank/v1beta1"
 	kiraGov "github.com/KiraCore/interx/proto-gen/kira/gov"
+	kiraMultiStaking "github.com/KiraCore/interx/proto-gen/kira/multistaking"
 	kiraSlashing "github.com/KiraCore/interx/proto-gen/kira/slashing/v1beta1"
 	kiraSpending "github.com/KiraCore/interx/proto-gen/kira/spending"
 	kiraStaking "github.com/KiraCore/interx/proto-gen/kira/staking"
@@ -26,7 +27,7 @@ import (
 	kiraUbi "github.com/KiraCore/interx/proto-gen/kira/ubi"
 	kiraUpgrades "github.com/KiraCore/interx/proto-gen/kira/upgrade"
 	"github.com/KiraCore/interx/test"
-	pb "github.com/KiraCore/sekai/x/gov/types"
+	govTypes "github.com/KiraCore/sekai/x/gov/types"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )
@@ -80,6 +81,11 @@ func GetGrpcServeMux(grpcAddr string) (*runtime.ServeMux, error) {
 		return nil, fmt.Errorf("failed to register gateway: %w", err)
 	}
 
+	err = kiraMultiStaking.RegisterQueryHandler(context.Background(), gwCosmosmux, conn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register gateway: %w", err)
+	}
+
 	err = kiraSlashing.RegisterQueryHandler(context.Background(), gwCosmosmux, conn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register gateway: %w", err)
@@ -108,29 +114,28 @@ func GetGrpcServeMux(grpcAddr string) (*runtime.ServeMux, error) {
 	return gwCosmosmux, nil
 }
 
-type server struct {
-	pb.UnimplementedQueryServer
-	pb.UnimplementedMsgServer
+type govServer struct {
+	govTypes.UnimplementedQueryServer
 }
 
-func (s *server) AllDataReferenceKeys(ctx context.Context, in *pb.QueryDataReferenceKeysRequest) (*pb.QueryDataReferenceKeysResponse, error) {
-	return &pb.QueryDataReferenceKeysResponse{Keys: []string{
+func (s *govServer) AllDataReferenceKeys(ctx context.Context, in *govTypes.QueryDataReferenceKeysRequest) (*govTypes.QueryDataReferenceKeysResponse, error) {
+	return &govTypes.QueryDataReferenceKeysResponse{Keys: []string{
 		"test1", "test2",
 	}}, nil
 }
 
-func (s *server) DataReferenceByKey(ctx context.Context, in *pb.QueryDataReferenceRequest) (*pb.QueryDataReferenceResponse, error) {
-	return &pb.QueryDataReferenceResponse{
-		Data: &pb.DataRegistryEntry{
+func (s *govServer) DataReferenceByKey(ctx context.Context, in *govTypes.QueryDataReferenceRequest) (*govTypes.QueryDataReferenceResponse, error) {
+	return &govTypes.QueryDataReferenceResponse{
+		Data: &govTypes.DataRegistryEntry{
 			Hash:      "test_hash",
 			Reference: "test_reference",
 		},
 	}, nil
 }
 
-func (s *server) NetworkProperties(ctx context.Context, in *pb.NetworkPropertiesRequest) (*pb.NetworkPropertiesResponse, error) {
-	return &pb.NetworkPropertiesResponse{
-		Properties: &pb.NetworkProperties{
+func (s *govServer) NetworkProperties(ctx context.Context, in *govTypes.NetworkPropertiesRequest) (*govTypes.NetworkPropertiesResponse, error) {
+	return &govTypes.NetworkPropertiesResponse{
+		Properties: &govTypes.NetworkProperties{
 			MinTxFee:   777,
 			MaxTxFee:   888,
 			VoteQuorum: 999,
@@ -138,9 +143,9 @@ func (s *server) NetworkProperties(ctx context.Context, in *pb.NetworkProperties
 	}, nil
 }
 
-func (s *server) ExecutionFee(ctx context.Context, in *pb.ExecutionFeeRequest) (*pb.ExecutionFeeResponse, error) {
-	return &pb.ExecutionFeeResponse{
-		Fee: &pb.ExecutionFee{
+func (s *govServer) ExecutionFee(ctx context.Context, in *govTypes.ExecutionFeeRequest) (*govTypes.ExecutionFeeResponse, error) {
+	return &govTypes.ExecutionFeeResponse{
+		Fee: &govTypes.ExecutionFee{
 			TransactionType: "test_type",
 		},
 	}, nil
@@ -161,7 +166,7 @@ func (suite *DataReferenceTestSuite) TestDataReferenceKeysHandler() {
 	}
 	r.URL.Path = "/kira/gov/data_keys"
 	refInfo, _, _ := queryDataReferenceKeysHandle(r, gwCosmosmux)
-	res := pb.QueryDataReferenceKeysResponse{}
+	res := govTypes.QueryDataReferenceKeysResponse{}
 	bz, err := json.Marshal(refInfo)
 	if err != nil {
 		panic(err)
@@ -188,7 +193,7 @@ func (suite *DataReferenceTestSuite) TestDataReferenceByKeyHandler() {
 	}
 	r.URL.Path = "/kira/gov/data/test"
 	refInfo, _, _ := queryDataReferenceHandle(r, gwCosmosmux, "test")
-	res := pb.DataRegistryEntry{}
+	res := govTypes.DataRegistryEntry{}
 	bz, err := json.Marshal(refInfo)
 	if err != nil {
 		panic(err)
@@ -233,7 +238,7 @@ func TestDataReferenceTestSuite(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterQueryServer(s, &server{})
+	govTypes.RegisterQueryServer(s, &govServer{})
 	log.Printf("server listening at %v", lis.Addr())
 
 	go func() {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
+	"github.com/KiraCore/interx/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -109,17 +110,8 @@ func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux)
 	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {
-		type TokenRate struct {
-			Denom       string `json:"denom"`
-			FeePayments bool   `json:"feePayments"`
-			FeeRate     string `json:"feeRate"`
-			StakeCap    string `json:"stakeCap"`
-			StakeMin    string `json:"stakeMin"`
-			StakeToken  bool   `json:"stakeToken"`
-		}
-
 		type TokenRatesResponse struct {
-			Data []TokenRate `json:"data"`
+			Data []types.TokenRate `json:"data"`
 		}
 		result := TokenRatesResponse{}
 

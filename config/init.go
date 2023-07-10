@@ -76,6 +76,7 @@ func getRPCSettings() RPCConfig {
 	config.API["GET"][QueryIdentityRecordVerifyRequestsByApprover] = defaultRPCSetting
 	config.API["GET"][QueryAllIdentityRecordVerifyRequests] = defaultRPCSetting
 	config.API["GET"][QuerySpendingPools] = defaultRPCSetting
+	config.API["GET"][QueryStakingPool] = defaultRPCSetting
 	config.API["GET"][QuerySpendingPoolProposals] = defaultRPCSetting
 	config.API["GET"][QueryUBIRecords] = defaultRPCSetting
 
