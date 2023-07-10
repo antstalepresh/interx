@@ -14,7 +14,8 @@ import (
 	"github.com/KiraCore/interx/tasks"
 	"github.com/KiraCore/interx/test"
 	"github.com/KiraCore/interx/types"
-	pb "github.com/KiraCore/sekai/x/slashing/types"
+	multiStakingTypes "github.com/KiraCore/sekai/x/multistaking/types"
+	slashingTypes "github.com/KiraCore/sekai/x/slashing/types"
 	stakingTypes "github.com/KiraCore/sekai/x/staking/types"
 	"github.com/stretchr/testify/suite"
 	tmJsonRPCTypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
@@ -27,9 +28,13 @@ type ValidatorsTestSuite struct {
 	dumpConsensusQuery tmJsonRPCTypes.RPCResponse
 }
 
-type kiraserver struct {
-	pb.UnimplementedQueryServer
-	pb.UnimplementedMsgServer
+type slashingServer struct {
+	slashingTypes.UnimplementedQueryServer
+}
+
+type multiStakingServer struct {
+	multiStakingTypes.UnimplementedQueryServer
+	multiStakingTypes.UnimplementedMsgServer
 }
 
 type ValidatorsStatus struct {
@@ -39,48 +44,24 @@ type ValidatorsStatus struct {
 	} `json:"pagination,omitempty"`
 }
 
-func (s *kiraserver) SigningInfos(ctx context.Context, req *pb.QuerySigningInfosRequest) (*pb.QuerySigningInfosResponse, error) {
-	return &pb.QuerySigningInfosResponse{Validators: []stakingTypes.QueryValidator{
+func (s *slashingServer) SigningInfos(ctx context.Context, req *slashingTypes.QuerySigningInfosRequest) (*slashingTypes.QuerySigningInfosResponse, error) {
+	return &slashingTypes.QuerySigningInfosResponse{Validators: []stakingTypes.QueryValidator{
 		{
 			Address: "test_address",
 		},
 	}}, nil
 }
 
+func (s *multiStakingServer) StakingPools(ctx context.Context, req *multiStakingTypes.QueryStakingPoolsRequest) (*multiStakingTypes.QueryStakingPoolsResponse, error) {
+	return &multiStakingTypes.QueryStakingPoolsResponse{Pools: []multiStakingTypes.StakingPool{
+		{
+			Id:      1,
+			Enabled: true,
+		},
+	}}, nil
+}
+
 func (suite *ValidatorsTestSuite) SetupTest() {
-}
-
-func (suite *ValidatorsTestSuite) TestDumpConsensusStateHandler() {
-	response, _, statusCode := queryDumpConsensusStateHandler(nil, nil, test.TENDERMINT_RPC)
-	suite.Require().EqualValues(response, "test")
-	suite.Require().EqualValues(statusCode, http.StatusOK)
-}
-
-func (suite *ValidatorsTestSuite) TestValidatorInfosQuery() {
-	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
-	q := r.URL.Query()
-	r.URL.RawQuery = q.Encode()
-
-	gwCosmosmux, err := GetGrpcServeMux(*addr)
-	if err != nil {
-		panic("failed to serve grpc")
-	}
-
-	r.URL.Path = "/kira/slashing/v1beta1/signing_infos"
-	response, _, statusCode := queryValidatorInfosHandle(r, gwCosmosmux)
-
-	res := pb.QuerySigningInfosResponse{}
-	bz, _ := json.Marshal(response)
-	err = json.Unmarshal(bz, &res)
-	if err != nil {
-		suite.Assert()
-	}
-
-	suite.Require().EqualValues(res.Validators[0].Address, "test_address")
-	suite.Require().EqualValues(statusCode, http.StatusOK)
-}
-
-func (suite *ValidatorsTestSuite) TestSnapInfoQuery() {
 	tasks.AllValidators = types.AllValidators{
 		Status: struct {
 			ActiveValidators   int `json:"active_validators"`
@@ -94,16 +75,51 @@ func (suite *ValidatorsTestSuite) TestSnapInfoQuery() {
 		},
 		Validators: []types.QueryValidator{
 			{
-				Address:  "test_addr",
-				Valkey:   "test_valkey",
-				Pubkey:   "test_pubkey",
-				Proposer: "test_proposer",
-				Moniker:  "test_moniker",
-				Status:   "test_status",
+				Address:           "test_addr",
+				Valkey:            "test_valkey",
+				Pubkey:            "test_pubkey",
+				Proposer:          "test_proposer",
+				Moniker:           "test_moniker",
+				Status:            "test_status",
+				StakingPoolId:     1,
+				StakingPoolStatus: "ACTIVE",
 			},
 		},
 	}
+}
 
+func (suite *ValidatorsTestSuite) TestDumpConsensusStateHandler() {
+	response, _, statusCode := queryDumpConsensusStateHandler(nil, nil, test.TENDERMINT_RPC)
+	suite.Require().EqualValues(response, "test")
+	suite.Require().EqualValues(statusCode, http.StatusOK)
+}
+
+func (suite *ValidatorsTestSuite) TestValidatorInfosQuery() {
+	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
+	response, error, statusCode := queryValidatorsHandle(r, nil, test.TENDERMINT_RPC)
+
+	byteData, err := json.Marshal(response)
+	if err != nil {
+		suite.Assert()
+	}
+
+	result := struct {
+		Validators []types.QueryValidator `json:"validators,omitempty"`
+		Pagination struct {
+			Total int `json:"total,string,omitempty"`
+		} `json:"pagination,omitempty"`
+	}{}
+
+	err = json.Unmarshal(byteData, &result)
+	suite.Require().NoError(err)
+	suite.Require().EqualValues(len(result.Validators), 1)
+	suite.Require().EqualValues(result.Validators[0].StakingPoolStatus, "ACTIVE")
+	suite.Require().EqualValues(result.Validators[0].StakingPoolId, 1)
+	suite.Require().Nil(error)
+	suite.Require().EqualValues(statusCode, http.StatusOK)
+}
+
+func (suite *ValidatorsTestSuite) TestSnapInfoQuery() {
 	r := httptest.NewRequest("GET", test.INTERX_RPC, nil)
 	q := r.URL.Query()
 	q.Add("address", "test_addr")
@@ -134,7 +150,7 @@ func TestValidatorsTestSuite(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterQueryServer(s, &kiraserver{})
+	slashingTypes.RegisterQueryServer(s, &slashingServer{})
 	log.Printf("server listening at %v", lis.Addr())
 
 	go func() {

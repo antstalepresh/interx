@@ -15,29 +15,29 @@ import (
 	"time"
 
 	"github.com/KiraCore/interx/test"
-	pb "github.com/KiraCore/sekai/x/gov/types"
+	govTypes "github.com/KiraCore/sekai/x/gov/types"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )
 
-func (s *server) IdentityRecordsByAddress(ctx context.Context, in *pb.QueryIdentityRecordsByAddressRequest) (*pb.QueryIdentityRecordsByAddressResponse, error) {
-	return &pb.QueryIdentityRecordsByAddressResponse{Records: []pb.IdentityRecord{
+func (s *govServer) IdentityRecordsByAddress(ctx context.Context, in *govTypes.QueryIdentityRecordsByAddressRequest) (*govTypes.QueryIdentityRecordsByAddressResponse, error) {
+	return &govTypes.QueryIdentityRecordsByAddressResponse{Records: []govTypes.IdentityRecord{
 		{
 			Address: "test_address",
 		},
 	}}, nil
 }
 
-func (s *server) AllIdentityRecords(ctx context.Context, in *pb.QueryAllIdentityRecordsRequest) (*pb.QueryAllIdentityRecordsResponse, error) {
-	return &pb.QueryAllIdentityRecordsResponse{Records: []pb.IdentityRecord{
+func (s *govServer) AllIdentityRecords(ctx context.Context, in *govTypes.QueryAllIdentityRecordsRequest) (*govTypes.QueryAllIdentityRecordsResponse, error) {
+	return &govTypes.QueryAllIdentityRecordsResponse{Records: []govTypes.IdentityRecord{
 		{
 			Address: "test_address",
 		},
 	}}, nil
 }
 
-func (s *server) IdentityRecordVerifyRequestsByRequester(ctx context.Context, in *pb.QueryIdentityRecordVerifyRequestsByRequester) (*pb.QueryIdentityRecordVerifyRequestsByRequesterResponse, error) {
-	return &pb.QueryIdentityRecordVerifyRequestsByRequesterResponse{VerifyRecords: []pb.IdentityRecordsVerify{
+func (s *govServer) IdentityRecordVerifyRequestsByRequester(ctx context.Context, in *govTypes.QueryIdentityRecordVerifyRequestsByRequester) (*govTypes.QueryIdentityRecordVerifyRequestsByRequesterResponse, error) {
+	return &govTypes.QueryIdentityRecordVerifyRequestsByRequesterResponse{VerifyRecords: []govTypes.IdentityRecordsVerify{
 		{
 			Address: "test_address",
 		},
@@ -167,7 +167,7 @@ func TestIdentityRecordsTestSuite(t *testing.T) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterQueryServer(s, &server{})
+	govTypes.RegisterQueryServer(s, &govServer{})
 	log.Printf("server listening at %v", lis.Addr())
 
 	go func() {
