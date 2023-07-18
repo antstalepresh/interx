@@ -193,14 +193,38 @@ type ValidatorPool struct {
 	Commission         string   `json:"commission"`
 }
 
-// ValidatorPoolResult is a struct to be used for query staking pool response
-type ValidatorPoolResult struct {
+// QueryValidatorPoolResult is a struct to be used for query staking pool response
+type QueryValidatorPoolResult struct {
 	ID              int64    `json:"id,omitempty"`
 	Slashed         string   `json:"slashed"`
 	Commission      string   `json:"commission"`
 	TotalDelegators int64    `json:"total_delegators"`
 	VotingPower     []string `json:"voting_power"`
 	Tokens          []string `json:"tokens"`
+}
+
+type Delegation struct {
+	ValidatorInfo struct {
+		Moniker string `json:"moniker,omitempty"`
+		Address string `json:"address,omitempty"`
+		ValKey  string `json:"valkey,omitempty"`
+		Website string `json:"website,omitempty"`
+		Logo    string `json:"logo,omitempty"`
+	} `json:"validator_info"`
+	PoolInfo struct {
+		ID         int64    `json:"id,omitempty"`
+		Commission string   `json:"commission,omitempty"`
+		Status     string   `json:"status,omitempty"`
+		Tokens     []string `json:"tokens,omitempty"`
+	} `json:"pool_info"`
+}
+
+// QueryDelegationsResult is a struct to be used for query delegations response
+type QueryDelegationsResult struct {
+	Delegations []Delegation `json:"delegations"`
+	Pagination  struct {
+		Total int `json:"total,string,omitempty"`
+	} `json:"pagination,omitempty"`
 }
 
 type QueryValidator struct {

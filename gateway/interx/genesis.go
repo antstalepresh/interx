@@ -141,7 +141,6 @@ func QueryGenesis(rpcAddr string) http.HandlerFunc {
 		request := common.GetInterxRequest(r)
 		response := common.GetResponseFormat(request, rpcAddr)
 
-		fmt.Println(genesisPath())
 		if saveGenesis(rpcAddr) != nil {
 			response.Response, response.Error, statusCode = common.ServeError(0, "", "interx error", http.StatusInternalServerError)
 			common.WrapResponse(w, request, *response, statusCode, false)
