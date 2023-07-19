@@ -2,7 +2,6 @@ package data
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/KiraCore/interx/common"
@@ -33,9 +32,7 @@ func queryAccountBalanceHandler(r *http.Request, request types.InterxRequest, rp
 	var response dataapi.AccountBalanceResponse
 
 	balances := common.GetAccountBalances(gwCosmosmux, r.Clone(r.Context()), req.AccountIdentifier.Address)
-	fmt.Println(balances)
 	tokens := common.GetTokenAliases(gwCosmosmux, r.Clone(r.Context()))
-	fmt.Println(tokens)
 
 	response.Balances = make([]rosetta.Amount, 0)
 	for _, balance := range balances {
