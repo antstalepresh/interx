@@ -70,7 +70,6 @@ func serveFaucet(r *http.Request, gwCosmosmux *runtime.ServeMux, request types.I
 
 	availableAmount := new(big.Int)
 	availableAmount.SetString("0", 10)
-	fmt.Println(availableBalances)
 	for _, balance := range availableBalances {
 		if balance.Denom == token {
 			availableAmount.SetString(balance.Amount, 10)
