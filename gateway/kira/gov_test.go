@@ -177,7 +177,6 @@ func (suite *DataReferenceTestSuite) TestDataReferenceKeysHandler() {
 		panic(err)
 	}
 
-	fmt.Println(res)
 	suite.Require().EqualValues(len(res.Keys), 2)
 }
 
