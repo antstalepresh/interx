@@ -17,6 +17,7 @@ PROPOSAL_ID_INTERX=$(curl --fail "$INTERX_GATEWAY/api/kira/gov/proposals" | jq '
 RESULT_INTERX=$(curl --fail $INTERX_GATEWAY/api/kira/gov/proposals/$PROPOSAL_ID_INTERX || exit 1)
 DESCRIPTION_INTERX=$(echo $RESULT_INTERX | jq '.proposal.content.messages[0]')
 QUORUM_INTERX=$(echo $RESULT_INTERX | jq '.proposal.quorum' | tr -d '"')
+QUORUM_INTERX=$(printf "%.0f" "$(echo "$QUORUM_INTERX * 100" | bc)")
 
 DESCRIPTION_CLI=$(showProposal $PROPOSAL_ID_INTERX | jq '.content.messages[0]')
 QUORUM_CLI=$(showNetworkProperties | jq '.properties.vote_quorum' | tr -d '"' || exit 1)
