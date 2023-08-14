@@ -13,7 +13,7 @@ func RunTasks(gwCosmosmux *runtime.ServeMux, rpcAddr string, gatewayAddr string)
 	go DataReferenceCheck(false)
 	go NodeDiscover(rpcAddr, false)
 	go SyncValidators(gwCosmosmux, gatewayAddr, false)
-	go SyncProposals(gwCosmosmux, gatewayAddr, false)
+	go SyncProposals(gwCosmosmux, gatewayAddr, rpcAddr, false)
 	go CalcSnapshotChecksum(false)
 	go SyncBitcoinWallets()
 }
