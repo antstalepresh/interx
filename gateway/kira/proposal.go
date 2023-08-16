@@ -39,17 +39,17 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 		sortBy    string   = "dateDESC"
 		types     []string = []string{}
 		statuses  []string = []string{}
-		// voter      string
-		offset int = -1
-		limit  int = -1
-		err    error
+		voter     string
+		offset    int = -1
+		limit     int = -1
+		err       error
 	)
 
 	//------------ Proposer ------------
 	proposer = r.FormValue("proposer")
 
-	// //------------ Voter ------------
-	// voter = r.FormValue("voter")
+	//------------ Voter ------------
+	voter = r.FormValue("voter")
 
 	//------------ Sort ------------
 	sortParam := r.FormValue("sort")
@@ -108,8 +108,8 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 			layout := "01/02/2006 3:04:05 PM"
 			t, err1 := time.Parse(layout, dateStStr+" 12:00:00 AM")
 			if err1 != nil {
-				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateStart': ", err1)
-				return common.ServeError(0, "failed to parse parameter 'dateStart'", err.Error(), http.StatusBadRequest)
+				common.GetLogger().Error("[query-proposals] Failed to parse parameter 'dateStart': ", err1)
+				return common.ServeError(0, "failed to parse parameter 'dateStart'", err1.Error(), http.StatusBadRequest)
 			}
 
 			dateStart = int(t.Unix())
@@ -121,7 +121,7 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 			layout := "01/02/2006 3:04:05 PM"
 			t, err1 := time.Parse(layout, dateEdStr+" 12:00:00 AM")
 			if err1 != nil {
-				common.GetLogger().Error("[query-transactions] Failed to parse parameter 'dateEnd': ", err1)
+				common.GetLogger().Error("[query-proposals] Failed to parse parameter 'dateEnd': ", err1)
 				return common.ServeError(0, "failed to parse parameter 'dateEnd'", err.Error(), http.StatusBadRequest)
 			}
 
@@ -130,8 +130,48 @@ func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (inte
 	}
 
 	//------------ Filter proposals by filtering options & Pagination ------------
+	voterMap := map[string]bool{}
+
+	voterLimit := sekaitypes.PageIterationLimit - 1
+	voterOffset := 0
+	for {
+		reqPath := strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
+		proposalsQueryRequest, _ := http.NewRequest("GET", reqPath+"?voter="+voter+"&pagination.offset="+strconv.Itoa(voterOffset)+"&pagination.limit="+strconv.Itoa(voterLimit), nil)
+
+		proposalsQueryResponse, failure, statusCode := common.ServeGRPC(proposalsQueryRequest, gwCosmosmux)
+
+		if proposalsQueryResponse == nil {
+			return proposalsQueryResponse, failure, statusCode
+		}
+
+		byteData, err := json.Marshal(proposalsQueryResponse)
+		if err != nil {
+			return common.ServeError(0, "failed to parse proposals response", err.Error(), http.StatusBadRequest)
+		}
+
+		subResult := govTypes.ProposalsResponse{}
+		err = json.Unmarshal(byteData, &subResult)
+		if err != nil {
+			return common.ServeError(0, "failed to parse proposals response", err.Error(), http.StatusBadRequest)
+		}
+
+		if len(subResult.Proposals) == 0 {
+			break
+		}
+
+		for _, prop := range subResult.Proposals {
+			voterMap[prop.ProposalID] = true
+		}
+
+		voterOffset += voterLimit
+	}
+
 	propResults := []govTypes.Proposal{}
 	for _, proposal := range tasks.ProposalsMap {
+		if !voterMap[proposal.ProposalID] {
+			continue
+		}
+
 		if len(statuses) > 0 && !common.Include(statuses, proposal.Result) {
 			continue
 		}

@@ -38,12 +38,7 @@ const (
 )
 
 func QueryProposals(gwCosmosmux *runtime.ServeMux, gatewayAddr string, rpcAddr string) error {
-	type ProposalsResponse = struct {
-		Proposals  []gov.Proposal `json:"proposals,omitempty"`
-		Pagination interface{}    `json:"pagination,omitempty"`
-	}
-
-	result := ProposalsResponse{}
+	result := gov.ProposalsResponse{}
 
 	limit := sekaitypes.PageIterationLimit - 1
 	offset := 0
@@ -61,7 +56,7 @@ func QueryProposals(gwCosmosmux *runtime.ServeMux, gatewayAddr string, rpcAddr s
 			return err
 		}
 
-		subResult := ProposalsResponse{}
+		subResult := gov.ProposalsResponse{}
 		err = json.Unmarshal(byteData, &subResult)
 		if err != nil {
 			return err

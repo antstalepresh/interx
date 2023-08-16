@@ -98,9 +98,16 @@ type CachedProposal struct {
 	Proposer    string `json:"proposer"`
 }
 
+// Used to return proposal response
 type PropsResponse struct {
 	TotalCount int        `json:"total_count"`
 	Proposals  []Proposal `json:"proposals"`
+}
+
+// Used to parse proposal response from sekai
+type ProposalsResponse = struct {
+	Proposals  []Proposal  `json:"proposals,omitempty"`
+	Pagination interface{} `json:"pagination,omitempty"`
 }
 
 // Used to sync proposals with sekaid
