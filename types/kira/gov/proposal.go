@@ -34,6 +34,20 @@ var (
 	}
 )
 
+// Enum value maps for VoteResult.
+var (
+	VoteResult = map[string]string{
+		"Unknown":            "VOTE_RESULT_UNKNOWN",
+		"Passed":             "VOTE_RESULT_PASSED",
+		"Rejected":           "VOTE_RESULT_REJECTED",
+		"RejectedWithVeto":   "VOTE_RESULT_REJECTED_WITH_VETO",
+		"Pending":            "VOTE_PENDING",
+		"QuorumNotReached":   "VOTE_RESULT_QUORUM_NOT_REACHED",
+		"Enactment":          "VOTE_RESULT_ENACTMENT",
+		"PassedWithExecFail": "VOTE_RESULT_PASSED_WITH_EXEC_FAIL",
+	}
+)
+
 // Used to parse response from sekai gRPC ("/kira/gov/votes/{proposal_id}")
 type Vote struct {
 	ProposalID uint64 `json:"proposal_id"`
@@ -43,8 +57,57 @@ type Vote struct {
 
 // Used to sync proposals with sekaid
 type Proposal struct {
+	ProposalID                 string      `json:"proposalId"`
+	Title                      string      `json:"title"`
+	Description                string      `json:"description"`
+	Content                    interface{} `json:"content"`
+	SubmitTime                 string      `json:"submitTime"`
+	VotingEndTime              string      `json:"votingEndTime"`
+	EnactmentEndTime           string      `json:"enactmentEndTime"`
+	MinVotingEndBlockHeight    string      `json:"minVotingEndBlockHeight"`
+	MinEnactmentEndBlockHeight string      `json:"minEnactmentEndBlockHeight"`
+	ExecResult                 string      `json:"execResult"`
+	Result                     string      `json:"result"`
+	// New fields
+	VotersCount int    `json:"voters_count"`
+	VotesCount  int    `json:"votes_count"`
+	Quorum      string `json:"quorum"`
+	Metadata    string `json:"meta_data"`
+
+	// Extra fields for filtering
+	Hash        string `json:"transaction_hash,omitempty"`
+	Timestamp   int    `json:"timestamp,omitempty"`
+	BlockHeight int    `json:"block_height,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Proposer    string `json:"proposer,omitempty"`
+}
+
+type CachedProposal struct {
 	ProposalID string `json:"proposal_id"`
-	Result     string `json:"result"`
+	// New fields
+	VotersCount int    `json:"voters_count"`
+	VotesCount  int    `json:"votes_count"`
+	Quorum      string `json:"quorum"`
+	Metadata    string `json:"meta_data"`
+
+	// Extra fields for filtering
+	Hash        string `json:"transaction_hash"`
+	Timestamp   int    `json:"timestamp"`
+	BlockHeight int    `json:"block_height"`
+	Type        string `json:"type"`
+	Proposer    string `json:"proposer"`
+}
+
+// Used to return proposal response
+type PropsResponse struct {
+	TotalCount int        `json:"total_count"`
+	Proposals  []Proposal `json:"proposals"`
+}
+
+// Used to parse proposal response from sekai
+type ProposalsResponse = struct {
+	Proposals  []Proposal  `json:"proposals,omitempty"`
+	Pagination interface{} `json:"pagination,omitempty"`
 }
 
 // Used to sync proposals with sekaid

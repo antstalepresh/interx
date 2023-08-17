@@ -280,17 +280,12 @@ func RegisterInterxFunctions() {
 			"parameters": {
 				"voter": {
 					"type":        "string",
-					"description": "This represents the kira account address.",
+					"description": "This represents the voter address.",
 					"optional": true
 				},
-				"reverse": {
-					"type":        "bool",
-					"description": "This an option to sort proposals.",
-					"optional": true
-				},
-				"key": {
+				"proposer": {
 					"type":        "string",
-					"description": "This is an option to validators pagination. key is a value returned in PageResponse.next_key to begin querying the next page most efficiently. Only one of offset or key should be set.",
+					"description": "This represents the proposer address.",
 					"optional": true
 				},
 				"offset": {
@@ -303,9 +298,29 @@ func RegisterInterxFunctions() {
 					"description": "This is an option to validators pagination. limit is the total number of results to be returned in the result page. If left empty it will default to a value to be set by each app.",
 					"optional": true
 				},
-				"countTotal": {
+				"status": {
 					"type":        "string",
-					"description": "This is an option to validators pagination. count_total is set to true  to indicate that the result set should include a count of the total number of items available for pagination in UIs. count_total is only respected when offset is used. It is ignored when key is set.",
+					"description": "This represents the proposal statuses(Unknown, Passed, Rejected, RejectedWithVeto, Pending, QuorumNotReached, Enactment, PassedWithExecFailed) separated by comma.",
+					"optional": true
+				},
+				"sort": {
+					"type":        "string",
+					"description": "This represents how the proposal should be sorted(dateASC, dateDESC).",
+					"optional": true
+				},
+				"types": {
+					"type":        "string",
+					"description": "This represents the proposal types separated by comma.",
+					"optional": true
+				},
+				"dateStart": {
+					"type":        "string",
+					"description": "This represents the starting point in timestamp or date(DD/MM/YY) format.",
+					"optional": true
+				},
+				"dateEnd": {
+					"type":        "string",
+					"description": "This represents the ending point in timestamp or date(DD/MM/YY) format.",
 					"optional": true
 				}
 			},
@@ -454,7 +469,7 @@ func RegisterInterxFunctions() {
 				},
 				"type": {
 					"type":        "string",
-					"description": "This represents the transaction type.",
+					"description": "This represents the transaction types separated by comma.",
 					"optional": true
 				},
 				"page": {
@@ -489,12 +504,12 @@ func RegisterInterxFunctions() {
 				},
 				"direction": {
 					"type":        "string",
-					"description": "This represents direction of the transaction(outbound, inbound).",
+					"description": "This represents directions of the transaction(outbound, inbound) separated by comma.",
 					"optional": true
 				},
 				"status": {
 					"type":        "string",
-					"description": "This represents the transaction status(pending, confirmed, failed).",
+					"description": "This represents the transaction statuses(pending, confirmed, failed) separated by comma.",
 					"optional": true
 				},
 				"sort": {

@@ -1,6 +1,5 @@
 
 Features:
 
-* Add delegation endpoint
-* Update metadata endpoint
-* Write unit/integration tests for the delegation endpoint
+* Updated proposals endpoint for optimized query from the frontend
+* Update tests for proposals endpoint
