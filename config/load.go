@@ -9,6 +9,7 @@ import (
 
 	"github.com/KiraCore/interx/types"
 	sekaiapp "github.com/KiraCore/sekai/app"
+	sekaiappparams "github.com/KiraCore/sekai/app/params"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -60,7 +61,7 @@ func LoadMnemonic(mnemonic string) string {
 
 // LoadConfig is a function to load interx configurations from a given file
 func LoadConfig(configFilePath string) {
-	sekaiapp.SetConfig()
+	sekaiappparams.SetConfig()
 
 	Config = InterxConfig{}
 
