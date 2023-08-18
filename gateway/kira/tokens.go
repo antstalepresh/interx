@@ -2,9 +2,7 @@ package kira
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/KiraCore/interx/common"
@@ -95,16 +93,6 @@ func QueryKiraTokensAliasesRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string
 	}
 }
 
-func convertRate(rateString string) string {
-	rate, _ := strconv.ParseFloat(rateString, 64)
-	rate = rate / 1000000000000000000.0
-	rateString = fmt.Sprintf("%g", rate)
-	if !strings.Contains(rateString, ".") {
-		rateString = rateString + ".0"
-	}
-	return rateString
-}
-
 func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/tokens", "/kira/tokens", -1)
 	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
@@ -127,9 +115,9 @@ func queryKiraTokensRatesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux)
 		}
 
 		for index, tokenRate := range result.Data {
-			result.Data[index].FeeRate = convertRate(tokenRate.FeeRate)
-			result.Data[index].StakeCap = convertRate(tokenRate.StakeCap)
-			result.Data[index].StakeMin = convertRate(tokenRate.StakeMin)
+			result.Data[index].FeeRate = common.ConvertRate(tokenRate.FeeRate)
+			result.Data[index].StakeCap = common.ConvertRate(tokenRate.StakeCap)
+			result.Data[index].StakeMin = common.ConvertRate(tokenRate.StakeMin)
 		}
 
 		success = result

@@ -62,8 +62,8 @@ func queryStakingPoolHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 
 		response := types.QueryValidatorPoolResult{}
 		response.ID = result.Pool.ID
-		response.Slashed = convertRate(result.Pool.Slashed)
-		response.Commission = convertRate(result.Pool.Commission)
+		response.Slashed = common.ConvertRate(result.Pool.Slashed)
+		response.Commission = common.ConvertRate(result.Pool.Commission)
 		response.VotingPower = result.Pool.TotalStakingTokens
 		response.TotalDelegators = int64(len(result.Delegators))
 		response.Tokens = []string{}
@@ -150,7 +150,7 @@ func queryDelegationsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 				}
 				// fill up PoolInfo
 				delegation.PoolInfo.ID = pool.ID
-				delegation.PoolInfo.Commission = convertRate(pool.Commission)
+				delegation.PoolInfo.Commission = common.ConvertRate(pool.Commission)
 				if pool.Enabled {
 					delegation.PoolInfo.Status = "ACTIVE"
 				} else {

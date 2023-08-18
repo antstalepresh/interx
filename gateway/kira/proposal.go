@@ -2,14 +2,18 @@ package kira
 
 import (
 	"encoding/json"
-	"fmt"
+	"math"
 	"net/http"
+	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
+	"github.com/KiraCore/interx/tasks"
 	govTypes "github.com/KiraCore/interx/types/kira/gov"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sekaitypes "github.com/KiraCore/sekai/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
@@ -28,38 +32,211 @@ func RegisterKiraGovProposalRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux,
 }
 
 func queryProposalsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
-	queries := r.URL.Query()
-	voter := queries["voter"]
-	key := queries["key"]
-	offset := queries["offset"]
-	limit := queries["limit"]
-	countTotal := queries["count_total"]
-	reverse := queries["reverse"]
+	var (
+		proposer  string   = ""
+		dateStart int      = -1
+		dateEnd   int      = -1
+		sortBy    string   = "dateDESC"
+		types     []string = []string{}
+		statuses  []string = []string{}
+		voter     string
+		offset    int = -1
+		limit     int = -1
+		err       error
+	)
 
-	var events = make([]string, 0, 6)
-	if len(voter) == 1 {
-		events = append(events, fmt.Sprintf("voter=%s", voter[0]))
-	}
-	if len(key) == 1 {
-		events = append(events, fmt.Sprintf("pagination.key=%s", key[0]))
-	}
-	if len(offset) == 1 {
-		events = append(events, fmt.Sprintf("pagination.offset=%s", offset[0]))
-	}
-	if len(limit) == 1 {
-		events = append(events, fmt.Sprintf("pagination.limit=%s", limit[0]))
-	}
-	if len(countTotal) == 1 {
-		events = append(events, fmt.Sprintf("pagination.count_total=%s", countTotal[0]))
-	}
-	if len(reverse) == 1 {
-		events = append(events, fmt.Sprintf("reverse=%s", reverse[0]))
+	//------------ Proposer ------------
+	proposer = r.FormValue("proposer")
+
+	//------------ Voter ------------
+	voter = r.FormValue("voter")
+
+	//------------ Sort ------------
+	sortParam := r.FormValue("sort")
+	if sortParam == "dateASC" || sortParam == "dateDESC" {
+		sortBy = sortParam
 	}
 
-	r.URL.RawQuery = strings.Join(events, "&")
+	//------------ Offset ------------
+	if offsetStr := r.FormValue("offset"); offsetStr != "" {
+		if offset, err = strconv.Atoi(offsetStr); err != nil {
+			common.GetLogger().Error("[query-proposals] Failed to parse parameter 'offset': ", err)
+			return common.ServeError(0, "failed to parse parameter 'offset'", err.Error(), http.StatusBadRequest)
+		}
+	}
 
-	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+	//------------ Limit ------------
+	if limitStr := r.FormValue("limit"); limitStr != "" {
+		if limit, err = strconv.Atoi(limitStr); err != nil {
+			common.GetLogger().Error("[query-proposals] Failed to parse parameter 'limit': ", err)
+			return common.ServeError(0, "failed to parse parameter 'limit'", err.Error(), http.StatusBadRequest)
+		}
+
+		if limit < 1 || limit > 100 {
+			common.GetLogger().Error("[query-proposals] Invalid 'limit' range: ", limit)
+			return common.ServeError(0, "'limit' should be 1 ~ 100", "", http.StatusBadRequest)
+		}
+	}
+
+	//------------ Type ------------
+	typeFlags := make(map[string]bool)
+	for _, propType := range sekaitypes.AllProposalTypes {
+		typeFlags[propType] = true
+	}
+
+	proposalTypesParam := r.FormValue("types")
+	proposalTypesArray := strings.Split(proposalTypesParam, ",")
+	for _, txType := range proposalTypesArray {
+		if typeFlags[txType] {
+			types = append(types, txType)
+		}
+	}
+
+	//------------ Status ------------
+	statusesParam := r.FormValue("status")
+	statusesArray := strings.Split(statusesParam, ",")
+
+	for _, sts := range statusesArray {
+		if voteResult, found := govTypes.VoteResult[sts]; found {
+			statuses = append(statuses, voteResult)
+		}
+	}
+
+	//------------ Timestamps ------------
+	if dateStStr := r.FormValue("dateStart"); dateStStr != "" {
+		if dateStart, err = strconv.Atoi(dateStStr); err != nil {
+			layout := "01/02/2006 3:04:05 PM"
+			t, err1 := time.Parse(layout, dateStStr+" 12:00:00 AM")
+			if err1 != nil {
+				common.GetLogger().Error("[query-proposals] Failed to parse parameter 'dateStart': ", err1)
+				return common.ServeError(0, "failed to parse parameter 'dateStart'", err1.Error(), http.StatusBadRequest)
+			}
+
+			dateStart = int(t.Unix())
+		}
+	}
+
+	if dateEdStr := r.FormValue("dateEnd"); dateEdStr != "" {
+		if dateEnd, err = strconv.Atoi(dateEdStr); err != nil {
+			layout := "01/02/2006 3:04:05 PM"
+			t, err1 := time.Parse(layout, dateEdStr+" 12:00:00 AM")
+			if err1 != nil {
+				common.GetLogger().Error("[query-proposals] Failed to parse parameter 'dateEnd': ", err1)
+				return common.ServeError(0, "failed to parse parameter 'dateEnd'", err.Error(), http.StatusBadRequest)
+			}
+
+			dateEnd = int(t.Unix())
+		}
+	}
+
+	//------------ Filter proposals by filtering options & Pagination ------------
+	voterMap := map[string]bool{}
+
+	voterLimit := sekaitypes.PageIterationLimit - 1
+	voterOffset := 0
+	for {
+		reqPath := strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
+		proposalsQueryRequest, _ := http.NewRequest("GET", reqPath+"?voter="+voter+"&pagination.offset="+strconv.Itoa(voterOffset)+"&pagination.limit="+strconv.Itoa(voterLimit), nil)
+
+		proposalsQueryResponse, failure, statusCode := common.ServeGRPC(proposalsQueryRequest, gwCosmosmux)
+
+		if proposalsQueryResponse == nil {
+			return proposalsQueryResponse, failure, statusCode
+		}
+
+		byteData, err := json.Marshal(proposalsQueryResponse)
+		if err != nil {
+			return common.ServeError(0, "failed to parse proposals response", err.Error(), http.StatusBadRequest)
+		}
+
+		subResult := govTypes.ProposalsResponse{}
+		err = json.Unmarshal(byteData, &subResult)
+		if err != nil {
+			return common.ServeError(0, "failed to parse proposals response", err.Error(), http.StatusBadRequest)
+		}
+
+		if len(subResult.Proposals) == 0 {
+			break
+		}
+
+		for _, prop := range subResult.Proposals {
+			voterMap[prop.ProposalID] = true
+		}
+
+		voterOffset += voterLimit
+	}
+
+	propResults := []govTypes.Proposal{}
+	for _, proposal := range tasks.ProposalsMap {
+		if !voterMap[proposal.ProposalID] {
+			continue
+		}
+
+		if len(statuses) > 0 && !common.Include(statuses, proposal.Result) {
+			continue
+		}
+
+		if len(types) > 0 && !common.Include(types, proposal.Type) {
+			continue
+		}
+
+		if proposer != "" && proposal.Proposer != proposer {
+			continue
+		}
+
+		if dateStart != -1 && proposal.Timestamp < dateStart {
+			continue
+		}
+
+		if dateEnd != -1 && proposal.Timestamp > dateEnd {
+			continue
+		}
+
+		propResults = append(propResults, proposal)
+	}
+
+	// sort proposals
+	if sortBy == "dateASC" {
+		sort.Slice(propResults, func(i, j int) bool {
+			return propResults[i].Timestamp < propResults[j].Timestamp
+		})
+	} else {
+		sort.Slice(propResults, func(i, j int) bool {
+			return propResults[i].Timestamp > propResults[j].Timestamp
+		})
+	}
+
+	totalCount := len(propResults)
+
+	// pagination
+	if limit == -1 {
+		limit = 30
+	}
+	if offset == -1 {
+		offset = 0
+	}
+
+	if offset > totalCount {
+		offset = totalCount
+	}
+
+	propResults = propResults[offset:int(math.Min(float64(offset+limit), float64(len(propResults))))]
+
+	//------------ Remove unnecessary fields ------------
+	for idx, prop := range propResults {
+		prop.Hash = ""
+		prop.Timestamp = 0
+		prop.BlockHeight = 0
+		prop.Type = ""
+		prop.Proposer = ""
+		propResults[idx] = prop
+	}
+
+	res := govTypes.PropsResponse{
+		TotalCount: totalCount,
+		Proposals:  propResults,
+	}
+	return res, nil, http.StatusOK
 }
 
 // QueryProposalsRequest is a function to query all proposals.
@@ -92,9 +269,35 @@ func QueryProposalsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.H
 	}
 }
 
-func queryProposalHandler(r *http.Request, gwCosmosmux *runtime.ServeMux, proposal_id string) (interface{}, interface{}, int) {
+func queryProposalHandler(r *http.Request, gwCosmosmux *runtime.ServeMux, proposalID string, rpcAddr string) (interface{}, interface{}, int) {
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
+
+	if success != nil {
+		// query proposal by id
+		result := make(map[string]interface{})
+		byteData, err := json.Marshal(success)
+		if err != nil {
+			common.GetLogger().Error("[query-proposal] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		err = json.Unmarshal(byteData, &result)
+		if err != nil {
+			common.GetLogger().Error("[query-proposal] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+		propResult := tasks.ProposalsMap[proposalID]
+		propResult.Hash = ""
+		propResult.Timestamp = 0
+		propResult.BlockHeight = 0
+		propResult.Type = ""
+		propResult.Proposer = ""
+
+		result["proposal"] = propResult
+		success = result
+	}
+	return success, failure, status
 }
 
 // QueryProposalRequest is a function to query a proposal by a given proposal_id.
@@ -122,7 +325,7 @@ func QueryProposalRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.Ha
 				}
 			}
 
-			response.Response, response.Error, statusCode = queryProposalHandler(r, gwCosmosmux, proposalID)
+			response.Response, response.Error, statusCode = queryProposalHandler(r, gwCosmosmux, proposalID, rpcAddr)
 		}
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryProposal].CachingEnabled)
@@ -134,51 +337,10 @@ func queryVotersHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfa
 	success, failure, statusCode := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {
-		result := struct {
-			Voters []struct {
-				Address     []byte                `json:"address,omitempty"`
-				Roles       []string              `json:"roles,omitempty"`
-				Status      string                `json:"status,omitempty"`
-				Votes       []string              `json:"votes,omitempty"`
-				Permissions *govTypes.Permissions `json:"permissions,omitempty"`
-				Skin        uint64                `json:"skin,string,omitempty"`
-			} `json:"voters,omitempty"`
-		}{}
-
-		byteData, err := json.Marshal(success)
+		voters, err := common.QueryVotersFromGrpcResult(success)
 		if err != nil {
 			common.GetLogger().Error("[query-voters] Invalid response format: ", err)
 			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		err = json.Unmarshal(byteData, &result)
-		if err != nil {
-			common.GetLogger().Error("[query-voters] Invalid response format: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		voters := make([]govTypes.Voter, 0)
-
-		for _, voter := range result.Voters {
-			newVoter := govTypes.Voter{}
-
-			newVoter.Address = sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), voter.Address)
-			newVoter.Roles = voter.Roles
-			newVoter.Status = voter.Status
-			newVoter.Votes = voter.Votes
-
-			newVoter.Permissions.Blacklist = make([]string, 0)
-			for _, black := range voter.Permissions.Blacklist {
-				newVoter.Permissions.Blacklist = append(newVoter.Permissions.Blacklist, govTypes.PermValue_name[int32(black)])
-			}
-			newVoter.Permissions.Whitelist = make([]string, 0)
-			for _, white := range voter.Permissions.Whitelist {
-				newVoter.Permissions.Whitelist = append(newVoter.Permissions.Whitelist, govTypes.PermValue_name[int32(white)])
-			}
-
-			newVoter.Skin = voter.Skin
-
-			voters = append(voters, newVoter)
 		}
 
 		success = voters
@@ -224,36 +386,10 @@ func queryVotesHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interfac
 	success, failure, statusCode := common.ServeGRPC(r, gwCosmosmux)
 
 	if success != nil {
-		result := struct {
-			Votes []struct {
-				ProposalID uint64 `json:"proposalID,string,omitempty"`
-				Voter      []byte `json:"voter,omitempty"`
-				Option     string `json:"option,omitempty"`
-			} `json:"votes,omitempty"`
-		}{}
-
-		byteData, err := json.Marshal(success)
+		votes, err := common.QueryVotesFromGrpcResult(success)
 		if err != nil {
 			common.GetLogger().Error("[query-votes] Invalid response format: ", err)
 			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		err = json.Unmarshal(byteData, &result)
-		if err != nil {
-			common.GetLogger().Error("[query-votes] Invalid response format: ", err)
-			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
-		}
-
-		votes := make([]govTypes.Vote, 0)
-
-		for _, vote := range result.Votes {
-			newVote := govTypes.Vote{}
-
-			newVote.ProposalID = vote.ProposalID
-			newVote.Voter = sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), vote.Voter)
-			newVote.Option = vote.Option
-
-			votes = append(votes, newVote)
 		}
 
 		success = votes
