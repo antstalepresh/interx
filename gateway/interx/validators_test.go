@@ -82,7 +82,7 @@ func (suite *ValidatorsTestSuite) SetupTest() {
 				Moniker:           "test_moniker",
 				Status:            "test_status",
 				StakingPoolId:     1,
-				StakingPoolStatus: "ACTIVE",
+				StakingPoolStatus: "ENABLED",
 			},
 		},
 	}
@@ -113,7 +113,7 @@ func (suite *ValidatorsTestSuite) TestValidatorInfosQuery() {
 	err = json.Unmarshal(byteData, &result)
 	suite.Require().NoError(err)
 	suite.Require().EqualValues(len(result.Validators), 1)
-	suite.Require().EqualValues(result.Validators[0].StakingPoolStatus, "ACTIVE")
+	suite.Require().EqualValues(result.Validators[0].StakingPoolStatus, "ENABLED")
 	suite.Require().EqualValues(result.Validators[0].StakingPoolId, 1)
 	suite.Require().Nil(error)
 	suite.Require().EqualValues(statusCode, http.StatusOK)
