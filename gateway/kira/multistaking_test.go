@@ -155,7 +155,7 @@ func (suite *MultistakingTestSuite) TestQueryDelegationsHandler() {
 	suite.Require().EqualValues(len(res.Delegations), 1)
 	suite.Require().EqualValues(res.Delegations[0].PoolInfo.ID, 1)
 	suite.Require().EqualValues(res.Delegations[0].PoolInfo.ID, 1)
-	suite.Require().EqualValues(res.Delegations[0].PoolInfo.Status, "ACTIVE")
+	suite.Require().EqualValues(res.Delegations[0].PoolInfo.Status, "ENABLED")
 	suite.Require().EqualValues(res.Delegations[0].ValidatorInfo.Address, "test_address")
 	suite.Require().EqualValues(res.Delegations[0].ValidatorInfo.ValKey, "test_valkey")
 	suite.Require().EqualValues(statusCode, http.StatusOK)
