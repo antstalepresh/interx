@@ -195,12 +195,12 @@ type ValidatorPool struct {
 
 // QueryValidatorPoolResult is a struct to be used for query staking pool response
 type QueryValidatorPoolResult struct {
-	ID              int64    `json:"id,omitempty"`
-	Slashed         string   `json:"slashed"`
-	Commission      string   `json:"commission"`
-	TotalDelegators int64    `json:"total_delegators"`
-	VotingPower     []string `json:"voting_power"`
-	Tokens          []string `json:"tokens"`
+	ID              int64      `json:"id,omitempty"`
+	Slashed         string     `json:"slashed"`
+	Commission      string     `json:"commission"`
+	TotalDelegators int64      `json:"total_delegators"`
+	VotingPower     []sdk.Coin `json:"voting_power"`
+	Tokens          []string   `json:"tokens"`
 }
 
 type Delegation struct {
@@ -248,8 +248,8 @@ type QueryValidator struct {
 	LastPresentBlock      int64  `json:"last_present_block,string"`
 	MissedBlocksCounter   int64  `json:"missed_blocks_counter,string"`
 	ProducedBlocksCounter int64  `json:"produced_blocks_counter,string"`
-	StakingPoolId         int64  `json:"staking_pool_id,string"`
-	StakingPoolStatus     string `json:"staking_pool_status,string"`
+	StakingPoolId         int64  `json:"staking_pool_id,string,omitempty"`
+	StakingPoolStatus     string `json:"staking_pool_status,omitempty"`
 
 	// From Identity Records
 	Description       string `json:"description,omitempty"`

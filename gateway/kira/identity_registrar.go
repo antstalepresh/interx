@@ -2,12 +2,14 @@ package kira
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/KiraCore/interx/common"
 	"github.com/KiraCore/interx/config"
+	"github.com/KiraCore/interx/types/kira/gov"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -224,7 +226,28 @@ func QueryIdentityRecordVerifyRequestsByRequesterHandler(r *http.Request, gwCosm
 	r.URL.RawQuery = strings.Join(events, "&")
 
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
+	if success != nil {
+		res := gov.IdVerifyRequests{}
+		bz, err := json.Marshal(success)
+		if err != nil {
+			common.GetLogger().Error("[query-identity-record-verify-requests-by-requester] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		err = json.Unmarshal(bz, &res)
+		if err != nil {
+			common.GetLogger().Error("[query-identity-record-verify-requests-by-requester] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		for idx, record := range res.VerifyRecords {
+			res.VerifyRecords[idx].Tip = parseCoinString(record.Tip).String()
+		}
+		success = res
+	}
+
+	return success, failure, status
 }
 
 func QueryIdentityRecordVerifyRequestsByRequester(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
@@ -285,7 +308,29 @@ func QueryIdentityRecordVerifyRequestsByApproverHandler(r *http.Request, gwCosmo
 	r.URL.RawQuery = strings.Join(events, "&")
 
 	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/gov", "/kira/gov", -1)
-	return common.ServeGRPC(r, gwCosmosmux)
+
+	success, failure, status := common.ServeGRPC(r, gwCosmosmux)
+	if success != nil {
+		res := gov.IdVerifyRequests{}
+		bz, err := json.Marshal(success)
+		if err != nil {
+			common.GetLogger().Error("[query-identity-record-verify-requests-by-approver] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		err = json.Unmarshal(bz, &res)
+		if err != nil {
+			common.GetLogger().Error("[query-identity-record-verify-requests-by-approver] Invalid response format", err)
+			return common.ServeError(0, "", err.Error(), http.StatusInternalServerError)
+		}
+
+		for idx, record := range res.VerifyRecords {
+			res.VerifyRecords[idx].Tip = parseCoinString(record.Tip).String()
+		}
+		success = res
+	}
+
+	return success, failure, status
 }
 
 func QueryIdentityRecordVerifyRequestsByApprover(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
