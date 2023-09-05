@@ -219,13 +219,16 @@ func QueryValidators(gwCosmosmux *runtime.ServeMux, gatewayAddr string) error {
 		result.Validators[index].LastPresentBlock = valSigningInfo.LastPresentBlock
 		result.Validators[index].MissedBlocksCounter = valSigningInfo.MissedBlocksCounter
 		result.Validators[index].ProducedBlocksCounter = valSigningInfo.ProducedBlocksCounter
-		result.Validators[index].StakingPoolId = valToPool[validator.Valkey].ID
-		if valToPool[validator.Valkey].Enabled {
-			result.Validators[index].StakingPoolStatus = "ACTIVE"
-		} else {
-			result.Validators[index].StakingPoolStatus = "INACTIVE"
+		pool, found := valToPool[validator.Valkey]
+		if found {
+			result.Validators[index].StakingPoolId = pool.ID
+			if pool.Enabled {
+				result.Validators[index].StakingPoolStatus = "ENABLED"
+			} else {
+				result.Validators[index].StakingPoolStatus = "DISABLED"
+			}
+			PoolToValidator[result.Validators[index].StakingPoolId] = result.Validators[index]
 		}
-		PoolToValidator[result.Validators[index].StakingPoolId] = result.Validators[index]
 	}
 
 	sort.Sort(types.QueryValidators(result.Validators))

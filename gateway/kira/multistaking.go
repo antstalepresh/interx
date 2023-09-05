@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/tasks"
 	"github.com/KiraCore/interx/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
@@ -30,6 +32,25 @@ func RegisterKiraMultiStakingRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux
 
 	common.AddRPCMethod("GET", config.QueryStakingPool, "This is an API to query staking pool.", true)
 	common.AddRPCMethod("GET", config.QueryDelegations, "This is an API to query delegations.", true)
+}
+
+func parseCoinString(input string) sdk.Coin {
+	denom := ""
+	amount := 0
+	for _, poolToken := range tasks.PoolTokens {
+		if strings.Contains(input, poolToken) {
+			pattern := regexp.MustCompile("[^a-zA-Z0-9]+")
+			amountStr := strings.ReplaceAll(input, poolToken, "")
+			amountStr = pattern.ReplaceAllString(amountStr, "")
+
+			denom = poolToken
+			amount, _ = strconv.Atoi(amountStr)
+		}
+	}
+	return sdk.Coin{
+		Denom:  denom,
+		Amount: sdk.NewIntFromUint64(uint64(amount)),
+	}
 }
 
 // queryStakingPoolHandler is a function to query staking pool information for a validator
@@ -64,7 +85,12 @@ func queryStakingPoolHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 		response.ID = result.Pool.ID
 		response.Slashed = common.ConvertRate(result.Pool.Slashed)
 		response.Commission = common.ConvertRate(result.Pool.Commission)
-		response.VotingPower = result.Pool.TotalStakingTokens
+
+		response.VotingPower = []sdk.Coin{}
+		for _, coinStr := range result.Pool.TotalStakingTokens {
+			response.VotingPower = append(response.VotingPower, parseCoinString(coinStr))
+		}
+
 		response.TotalDelegators = int64(len(result.Delegators))
 		response.Tokens = []string{}
 		response.Tokens = tasks.PoolTokens
@@ -152,9 +178,9 @@ func queryDelegationsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (in
 				delegation.PoolInfo.ID = pool.ID
 				delegation.PoolInfo.Commission = common.ConvertRate(pool.Commission)
 				if pool.Enabled {
-					delegation.PoolInfo.Status = "ACTIVE"
+					delegation.PoolInfo.Status = "ENABLED"
 				} else {
-					delegation.PoolInfo.Status = "INACTIVE"
+					delegation.PoolInfo.Status = "DISABLED"
 				}
 				delegation.PoolInfo.Tokens = tasks.PoolTokens
 
