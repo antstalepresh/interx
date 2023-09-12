@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/KeisukeYamashita/go-jsonrpc v1.0.1
-	github.com/KiraCore/sekai v0.3.27
+	github.com/KiraCore/sekai v0.3.29
 	github.com/btcsuite/btcd v0.22.1
 	github.com/cosmos/cosmos-sdk v0.45.10
 	github.com/cosmos/go-bip39 v1.0.0
