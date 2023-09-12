@@ -172,8 +172,8 @@ github.com/HdrHistogram/hdrhistogram-go v1.1.0/go.mod h1:yDgFjdqOqDEKOvasDdhWNXY
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/KeisukeYamashita/go-jsonrpc v1.0.1 h1:mkg8th2I7C1y3tnAsxroQbmQcXEZ22AkQ5pazRd/KDM=
 github.com/KeisukeYamashita/go-jsonrpc v1.0.1/go.mod h1:NyiYd1oDwaSsIflCju5dKRvLdG5rZ/I4E07ygRYYmgc=
-github.com/KiraCore/sekai v0.3.27 h1:5rdlMrl4ZFNab8F+U5rJADYy5R598ustnx85AHthlpw=
-github.com/KiraCore/sekai v0.3.27/go.mod h1:qQG8mK2ybhKqa6DW+btiUni4qN8OQTa5eoL49HZcNHg=
+github.com/KiraCore/sekai v0.3.29 h1:m08pcagGw7vFHOP7VfF+elBu632Z8/jItp1IznOQpaw=
+github.com/KiraCore/sekai v0.3.29/go.mod h1:qQG8mK2ybhKqa6DW+btiUni4qN8OQTa5eoL49HZcNHg=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver v1.4.2/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=

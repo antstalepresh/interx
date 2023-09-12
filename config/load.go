@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	bytesize "github.com/inhies/go-bytesize"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/sr25519"
@@ -59,12 +62,54 @@ func LoadMnemonic(mnemonic string) string {
 	return TrimMnemonic(mnemonicFromFile(mnemonic))
 }
 
-// LoadConfig is a function to load interx configurations from a given file
-func LoadConfig(configFilePath string) {
+// serveGRPC is a function to serve GRPC
+func serveGRPC(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	recorder := httptest.NewRecorder()
+	gwCosmosmux.ServeHTTP(recorder, r)
+	resp := recorder.Result()
+
+	result := new(interface{})
+	if json.NewDecoder(resp.Body).Decode(result) == nil {
+		if resp.StatusCode == http.StatusOK {
+			return result, nil, resp.StatusCode
+		}
+
+		return nil, result, resp.StatusCode
+	}
+
+	return nil, nil, resp.StatusCode
+}
+
+// LoadAddressAndDenom is a function to load addresses and migrate config using custom bech32 and denom prefixes
+func LoadAddressAndDenom(configFilePath string, gwCosmosmux *runtime.ServeMux, rpcAddr string, gatewayAddr string) {
+	request, _ := http.NewRequest("GET", "http://"+gatewayAddr+"/kira/gov/custom_prefixes", nil)
+	response, failure, _ := serveGRPC(request, gwCosmosmux)
+
+	if response == nil {
+		panic(failure)
+	}
+
+	byteData, err := json.Marshal(response)
+	if err != nil {
+		panic(err)
+	}
+	result := map[string]string{}
+	err = json.Unmarshal(byteData, &result)
+	if err != nil {
+		panic(err)
+	}
+
+	bech32Prefix := result["bech32Prefix"]
+	defaultDenom := result["defaultDenom"]
+	sekaiappparams.DefaultDenom = defaultDenom
+	sekaiappparams.AccountAddressPrefix = bech32Prefix
+	sekaiappparams.AccountPubKeyPrefix = bech32Prefix + "pub"
+	sekaiappparams.ValidatorAddressPrefix = bech32Prefix + "valoper"
+	sekaiappparams.ValidatorPubKeyPrefix = bech32Prefix + "valoperpub"
+	sekaiappparams.ConsNodeAddressPrefix = bech32Prefix + "valcons"
+	sekaiappparams.ConsNodePubKeyPrefix = bech32Prefix + "valconspub"
+
 	sekaiappparams.SetConfig()
-
-	Config = InterxConfig{}
-
 	file, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
 		fmt.Println("Invalid configuration: {}", err)
@@ -79,21 +124,8 @@ func LoadConfig(configFilePath string) {
 		panic(err)
 	}
 
-	// Interx Main Configuration
-	Config.InterxVersion = InterxVersion
-	Config.ServeHTTPS = configFromFile.ServeHTTPS
-	Config.GRPC = configFromFile.GRPC
-	Config.RPC = configFromFile.RPC
-	Config.PORT = configFromFile.PORT
+	//=============== interx address ===============
 	Config.Mnemonic = LoadMnemonic(configFromFile.MnemonicFile)
-
-	Config.Node = configFromFile.Node
-
-	fmt.Println("Interx Version: ", Config.InterxVersion)
-	fmt.Println("Interx GRPC: ", Config.GRPC)
-	fmt.Println("Interx RPC : ", Config.RPC)
-	fmt.Println("Interx PORT: ", Config.PORT)
-
 	if !bip39.IsMnemonicValid(Config.Mnemonic) {
 		fmt.Println("Invalid Interx Mnemonic: ", Config.Mnemonic)
 		panic("Invalid Interx Mnemonic")
@@ -113,40 +145,33 @@ func LoadConfig(configFilePath string) {
 	Config.PubKey = Config.PrivKey.PubKey()
 	Config.Address = sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), Config.PubKey.Address())
 
-	Config.AddrBooks = strings.Split(configFromFile.AddrBooks, ",")
-	Config.NodeKey, err = p2p.LoadOrGenNodeKey(configFromFile.NodeKey)
-	if err != nil {
-		panic(err)
-	}
-
-	Config.TxModes = strings.Split(configFromFile.TxModes, ",")
-	if len(Config.TxModes) == 0 {
-		Config.TxModes = strings.Split("sync,async,block", ",")
-	}
-
 	// Display mnemonic and keys
-	// fmt.Println("Interx Mnemonic  : ", Config.Mnemonic)
 	fmt.Println("Interx Address   : ", Config.Address)
 	fmt.Println("Interx Public Key: ", Config.PubKey.String())
 
-	Config.NodeDiscovery = configFromFile.NodeDiscovery
+	//=============== faucet address ===============
 
-	Config.Block.StatusSync = configFromFile.Block.StatusSync
-	Config.Block.HaltedAvgBlockTimes = configFromFile.Block.HaltedAvgBlockTimes
+	amount, found := configFromFile.Faucet.FaucetAmounts["ukex"]
+	if found {
+		configFromFile.Faucet.FaucetAmounts[defaultDenom] = amount
+		delete(configFromFile.Faucet.FaucetAmounts, "ukex")
+	}
 
-	Config.Cache.CacheDir = configFromFile.Cache.CacheDir
-	Config.Cache.MaxCacheSize = parseSizeString(configFromFile.Cache.MaxCacheSize)
-	Config.Cache.CachingDuration = configFromFile.Cache.CachingDuration
-	Config.Cache.DownloadFileSizeLimitation = parseSizeString(configFromFile.Cache.DownloadFileSizeLimitation)
+	amount, found = configFromFile.Faucet.FaucetMinimumAmounts["ukex"]
+	if found {
+		configFromFile.Faucet.FaucetMinimumAmounts[defaultDenom] = amount
+		delete(configFromFile.Faucet.FaucetMinimumAmounts, "ukex")
+	}
 
-	// Display cache configurations
-	fmt.Println("Interx Block StatusSync                : ", Config.Block.StatusSync)
-	fmt.Println("Halted Avg Block Times                 : ", Config.Block.HaltedAvgBlockTimes)
+	amount, found = configFromFile.Faucet.FeeAmounts["ukex"]
+	if found {
+		configFromFile.Faucet.FeeAmounts[defaultDenom] = amount
+		delete(configFromFile.Faucet.FeeAmounts, "ukex")
+	}
 
-	fmt.Println("Interx Cache CacheDir                  : ", Config.Cache.CacheDir)
-	fmt.Println("Interx Cache MaxCacheSize              : ", Config.Cache.MaxCacheSize)
-	fmt.Println("Interx Cache CachingDuration           : ", Config.Cache.CachingDuration)
-	fmt.Println("Interx Cache DownloadFileSizeLimitation: ", Config.Cache.DownloadFileSizeLimitation)
+	for denom, coinStr := range configFromFile.Faucet.FeeAmounts {
+		configFromFile.Faucet.FeeAmounts[denom] = strings.ReplaceAll(coinStr, "ukex", defaultDenom)
+	}
 
 	// Faucet Configuration
 	Config.Faucet = FaucetConfig{
@@ -185,6 +210,80 @@ func LoadConfig(configFilePath string) {
 	fmt.Println("Interx Faucet FaucetMinimumAmounts: ", Config.Faucet.FaucetMinimumAmounts)
 	fmt.Println("Interx Faucet FeeAmounts          : ", Config.Faucet.FeeAmounts)
 	fmt.Println("Interx Faucet TimeLimit           : ", Config.Faucet.TimeLimit)
+
+	// save denom changes to config
+	bytes, err := json.MarshalIndent(&configFromFile, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	err = ioutil.WriteFile(configFilePath, bytes, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// LoadConfig is a function to load interx configurations from a given file
+func LoadConfig(configFilePath string) {
+	Config = InterxConfig{}
+
+	file, err := ioutil.ReadFile(configFilePath)
+	if err != nil {
+		fmt.Println("Invalid configuration: {}", err)
+		panic(err)
+	}
+
+	configFromFile := InterxConfigFromFile{}
+
+	err = json.Unmarshal([]byte(file), &configFromFile)
+	if err != nil {
+		fmt.Println("Invalid configuration: {}", err)
+		panic(err)
+	}
+
+	// Interx Main Configuration
+	Config.InterxVersion = InterxVersion
+	Config.ServeHTTPS = configFromFile.ServeHTTPS
+	Config.GRPC = configFromFile.GRPC
+	Config.RPC = configFromFile.RPC
+	Config.PORT = configFromFile.PORT
+
+	Config.Node = configFromFile.Node
+
+	fmt.Println("Interx Version: ", Config.InterxVersion)
+	fmt.Println("Interx GRPC: ", Config.GRPC)
+	fmt.Println("Interx RPC : ", Config.RPC)
+	fmt.Println("Interx PORT: ", Config.PORT)
+
+	Config.AddrBooks = strings.Split(configFromFile.AddrBooks, ",")
+	Config.NodeKey, err = p2p.LoadOrGenNodeKey(configFromFile.NodeKey)
+	if err != nil {
+		panic(err)
+	}
+
+	Config.TxModes = strings.Split(configFromFile.TxModes, ",")
+	if len(Config.TxModes) == 0 {
+		Config.TxModes = strings.Split("sync,async,block", ",")
+	}
+
+	Config.NodeDiscovery = configFromFile.NodeDiscovery
+
+	Config.Block.StatusSync = configFromFile.Block.StatusSync
+	Config.Block.HaltedAvgBlockTimes = configFromFile.Block.HaltedAvgBlockTimes
+
+	Config.Cache.CacheDir = configFromFile.Cache.CacheDir
+	Config.Cache.MaxCacheSize = parseSizeString(configFromFile.Cache.MaxCacheSize)
+	Config.Cache.CachingDuration = configFromFile.Cache.CachingDuration
+	Config.Cache.DownloadFileSizeLimitation = parseSizeString(configFromFile.Cache.DownloadFileSizeLimitation)
+
+	// Display cache configurations
+	fmt.Println("Interx Block StatusSync                : ", Config.Block.StatusSync)
+	fmt.Println("Halted Avg Block Times                 : ", Config.Block.HaltedAvgBlockTimes)
+
+	fmt.Println("Interx Cache CacheDir                  : ", Config.Cache.CacheDir)
+	fmt.Println("Interx Cache MaxCacheSize              : ", Config.Cache.MaxCacheSize)
+	fmt.Println("Interx Cache CachingDuration           : ", Config.Cache.CachingDuration)
+	fmt.Println("Interx Cache DownloadFileSizeLimitation: ", Config.Cache.DownloadFileSizeLimitation)
 
 	// RPC Configuration
 	Config.RPCMethods = getRPCSettings()

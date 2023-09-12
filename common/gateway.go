@@ -304,7 +304,7 @@ func WrapResponse(w http.ResponseWriter, request types.InterxRequest, response t
 	}
 }
 
-// ServeGRPC is a function to server GRPC
+// ServeGRPC is a function to serve GRPC
 func ServeGRPC(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
 	recorder := httptest.NewRecorder()
 	gwCosmosmux.ServeHTTP(recorder, r)

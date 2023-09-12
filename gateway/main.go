@@ -188,6 +188,7 @@ func Run(configFilePath string, log grpclog.LoggerV2) error {
 		Handler: c.Handler(router),
 	}
 
+	config.LoadAddressAndDenom(configFilePath, gwCosmosmux, rpcAddr, gatewayAddr)
 	tasks.RunTasks(gwCosmosmux, rpcAddr, gatewayAddr)
 
 	if serveHTTPS {

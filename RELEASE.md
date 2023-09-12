@@ -1,5 +1,5 @@
 
 Features:
 
-* Fix staking-pool endpoint and valoper endpoint issues
-* Fix identity record querying issues
+* Implement custom denom and bech32 prefix
+* Bump sekai version to v0.3.29
