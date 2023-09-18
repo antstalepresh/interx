@@ -11,6 +11,7 @@ import (
 	"github.com/KiraCore/interx/config"
 	"github.com/KiraCore/interx/types"
 	kiratypes "github.com/KiraCore/sekai/types"
+	multistaking "github.com/KiraCore/sekai/x/multistaking/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -283,18 +284,13 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				},
 			})
 		} else if txType == "delegate" {
-			delegateMsg := msg.(*staking.MsgDelegate)
+			delegateMsg := msg.(*multistaking.MsgDelegate)
 
 			transfers = append(transfers, types.Transaction{
-				Type: txType,
-				From: delegateMsg.DelegatorAddress,
-				To:   delegateMsg.ValidatorAddress,
-				Amounts: []sdk.Coin{
-					{
-						Denom:  delegateMsg.Amount.Denom,
-						Amount: delegateMsg.Amount.Amount,
-					},
-				},
+				Type:    txType,
+				From:    delegateMsg.DelegatorAddress,
+				To:      delegateMsg.ValidatorAddress,
+				Amounts: delegateMsg.Amounts,
 			})
 		} else if txType == "begin_redelegate" {
 			reDelegateMsg := msg.(*staking.MsgBeginRedelegate)
@@ -311,18 +307,13 @@ func parseTransaction(rpcAddr string, transaction tmTypes.ResultTx) (types.Trans
 				},
 			})
 		} else if txType == "begin_unbonding" {
-			unDelegateMsg := msg.(*staking.MsgUndelegate)
+			unDelegateMsg := msg.(*multistaking.MsgUndelegate)
 
 			transfers = append(transfers, types.Transaction{
-				Type: txType,
-				From: unDelegateMsg.ValidatorAddress,
-				To:   unDelegateMsg.DelegatorAddress,
-				Amounts: []sdk.Coin{
-					{
-						Denom:  unDelegateMsg.Amount.Denom,
-						Amount: unDelegateMsg.Amount.Amount,
-					},
-				},
+				Type:    txType,
+				From:    unDelegateMsg.ValidatorAddress,
+				To:      unDelegateMsg.DelegatorAddress,
+				Amounts: unDelegateMsg.Amounts,
 			})
 		} else if txType == "withdraw_delegator_reward" {
 			var coin sdk.Coin
