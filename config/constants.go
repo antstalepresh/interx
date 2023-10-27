@@ -44,6 +44,7 @@ const (
 
 	QueryStakingPool           = "/api/kira/staking-pool"
 	QueryDelegations           = "/api/kira/delegations"
+	QueryUndelegations         = "/api/kira/undelegations"
 	QuerySpendingPools         = "/api/kira/spending-pools"
 	QuerySpendingPoolProposals = "/api/kira/spending-pool-proposals"
 

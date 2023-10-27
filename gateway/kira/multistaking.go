@@ -29,9 +29,11 @@ type QueryBalancesResponse struct {
 func RegisterKiraMultiStakingRoutes(r *mux.Router, gwCosmosmux *runtime.ServeMux, rpcAddr string) {
 	r.HandleFunc(config.QueryStakingPool, QueryStakingPoolRequest(gwCosmosmux, rpcAddr)).Methods("GET")
 	r.HandleFunc(config.QueryDelegations, QueryDelegationsRequest(gwCosmosmux, rpcAddr)).Methods("GET")
+	r.HandleFunc(config.QueryUndelegations, QueryUndelegationsRequest(gwCosmosmux, rpcAddr)).Methods("GET")
 
 	common.AddRPCMethod("GET", config.QueryStakingPool, "This is an API to query staking pool.", true)
 	common.AddRPCMethod("GET", config.QueryDelegations, "This is an API to query delegations.", true)
+	common.AddRPCMethod("GET", config.QueryUndelegations, "This is an API to query undelegations.", true)
 }
 
 func parseCoinString(input string) sdk.Coin {
@@ -126,6 +128,20 @@ func QueryStakingPoolRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryStakingPool].CachingEnabled)
 	}
+}
+
+// queryUndelegationsHandler is a function to query all undelegations for a delegator
+func queryUndelegationsHandler(r *http.Request, gwCosmosmux *runtime.ServeMux) (interface{}, interface{}, int) {
+	queries := r.URL.Query()
+	account := queries["undelegatorAddress"]
+
+	if len(account) == 0 {
+		common.GetLogger().Error("[query-undelegations] 'delegator address' is not set")
+		return common.ServeError(0, "'delegator address' is not set", "", http.StatusBadRequest)
+	}
+
+	r.URL.Path = strings.Replace(r.URL.Path, "/api/kira/undelegations", "/kira/multistaking/v1beta1/undelegations", -1)
+	return common.ServeGRPC(r, gwCosmosmux)
 }
 
 // queryDelegationsHandler is a function to query all delegations for a delegator
@@ -254,5 +270,34 @@ func QueryDelegationsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http
 		}
 
 		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryDelegations].CachingEnabled)
+	}
+}
+
+func QueryUndelegationsRequest(gwCosmosmux *runtime.ServeMux, rpcAddr string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var statusCode int
+		request := common.GetInterxRequest(r)
+		response := common.GetResponseFormat(request, rpcAddr)
+
+		common.GetLogger().Info("[query-undelegations] Entering undelegations query")
+
+		if !common.RPCMethods["GET"][config.QueryUndelegations].Enabled {
+			response.Response, response.Error, statusCode = common.ServeError(0, "", "API disabled", http.StatusForbidden)
+		} else {
+			if common.RPCMethods["GET"][config.QueryUndelegations].CachingEnabled {
+				found, cacheResponse, cacheError, cacheStatus := common.SearchCache(request, response)
+				if found {
+					response.Response, response.Error, statusCode = cacheResponse, cacheError, cacheStatus
+					common.WrapResponse(w, request, *response, statusCode, false)
+
+					common.GetLogger().Info("[query-staking-pool] Returning from the cache")
+					return
+				}
+			}
+
+			response.Response, response.Error, statusCode = queryUndelegationsHandler(r, gwCosmosmux)
+		}
+
+		common.WrapResponse(w, request, *response, statusCode, common.RPCMethods["GET"][config.QueryUndelegations].CachingEnabled)
 	}
 }
