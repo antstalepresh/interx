@@ -141,7 +141,7 @@ if ($(isNullOrEmpty "$BUF_VER")) || [ "$INTERX_PROTO_DEP_VER" != "$EXPECTED_INTE
     go install github.com/regen-network/cosmos-proto/protoc-gen-gocosmos@v0.3.1 2> /dev/null || : 
     go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest
 
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
     setGlobEnv INTERX_PROTO_DEP_VER "$EXPECTED_INTERX_PROTO_DEP_VER"
 fi
 
@@ -163,7 +163,13 @@ cosmos_sdk_dir=$(go list -f '{{ .Dir }}' -m github.com/cosmos/cosmos-sdk@$COSMOS
 rm -rfv ./proto/cosmos ./proto/kira ./third_party/proto
 mkdir -p ./third_party/proto
 cp -rfv $cosmos_sdk_dir/proto/cosmos ./proto
-cp -rfv $cosmos_sdk_dir/third_party/proto/* ./third_party/proto
+rm -rfv ./proto/cosmos/app
+rm -rfv ./proto/cosmos/orm
+rm -rfv ./proto/cosmos/reflection
+rm -rfv ./proto/cosmos/tx
+cp -rfv $cosmos_sdk_dir/proto/amino ./proto
+tar -C ./third_party/ -xvf ./cosmos_proto.tar.xz
+# cp -rfv $cosmos_sdk_dir/third_party/proto/* ./third_party/proto
 # cp -rfv $kira_dir/proto/kira ./proto
 
 wget https://github.com/KiraCore/sekai/releases/download/$SEKAI_BRANCH/source-code.tar.gz
@@ -176,7 +182,7 @@ rm -rfv ./sekai
 ### This part is required by gocosmos_out
 rm -rfv ./codec && mkdir -p codec/types
 buf protoc -I "third_party/proto" --gogotypes_out=./codec/types third_party/proto/google/protobuf/any.proto
-mv codec/types/google/protobuf/any.pb.go codec/types
+mv codec/types/google.golang.org/protobuf/types/known/anypb/any.pb.go codec/types
 rm -rfv codec/types/third_party
 rm -rfv ./third_party/proto/gogoproto
 rm -rfv ./third_party/proto/google
@@ -210,15 +216,17 @@ echoInfo "Generating protobuf files..."
 for dir in $proto_dirs; do
     proto_fils=$(find "${dir}" -maxdepth 1 -name '*.proto') 
     for fil in $proto_fils; do
-        buf protoc \
-          -I "./proto" \
-          -I third_party/grpc-gateway/ \
-		  -I third_party/googleapis/ \
-		  -I third_party/proto/ \
-          --go_out=paths=source_relative:./proto-gen \
-          --go-grpc_out=paths=source_relative:./proto-gen \
-          --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto-gen \
-          $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
+        if [[ "$fil" != *module* ]]; then
+            buf protoc \
+            -I "./proto" \
+            -I third_party/grpc-gateway/ \
+            -I third_party/googleapis/ \
+            -I third_party/proto/ \
+            --go_out=paths=source_relative:./proto-gen \
+            --go-grpc_out=paths=source_relative:./proto-gen \
+            --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto-gen \
+            $fil || ( echoErr "ERROR: Failed proto build for: ${fil}" && sleep 2 && exit 1 )
+        fi
     done
 done
 
